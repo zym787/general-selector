@@ -282,8 +282,8 @@ void MB_PresetSingleHoldingRegister(void)
     			ModbusPara.tBuf[0] = ModbusPara.rBuf[0]; 			// 设备地址
     			ModbusPara.tBuf[1] = ModbusPara.rBuf[1];  			// 功能码
     			ModbusPara.tBuf[2] = ModbusPara.rBuf[2];  			// 端口编号
-    			ModbusPara.tBuf[3] = Valve.status;  			// 端口编号
-//    			ModbusPara.tBuf[3] = ModbusPara.rBuf[3];  			// 端口编号
+//    			ModbusPara.tBuf[3] = Valve.status;  			// 端口编号
+    			ModbusPara.tBuf[3] = ModbusPara.rBuf[3];  			// 端口编号
     			byteCount = 4;
     			reg_num = ModbusCRC16( &ModbusPara.tBuf[0], byteCount);	// 获取CRC
     			ModbusPara.tBuf[byteCount] = reg_num >> 8;
