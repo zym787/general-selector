@@ -8,7 +8,7 @@
 #endif
 
 #define SOFT_VER                215
-#define SOFT_VS                 "V2.0.0r2"
+#define SOFT_VS                 "V2.0.0r3"
 
 //------------------------------------------------------------------------------------------------------------
 #define ADDR_BOARD_ID           0
@@ -62,6 +62,8 @@
 
 #define NORMAL_BLINK            2500       //正常运行的闪烁间隔
 #define RETRY_TIME_OUT          500        //异常运行的闪烁间隔
+
+#define	KEY		    PBin(5)
 #define	RX_EN()		(PBout(1)=0)
 #define	TX_EN()		(PBout(1)=1)
 

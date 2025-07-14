@@ -86,7 +86,7 @@ void ParameterInit(void)
         (!Valve.fDirCw||Valve.fDirCw>100)?(Valve.fDirCw=1):(Valve.fDirCw);
         (!Valve.fDirCCw||Valve.fDirCCw>100)?(Valve.fDirCCw=1):(Valve.fDirCCw);
         printd("\r\n ¶¨Î»¼õËÙ:%d %d", Valve.fDirCw, Valve.fDirCCw);
-        
+
         I2CPageRead_Nbytes(ADDR_RDC_RATE, LEN_RDC_RATE, &rdc.rate);
 		switch(rdc.rate)
 		{
@@ -166,6 +166,7 @@ void ParameterInit(void)
         for(uint8 i=0; i<valveFix.fix.portCnt; i++)
             printd(" %d", sig.arrCount[i]);
     }
+    getOptStartStatus();
     VALVE_ENA = ON;
     Valve.status = VALVE_INITING;
     Valve.ErrBlinkTime = NORMAL_BLINK;
@@ -192,6 +193,14 @@ void everySecDo(void)
 */
 void GPIOInit(void)
 {
+    // FB OUT
+    GPIOB->CRH &= (GPIO_Crh_P13);
+    GPIOB->CRH |= (GPIO_Mode_Out_PP_50MHz_P13);
+    GPIOB->ODR |= (GPIO_Pin_13);
+    // KEY IN
+    GPIOB->CRL &= (GPIO_Crl_P5);
+    GPIOB->CRL |= (GPIO_Mode_IN_PU_PD_P5);
+
     RCC->APB2ENR |= (RCC_APB2Periph_GPIOB);
     GPIOB->CRL &= (GPIO_Crl_P1);
     GPIOB->CRL |= (GPIO_Mode_Out_PP_50MHz_P1);

@@ -265,23 +265,25 @@ void MB_PresetSingleHoldingRegister(void)
     		if(port_num && port_num<=valveFix.fix.portCnt)
     		{// 通道编号判断OK,开始响应处理。
                 if(Valve.status==VALVE_RUN_END)
-                	Valve.portDes = port_num;
-            	Valve.dir = 0xff;		// 方向
-                I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
-                if(!Valve.spd || Valve.spd>SPD_LMT)
-                    Valve.spd = SPD_VALVE;
-                speed[AXSV] = accel[AXSV] = decel[AXSV] = 100;
-                speed[AXSV] *= (Valve.spd);
-                speed[AXSV] *= (rdc.rate);
-                accel[AXSV] *= (Valve.spd);
-                accel[AXSV] *= (rdc.rate);
-                decel[AXSV] *= (Valve.spd);
-                decel[AXSV] *= (rdc.rate);
-
+                {
+                    Valve.portDes = port_num;
+                	Valve.dir = 0xff;		// 方向
+                    I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
+                    if(!Valve.spd || Valve.spd>SPD_LMT)
+                        Valve.spd = SPD_VALVE;
+                    speed[AXSV] = accel[AXSV] = decel[AXSV] = 100;
+                    speed[AXSV] *= (Valve.spd);
+                    speed[AXSV] *= (rdc.rate);
+                    accel[AXSV] *= (Valve.spd);
+                    accel[AXSV] *= (rdc.rate);
+                    decel[AXSV] *= (Valve.spd);
+                    decel[AXSV] *= (rdc.rate);
+                }
     			ModbusPara.tBuf[0] = ModbusPara.rBuf[0]; 			// 设备地址
     			ModbusPara.tBuf[1] = ModbusPara.rBuf[1];  			// 功能码
     			ModbusPara.tBuf[2] = ModbusPara.rBuf[2];  			// 端口编号
-    			ModbusPara.tBuf[3] = ModbusPara.rBuf[3];  			// 端口编号
+    			ModbusPara.tBuf[3] = Valve.status;  			// 端口编号
+//    			ModbusPara.tBuf[3] = ModbusPara.rBuf[3];  			// 端口编号
     			byteCount = 4;
     			reg_num = ModbusCRC16( &ModbusPara.tBuf[0], byteCount);	// 获取CRC
     			ModbusPara.tBuf[byteCount] = reg_num >> 8;

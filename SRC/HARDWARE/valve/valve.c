@@ -306,6 +306,7 @@ void ProcessValve(void)
 /*
     原点与端口光耦的信号激时，分别激活急停功能，确保停止的位置够精确
 */
+//#define PULSE_CNT_EN
 void ValveLimitDetect(void)
 {
     ++sig.basicPulse;
@@ -496,7 +497,7 @@ void ValveLimitDetect(void)
                     // 清时间，保证不会连续复位转动
                     timerPara.timeMilli = 0;
                     getPrePort();
-                    printd("\r\n inited");
+//                    printd("\r\n inited");
                 }
             }
         }

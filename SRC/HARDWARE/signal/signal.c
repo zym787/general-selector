@@ -3,28 +3,45 @@
 
 
 
+
+static bool optStaLst=false;
+void getOptStartStatus(void)
+{
+    optStaLst = (bool)VALVE_OPT;
+}
+
 /*
 
 */
 bool GettCliffSignal(void)
 {
-    static bool lastSta=false;
     bool bCliff=false;
 
-    if(VALVE_OPT)
+    if(optStaLst==(bool)VALVE_OPT)
     {
-        if(lastSta==false)
+        return false;
+    }
+    if(VALVE_OPT)
+    {// ≥›∆¨
+        if(optStaLst==false)
+        {
+            printd("\r\n gap");
             bCliff = true;
-        lastSta = true;
+        }
     }
     else
     {
-        if(lastSta==true)
+        if(optStaLst==true)
+        {
+            printd("\r\n block");
             bCliff = true;
-        lastSta = false;
+        }
     }
+    optStaLst = (bool)VALVE_OPT;
     return bCliff;
 }
+
+
 
 /*
     ≈≈–Ú
