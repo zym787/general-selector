@@ -441,10 +441,10 @@ void ValveLimitDetect(void)
             else
             {
                 if(Valve.OptGap>(sig.pulseGap[0]-sig.pulseGap[1]) && Valve.OptGap<(sig.pulseGap[0]+sig.pulseGap[1]))
-            {
-                if(!Valve.initStep && srd[AXSV].dir==CW)
-                {// 1步，首先碰到小的挡片
-                    Valve.initStep = 1;
+                {
+                    if(!Valve.initStep && srd[AXSV].dir==CW)
+                    {// 1步，首先碰到小的挡片
+                        Valve.initStep = 1;
                     }
                 }
             }
@@ -481,9 +481,10 @@ void ValveLimitDetect(void)
                     }
                     else
                     {
+                        if(Valve.status&VALVE_INITING && Valve.bNewInit==0xff)
+                            Valve.bNewInit = 1;
                         Valve.status &= ~(VALVE_INITING|VALVE_RUNNING);
                         Valve.portCur = valveFix.fix.portCnt;
-                        Valve.bNewInit = 1;
                     }
                     try.times = 3;
                     Valve.portDes = 0;

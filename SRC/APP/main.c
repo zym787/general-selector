@@ -8,6 +8,7 @@ void ParameterInit(void)
 {
     uint8 ReadBuf[8]={0,0,0,0,0,0,0,0};
 
+    printd("\r\n version:%s", SOFT_VS);
     I2CPageRead_Nbytes(ADDR_BOARD_ID, LEN_BOARD_ID, ReadBuf);
     if(ReadBuf[0]==0x88 && ReadBuf[1]==0x66)
     {
@@ -105,11 +106,6 @@ void ParameterInit(void)
 				rdc.stepP1dgr = STEPS_1_DEGREE_RD16;
 				rdc.stepP01dgr = STEPS_01_DEGREE_RD16;
 				break;
-      defalut:
-				rdc.rate = RDC10;
-				rdc.stepP1dgr = STEPS_1_DEGREE_RD10;
-				rdc.stepP01dgr = STEPS_01_DEGREE_RD10;
-				break;
 		}
 		rdc.stepRound = P_ROUND;
 		rdc.stepRound *= SCALE;
@@ -178,6 +174,19 @@ void ParameterInit(void)
     Valve.bNewInit = 0xff;
 }
 
+void everySecDo(void)
+{
+    if(!Valve.bHalfSeal)
+    {
+    	if(!(Valve.status&VALVE_INITING)&&Valve.bNewInit==1)
+    	{
+    		Valve.dir = CCW;
+    		Valve.portDes = 1;
+    		Valve.bNewInit = 0;
+    	}
+	}
+}
+
 /*
     GPIO³õÊ¼»¯
 */
@@ -220,6 +229,7 @@ int main(void)
 
         InitValve();
         ProcessValve();
+		everySecDo();
         SignalScan();
         TestBurn();
         DebugOut();
@@ -232,8 +242,8 @@ void DebugOut(void)
     {
         timerPara.timeDbg = 0;
         LED_WORK = !LED_WORK;
-        printd("\r\n >>sta:0x%02x,port:0x%02x,%d,%d,%d,%d",
-            Valve.status, Valve.portCur, Valve.portDes, Valve.retryTms, Valve.OptBlock, VALVE_OPT);
+        printd("\r\n >>sta:0x%02x,port:0x%02x,%d,%d,%d,%d,%d",
+            Valve.status, Valve.portCur, Valve.portDes, Valve.retryTms, Valve.OptBlock, VALVE_OPT, Valve.bNewInit);
         if(syspara.typeProtocal==MY_MODBUS)
             printd(" MODBUS");
         else

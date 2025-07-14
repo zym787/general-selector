@@ -676,7 +676,7 @@ void TermCnt(char rw)
         printd("\r Err code %d", ret);
         return;
     }
-    if(rw == READ_ACT)
+    if(rw == WRITE_ACT)
     {
         valveFix.fix.portCnt = getInt;
         I2CPageWrite_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
