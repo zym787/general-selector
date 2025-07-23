@@ -204,11 +204,15 @@ void MB_ReadHoldingRegisters(void)
     			ModbusPara.tBuf[3] = ModbusPara.mAddrs;         // 模块地址
                 byteCount = 4;
     	    }
-    	    else if(func_num==3)
-    		{
-    			ModbusPara.tBuf[3] = SOFT_VER;                  // 模块版本
-                byteCount = 4;
-    	    }
+    	    else if(0x03 == func_num)       /* 读版本 */
+            {
+                uint32_t temp = SOFT_VER;
+                ModbusPara.tBuf[3] = temp>>24;
+                ModbusPara.tBuf[4] = temp>>16;
+                ModbusPara.tBuf[5] = temp>>8;
+                ModbusPara.tBuf[6] = temp>>0;       /* 模块版本号 */
+                byteCount = 7;
+            }
     	    else if(func_num==4)
     		{
     			ModbusPara.tBuf[3] = Valve.fixOrg;              // 原点补偿值
@@ -270,7 +274,7 @@ void MB_PresetSingleHoldingRegister(void)
                 	Valve.dir = 0xff;		// 方向
                     I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
                     if(!Valve.spd || Valve.spd>SPD_LMT)
-                        Valve.spd = SPD_VALVE;
+                        Valve.spd = INIT_SPD;
                     speed[AXSV] = accel[AXSV] = decel[AXSV] = 100;
                     speed[AXSV] *= (Valve.spd);
                     speed[AXSV] *= (rdc.rate);
@@ -543,20 +547,28 @@ void MB_PresetMultipleHoldingRegisters(void)
                         Valve.serialPort[Valve.serialNum++] = port_num;
                     }
                 }
-            	Valve.spd = ModbusPara.rBuf[4];		//
-            	Valve.dir = ModbusPara.rBuf[5];		//
-            	if(!Valve.spd)
-            	{
-                    I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
-                    if(!Valve.spd || Valve.spd>SPD_LMT)
-                        Valve.spd = SPD_VALVE;
+                uint8_t tempSpd = 0;
+                /* 临时速度 */
+                if(30 <= ModbusPara.rBuf[4])
+                {
+                    tempSpd = ModbusPara.rBuf[4];
                 }
-                speed[AXSV] = accel[AXSV] = decel[AXSV] = 100;
-                speed[AXSV] *= (Valve.spd);
+                else
+                {
+                    tempSpd = 30 + (ModbusPara.rBuf[4] - 30) / 2;
+                }
+                Valve.dir = ModbusPara.rBuf[5];     /* 方向 */
+                if(!tempSpd || tempSpd > SPD_LMT)
+                {
+                    tempSpd = INIT_SPD;
+                }
+                speed[AXSV] = accel[AXSV] = 100;
+                decel[AXSV] = 200;
+                speed[AXSV] *= (tempSpd);
                 speed[AXSV] *= (rdc.rate);
-                accel[AXSV] *= (Valve.spd);
+                accel[AXSV] *= (tempSpd);
                 accel[AXSV] *= (rdc.rate);
-                decel[AXSV] *= (Valve.spd);
+                decel[AXSV] *= (tempSpd);
                 decel[AXSV] *= (rdc.rate);
 
     			ModbusPara.tBuf[0] = ModbusPara.rBuf[0]; 			// 设备地址

@@ -26,6 +26,10 @@ void TIM2_IRQHandler(void)
         TIM2->SR &= ~0x0001 ;//清除中断标志位
         ++timerPara.timeDbg;
         ++timerPara.timeWaitMill;
+        ++timerPara.timeOut;
+        ++timerPara.sec;
+        if(VALVE_INITING == Valve.status || VALVE_RUNNING == Valve.status)
+            ++syspara.protectTimeOut;
         if(protext.stepCnt)
         {
             if(++protext.time>500)
@@ -33,7 +37,7 @@ void TIM2_IRQHandler(void)
                 protext.time = 0;
             	protext.rxCount = 0;
             	protext.stepCnt = PROTOCOL_HEAD;
-                printd("\r\n Err");
+                printd("\r\n EXT_COMM Err");
             }        
         }
         else

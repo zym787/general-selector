@@ -16,8 +16,18 @@ typedef enum
 }bool;
 
 // PCB∂®“Â
-#define A12_909_A2
 //#define A12_906_B1
+#define A12_909_A2
+
+#ifdef A12_906_B1
+    #define PCB_VR                  "A12_906_B1"
+    #define HARDWARE_DESCRIPTION    "Horizontal Version (2.5A Max)"
+#endif
+#ifdef A12_909_A2
+    #define PCB_VR                  "A12_909_A2"
+    #define HARDWARE_DESCRIPTION     "Vertical Version (2.2A Max)"
+#endif
+#define CONTROL "AGS"
 
 //#define RED4
 //#define RED5

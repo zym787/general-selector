@@ -7,6 +7,9 @@
 #define PEXT extern
 #endif
 
+#define INIT_SPD            20  /* 初始化找位速度 */
+//#define SPD_VALVE             28                     // 转阀速度
+#define SPD_VALVE           100                     // 转阀速度
 
 #define AXSV                0
 #define SPD_LMT             255
@@ -95,9 +98,6 @@ enum
 
 #define BYTE_RANGE              255
 #define ADDR_MAX                64
-
-//#define SPD_VALVE               28                     // 转阀速度
-#define SPD_VALVE               100                     // 转阀速度
 
 #define PREPORTCNT              4                       // 预输入端口
 typedef struct

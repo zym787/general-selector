@@ -25,7 +25,7 @@ void TermVR(char rw)
     int getInt;
     if(rw==READ_ACT)
     {
-        printd("\r\n %s", SOFT_VS);
+        printd("\r\n %s", SOFT_VER_C);
     }
     else
     {

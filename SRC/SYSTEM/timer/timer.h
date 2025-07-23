@@ -15,6 +15,8 @@ typedef struct
     uint16 timeCmd;
     uint16 timeMilli;
     uint32 timeWaitMill;
+    uint16_t timeOut;   /* ¥ÌŒÛ÷∏ æµ∆ */
+    uint16_t sec;
 }_TIMER_T;
 
 PEXT _TIMER_T timerPara;
