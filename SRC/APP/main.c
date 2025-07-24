@@ -1,38 +1,45 @@
 #define _MAIN_H_GLOBALS_
 #include "common.h"
 
-uint8 moduleAddrDflt = 0, valveFixDflt = 0, valveFixDir=0, valvePortCnt=10, IntDflt=5, SpdDflt=3, protocalDflt=MY_MODBUS;
-uint8 bRdpDflt = 0;
+uint8_t moduleAddrDflt = 1, valveFixDflt = 0, valveFixDir=0, 
+    valvePortCnt=10, IntDflt=5, SpdDflt=INIT_SPD, protocalDflt=MY_MODBUS;
+uint8_t bRdpDflt = 0;
 
 void ParameterInit(void)
 {
     uint8 ReadBuf[8]={0,0,0,0,0,0,0,0};
 
-    printd("\r\n version:%s", SOFT_VS);
+    // 读取板号判断是否第一次进行初始化
     I2CPageRead_Nbytes(ADDR_BOARD_ID, LEN_BOARD_ID, ReadBuf);
+    // 读取默认参数
     if(ReadBuf[0]==0x88 && ReadBuf[1]==0x66)
     {
         printd("\r Read stored data");
 
+        // 地址 0~255
         I2CPageRead_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara.mAddrs);
         printd("\r Addr:%d", ModbusPara.mAddrs);
 
+        // 通道数
         I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
         (valveFix.fix.portCnt&&valveFix.fix.portCnt>32)?(valveFix.fix.portCnt=10):(valveFix.fix.portCnt);
         printd("\r Port Cnt:%d", valveFix.fix.portCnt);
-
+ 
+        // 原点补偿
         I2CPageRead_Nbytes(ADDR_VALVE_FIX, LEN_VALVE_FIX, &Valve.fixOrg);
-        printd("\r Fix:%d", Valve.fixOrg);
+        printd("\r Fix Org:%d DEG", Valve.fixOrg);
 
+        // 方向补偿
         I2CPageRead_Nbytes(ADDR_DIR_FIX, LEN_DIR_FIX, &valveFix.fix.dirGap);
-        printd("\r Dir:%d", valveFix.fix.dirGap);
+        printd("\r Fix Dir:%d (0.1)DEG", valveFix.fix.dirGap);
 
         printd("\r Fix:");
         for(uint32 i=0; i<valveFix.fix.portCnt; i++)
             printd(" %d", valveFix.array[i]);
 
+        // 烧机间隔
         I2CPageRead_Nbytes(ADDR_INTVL, LEN_INTVL, &intCtrl);
-        printd("\r Interval:%d", intCtrl);
+        printd("\r Interval:%d Sec", intCtrl);
 
         I2CPageRead_Nbytes(ADDR_SN, LEN_SN, Valve.SnCode);
         I2CPageRead_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.typeProtocal);
@@ -44,10 +51,11 @@ void ParameterInit(void)
             printd("\r\n disable pulse read");
         I2CPageRead_Nbytes(ADDR_SIG, LEN_SIG, sig.arrCount);
         sig.sum = SigSum(sig.arrCount, valveFix.fix.portCnt);
-        printd("\r\n SIG");
+        printd("\r\n SIG:");
         for(uint8 i=0; i<valveFix.fix.portCnt; i++)
             printd(" %d", sig.arrCount[i]);
         I2CPageRead_Nbytes(ADDR_SYMBOL, LEN_SYMBOL, ReadBuf);
+        
         sig.pulseBlock[0] = ReadBuf[0];
         sig.pulseBlock[0] <<= 8;
         sig.pulseBlock[0] |= ReadBuf[1];
@@ -87,73 +95,82 @@ void ParameterInit(void)
         (!Valve.fDirCCw||Valve.fDirCCw>100)?(Valve.fDirCCw=1):(Valve.fDirCCw);
         printd("\r\n 定位减速:%d %d", Valve.fDirCw, Valve.fDirCCw);
 
+        /* 减速比 */
         I2CPageRead_Nbytes(ADDR_RDC_RATE, LEN_RDC_RATE, &rdc.rate);
-		switch(rdc.rate)
-		{
-			case RDC01:
-				rdc.stepP1dgr = STEPS_1_DEGREE_RD01;
-				rdc.stepP01dgr = STEPS_01_DEGREE_RD01;
-				break;
+        switch(rdc.rate)
+        {
+            case RDC01:
+                rdc.stepP1dgr = STEPS_1_DEGREE_RD01;
+                rdc.stepP01dgr = STEPS_01_DEGREE_RD01;
+                break;
             case RDC04:
                 rdc.stepP1dgr = STEPS_1_DEGREE_RD04;
                 rdc.stepP01dgr = STEPS_01_DEGREE_RD04;
                 break;
-			case RDC10:
-				rdc.stepP1dgr = STEPS_1_DEGREE_RD10;
-				rdc.stepP01dgr = STEPS_01_DEGREE_RD10;
-				break;
-			case RDC16:
-				rdc.stepP1dgr = STEPS_1_DEGREE_RD16;
-				rdc.stepP01dgr = STEPS_01_DEGREE_RD16;
-				break;
-		}
-		rdc.stepRound = P_ROUND;
-		rdc.stepRound *= SCALE;
-		rdc.stepRound *= rdc.rate;
+            case RDC10:
+                rdc.stepP1dgr = STEPS_1_DEGREE_RD10;
+                rdc.stepP01dgr = STEPS_01_DEGREE_RD10;
+                break;
+            case RDC16:
+                rdc.stepP1dgr = STEPS_1_DEGREE_RD16;
+                rdc.stepP01dgr = STEPS_01_DEGREE_RD16;
+                break;
+            default:
+                printd("\r 减速比参数错误,缺省写入%d", RDC10);
+                rdc.rate = RDC10;
+                rdc.stepP1dgr = STEPS_1_DEGREE_RD10;
+                rdc.stepP01dgr = STEPS_01_DEGREE_RD10;
+                break;
+        }
+        rdc.stepRound = P_ROUND;    // 单圈步数 200
+        rdc.stepRound *= SCALE;     // 细分
+        rdc.stepRound *= rdc.rate;  // 减速比
+        printd("\r Rate:%d Round:%d", rdc.rate, rdc.stepRound);
+        /* 速度 */
         I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
         if(!Valve.spd || Valve.spd>SPD_LMT)
-            Valve.spd = SPD_VALVE;
-        speed[AXSV] *= (Valve.spd);
-        speed[AXSV] *= (rdc.rate);
-        accel[AXSV] *= (Valve.spd);
-        accel[AXSV] *= (rdc.rate);
-        decel[AXSV] *= (Valve.spd);
-        decel[AXSV] *= (rdc.rate);
-        printd("\r Spd:%d", Valve.spd);
+            Valve.spd = INIT_SPD;
+        printd("\r Speed:%d RPM", Valve.spd);
+        /* 半通道 */
         I2CPageRead_Nbytes(ADDR_HALF_SEAL, LEN_HALF_SEAL, &Valve.bHalfSeal);
-        printd("\r\n rate %d seal %d", rdc.rate, Valve.bHalfSeal);
+        printd("\r Half Seal:%d", Valve.bHalfSeal);
     }
     else
     {
         printd("\r\n Write default data");
+        /* 板号 */
         ReadBuf[0] = 0x88;
         ReadBuf[1] = 0x66;
         I2CPageWrite_Nbytes(ADDR_BOARD_ID, LEN_BOARD_ID, ReadBuf);
-        I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &moduleAddrDflt);
+        /* 地址 1 */
         ModbusPara .mAddrs = moduleAddrDflt;
-        I2CPageWrite_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valvePortCnt);
+        I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara .mAddrs);
+        /* 通道数 10 */
         valveFix.fix.portCnt = valvePortCnt;
+        I2CPageWrite_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
         printd("\r Port Cnt:%d", valveFix.fix.portCnt);
-
-        I2CPageWrite_Nbytes(ADDR_VALVE_FIX, LEN_VALVE_FIX, &valveFixDflt);
+        /* 原点补偿 0 */
         Valve.fixOrg = valveFixDflt;
-        I2CPageWrite_Nbytes(ADDR_DIR_FIX, LEN_DIR_FIX, &valveFixDir);
+        I2CPageWrite_Nbytes(ADDR_VALVE_FIX, LEN_VALVE_FIX, &Valve.fixOrg);
+        /* 方向补偿 0 */
         valveFix.fix.dirGap = valveFixDir;
-        I2CPageWrite_Nbytes(ADDR_INTVL, LEN_INTVL, &IntDflt);
+        I2CPageWrite_Nbytes(ADDR_DIR_FIX, LEN_DIR_FIX, &valveFix.fix.dirGap);
+        /* 老化间隔 5秒 */
         intCtrl = IntDflt;
-        I2CPageWrite_Nbytes(ADDR_SPD, LEN_SPD, &SpdDflt);
+        I2CPageWrite_Nbytes(ADDR_INTVL, LEN_INTVL, &intCtrl);
+        /* 减速比 10 */
+        rdc.rate = RDC10;
+        I2CPageWrite_Nbytes(ADDR_RDC_RATE, LEN_RDC_RATE, &rdc.rate);
+        /* 速度 20 */
         Valve.spd = SpdDflt;
-        speed[AXSV] *= (Valve.spd);
-        speed[AXSV] *= (rdc.rate);
-        accel[AXSV] *= (Valve.spd);
-        accel[AXSV] *= (rdc.rate);
-        decel[AXSV] *= (Valve.spd);
-        decel[AXSV] *= (rdc.rate);
-
+        I2CPageWrite_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
+        /* 序列号 */
         memset(Valve.SnCode, 0, sizeof(Valve.SnCode));
         I2CPageWrite_Nbytes(ADDR_SN, LEN_SN, Valve.SnCode);
-        I2CPageWrite_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &protocalDflt);
-
+        /* 协议 */
+        syspara.typeProtocal = protocalDflt;
+        I2CPageWrite_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.typeProtocal);
+        /* 读脉冲标志 */
         syspara.bRdPulse = (bool)bRdpDflt;
         if(syspara.bRdPulse==true)
             printd("\r\n enable pulse read");
@@ -162,11 +179,24 @@ void ParameterInit(void)
 
         I2CPageRead_Nbytes(ADDR_SIG, LEN_SIG, sig.arrCount);
         sig.sum = SigSum(sig.arrCount, valveFix.fix.portCnt);
-        printd("\r\n SIG");
+        printd("\r\n SIG:");
         for(uint8 i=0; i<valveFix.fix.portCnt; i++)
             printd(" %d", sig.arrCount[i]);
+        printd("\r 写入成功,请复位!!!");
     }
     getOptStartStatus();
+    /* 使用初始化速度找原点 */
+    speed[AXSV] = 100;
+    accel[AXSV] = 100;
+    decel[AXSV] = 200;
+    speed[AXSV] *= (INIT_SPD);
+    speed[AXSV] *= (rdc.rate);
+    accel[AXSV] *= (INIT_SPD);
+    accel[AXSV] *= (rdc.rate);
+    decel[AXSV] *= (INIT_SPD);
+    decel[AXSV] *= (rdc.rate);
+    printd("\r\n Init motion!  Slow Down!  (%d) spd%d acc%d dec%d", 
+        INIT_SPD, speed[AXSV], accel[AXSV], decel[AXSV]);
     VALVE_ENA = ON;
     Valve.status = VALVE_INITING;
     Valve.ErrBlinkTime = NORMAL_BLINK;
@@ -175,6 +205,11 @@ void ParameterInit(void)
     Valve.bNewInit = 0xff;
 }
 
+// 检测任务
+// 1 半通道
+// 2 超时检测任务(1s)
+#define SINGLE_RUN_TIMEOUT          5           // 运行5秒超时
+#define SINGLE_INITING_TIMOUT       14           // 转一圈差不多3秒，复位单次是两圈
 void everySecDo(void)
 {
     if(!Valve.bHalfSeal)
@@ -186,6 +221,41 @@ void everySecDo(void)
     		Valve.bNewInit = 0;
     	}
 	}
+    // 每秒检测一次
+    if(timerPara.sec > SEC)
+    {
+        timerPara.sec = 0;
+        // 超时报错
+        // 单通道间做5秒的超时处理，避免长时间堵转烧坏电路
+        if((Valve.status == VALVE_RUNNING && 
+            syspara.protectTimeOut > SINGLE_RUN_TIMEOUT*SEC) ||
+            (Valve.status&VALVE_INITING && 
+            syspara.protectTimeOut > SINGLE_INITING_TIMOUT*SEC))
+        {
+            if(!(Valve.status&VALVE_ERR))
+            {
+                Valve.portDes = 0;
+                Valve.status = VALVE_ERR;
+                VALVE_ENA = DISABLE;
+            }
+            else
+            {
+                VALVE_ENA = DISABLE;
+            }
+            printd("\r\n time out error! (initstep%d,%dms)", 
+                Valve.initStep, syspara.protectTimeOut);
+            Valve.ErrBlinkTime = RETRY_TIME_OUT;
+        }
+        // 15秒超时锁机
+        if(syspara.protectTimeOut > (SINGLE_INITING_TIMOUT+1)*SEC)
+        {
+            Valve.status = VALVE_ERR;
+            VALVE_ENA = DISABLE;
+            printd("\r\n %d Timeout protection! (initstep%d,%dms)", 
+                SINGLE_INITING_TIMOUT+1, Valve.initStep, syspara.protectTimeOut);
+            Valve.ErrBlinkTime = RETRY_TIME_OUT;
+        }
+    }
 }
 
 /*
@@ -224,6 +294,12 @@ int main(void)
     GPIOInit();
     delay_ms(100);
     BootInterface();
+    printd("\r\n Version:%s(%d)  Time: %s %s \
+        \r\n Description:%s (%s)\
+        \r\n PCB:%s  %s \r\n", 
+    SOFT_VER_C, SOFT_VER, __DATE__, __TIME__, 
+    DESCRIPTION, CONTROL, 
+    PCB_VR, HARDWARE_DESCRIPTION);
     ParameterInit();
     if(syspara.typeProtocal==MY_MODBUS)
         ModbusInit();
@@ -242,21 +318,23 @@ int main(void)
         SignalScan();
         TestBurn();
         DebugOut();
+        ErrBlink();
     }
 }
 
 void DebugOut(void)
 {
-    if(timerPara.timeDbg>SEC)
+    if(timerPara.timeDbg > SEC * 3)
     {
         timerPara.timeDbg = 0;
-        LED_WORK = !LED_WORK;
-        printd("\r\n >>sta:0x%02x,port:0x%02x,%d,%d,%d,%d,%d",
-            Valve.status, Valve.portCur, Valve.portDes, Valve.retryTms, Valve.OptBlock, VALVE_OPT, Valve.bNewInit);
+        // LED_WORK = !LED_WORK;
+        printd("\r\n >>sta:0x%02x  %02x->%02x  retry:%d  OptBlock:%d  Opt:%d  bNewInit:%d",
+            Valve.status, Valve.portCur, Valve.portDes, Valve.retryTms, 
+            Valve.OptBlock, VALVE_OPT, Valve.bNewInit);
         if(syspara.typeProtocal==MY_MODBUS)
-            printd(" MODBUS");
+            printd("  MODBUS");
         else
-            printd(" EXTCOM %d %d", protext.stepCnt, protext.time);
+            printd("  EXTCOM %d %d", protext.stepCnt, protext.time);
     }
     if(Valve.bPassPort)
     {
@@ -265,7 +343,12 @@ void DebugOut(void)
     }
 }
 
-
-
-
-
+void ErrBlink(void)
+{
+    /* 设置led闪烁间隔 */
+    if(timerPara.timeOut > Valve.ErrBlinkTime)
+    {
+        timerPara.timeOut = 0;
+        LED_WORK = !LED_WORK;
+    }
+}

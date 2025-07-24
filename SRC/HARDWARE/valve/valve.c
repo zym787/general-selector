@@ -246,9 +246,12 @@ void ProcessValve(void)
                         AxisMoveRel(AXSV, (int)tpFloat, accel[AXSV]*2, decel[AXSV]*2, speed[AXSV]);
                         Valve.dirLast = Valve.direct;
                     }
-    				Valve.status &= ~VALVE_RUN_END; 	// 清除运行结束标志
-    				Valve.status |= VALVE_RUNNING; 	    // 置位运行标志
+                    Valve.status &= ~VALVE_RUN_END;     /* 清除运行结束标志 */
+                    Valve.status |= VALVE_RUNNING;      /* 置位运行标志 */
                     Valve.statusLast = VALVE_RUNNING;
+                    syspara.protectTimeOut = 0;
+                    printd("\r\n %s initstep:%d (%d) ststus:%02x", 
+                        __FUNCTION__, Valve.initStep, syspara.protectTimeOut, Valve.status);
                 }
                 else
                 {
@@ -278,7 +281,7 @@ void ProcessValve(void)
                             Valve.ErrBlinkTime = RETRY_TIME_OUT;
                             Valve.status = VALVE_ERR;
                             VALVE_ENA = DISABLE;
-                            printd("\r\n ERR");
+                            printd("\r\n Valve ERR");
                             return;
                         }
                     }
@@ -315,19 +318,20 @@ void ValveLimitDetect(void)
         ++Valve.OptGap;
         if(Valve.OptBlock)
         {// 此时处理挡片
-            #ifdef PULSE_CNT_EN
+#ifdef PULSE_CNT_EN
             printd("\r\nB%d", Valve.OptBlock);
-            #endif
+#endif
             if(sig.bRdPulse==true)
                 sig.pulseBlock[sig.num] = Valve.OptBlock;
             else
             {
-                if(
-                    // 较大的特征挡片后必是位置定位孔
-                    (Valve.OptBlock>(sig.pulseBlock[0]-sig.pulseBlock[3]) && Valve.OptBlock<(sig.pulseBlock[0]+sig.pulseBlock[3]))
-                    // 反转时第二大特征挡片后必是位置定位孔
-                 || (srd[AXSV].dir==CCW && Valve.OptBlock>(sig.pulseBlock[1]-sig.pulseBlock[4]) && Valve.OptBlock<(sig.pulseBlock[1]+sig.pulseBlock[4]))
-                    )
+                /* 较大的特征挡片后必是位置定位孔 */
+                /* 反转时第二大特征挡片后必是位置定位孔 */
+                if((Valve.OptBlock > (sig.pulseBlock[0]-sig.pulseBlock[3]) && 
+                    Valve.OptBlock < (sig.pulseBlock[0]+sig.pulseBlock[3])) || 
+                   (srd[AXSV].dir == CCW && 
+                    Valve.OptBlock > (sig.pulseBlock[1]-sig.pulseBlock[4]) && 
+                    Valve.OptBlock < (sig.pulseBlock[1]+sig.pulseBlock[4])))
                 {
                     Valve.initStep = 0;
                     if(!(Valve.status&VALVE_INITING))
@@ -358,9 +362,10 @@ void ValveLimitDetect(void)
                         }
                     }
                 }
-                else if(Valve.OptBlock>(sig.pulseBlock[2]-sig.pulseBlock[5]) && Valve.OptBlock<=(sig.pulseBlock[2]+sig.pulseBlock[5]))
+                else if(Valve.OptBlock > (sig.pulseBlock[2]-sig.pulseBlock[5]) && 
+                        Valve.OptBlock <= (sig.pulseBlock[2]+sig.pulseBlock[5]))
                 {
-                    // 每圈进行数据清除，保证长期转动下来不会有误差累积
+                    /* 每圈进行数据清除，保证长期转动下来不会有误差累积 */
                     Valve.stpCnt = 0;
                     if(!(Valve.status&VALVE_INITING))
                     {
@@ -380,13 +385,14 @@ void ValveLimitDetect(void)
                         Valve.initStep = 2;
                     }
                 }
-                else if(Valve.OptBlock>sig.pulseBlock[0]*valveFix.fix.portCnt/4)
+                else if(Valve.OptBlock > sig.pulseBlock[0]*valveFix.fix.portCnt/4)
                 {
                     Valve.portDes = 0;
                     Valve.ErrBlinkTime = RETRY_TIME_OUT;
                     Valve.status = VALVE_ERR;
                     VALVE_ENA = DISABLE;
                 }
+                /* 半通道处理逻辑 */
                 if(Valve.bHalfSeal)
                 {
                     if(!(Valve.status&VALVE_INITING)&&Valve.bNewInit==1)
@@ -434,9 +440,9 @@ void ValveLimitDetect(void)
         ++Valve.OptBlock;
         if(Valve.OptGap)
         {// 此处处理缺口
-            #ifdef PULSE_CNT_EN
+#ifdef PULSE_CNT_EN
             printd("\r\nG%d",Valve.OptGap);
-            #endif
+#endif
             if(sig.bRdPulse==true)
                 sig.pulseGap[sig.num++] = Valve.OptGap;
             else
@@ -497,6 +503,17 @@ void ValveLimitDetect(void)
                     // 清时间，保证不会连续复位转动
                     timerPara.timeMilli = 0;
                     getPrePort();
+                    speed[AXSV] = 100;
+                    accel[AXSV] = 100;
+                    decel[AXSV] = 200;
+                    speed[AXSV] *= (Valve.spd);    /* 恢复设定速度 */
+                    speed[AXSV] *= (rdc.rate);
+                    accel[AXSV] *= (Valve.spd);
+                    accel[AXSV] *= (rdc.rate);
+                    decel[AXSV] *= (Valve.spd);
+                    decel[AXSV] *= (rdc.rate);
+                    printd("\r\n Restore motion speed  (%d) spd%d acc%d dec%d", 
+                        Valve.spd, speed[AXSV], accel[AXSV], decel[AXSV]);
 //                    printd("\r\n inited");
                 }
             }
@@ -541,11 +558,3 @@ void TestBurn(void)
         }
     }
 }
-
-
-
-
-
-
-
-

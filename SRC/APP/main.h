@@ -7,8 +7,24 @@
 #define PEXT extern
 #endif
 
-#define SOFT_VER                215
-#define SOFT_VS                 "V2.0.0r4"
+#define DESCRIPTION         "Selector Valve"
+#define SOFT_VER            2006        /* 软件版本4AGS */
+#define SOFTWARE_VERSION    "r6"        /* 软件修改版次 */
+#define SOFT_NAME           "v2.0.0-"
+#define SOFT_VER_C  SOFT_NAME##""##SOFTWARE_VERSION
+//  v2.0.0r0    2024.07.24  修复半通道起始位错误 (TZY)
+//  v2.0.0r2    2024.08.09  保留半通道或1通道 (TZY)
+//  v2.0.0r3    2024.10.12  限制繁忙时命令响应 (TZY)
+//  v2.0.0r4    2025.01.23  修复最短路径切换指令返回值异常
+//  v2.0.0-r5   2025.07.23  修复部分默认参数写入乱码
+//                          分离软件版本号中的修改版次和版本名称，修改版本号，支持03读版本
+//                          初始化降速增扭
+//                          增加超时保护，LED报错快闪
+//                          10写临时速度超过30部分会降低一半
+//                          默认速度强制设置为20
+//                          修复10写临时速度会篡改系统速度，方向仍会被篡改
+//  v2.0.0-r6   2025.07.24  恢复10写临时速度，速度不做限制
+//                          添加LIMIT_TEMP_SPD宏开关限制临时速度
 
 //------------------------------------------------------------------------------------------------------------
 #define ADDR_BOARD_ID           0
@@ -60,8 +76,8 @@
 #define LEN_HALF_SEAL			1
 //------------------------------------------------------------------------------------------------------------
 
-#define NORMAL_BLINK            2500       //正常运行的闪烁间隔
-#define RETRY_TIME_OUT          500        //异常运行的闪烁间隔
+#define NORMAL_BLINK            1500       //正常运行的闪烁间隔
+#define RETRY_TIME_OUT          400        //异常运行的闪烁间隔
 
 #define	KEY		    PBin(5)
 #define	RX_EN()		(PBout(1)=0)
@@ -79,6 +95,7 @@ typedef struct
     uint8   bdrate;
     bool    bRdPulse;
     uint32  OptBlockLast;
+    uint32_t protectTimeOut;
 }_SYS_T;
 PEXT _SYS_T syspara;
 
@@ -88,7 +105,7 @@ PEXT void ParameterInit(void);
 PEXT int main(void);
 PEXT void DebugOut(void);
 PEXT void UsrLimit(void);
-
+PEXT void ErrBlink(void);
 
 
 #undef PEXT
