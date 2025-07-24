@@ -16,7 +16,7 @@ typedef enum
 }bool;
 
 // PCB定义
-//#define A12_906_B1
+//#define A12_906_B1    /* 不用 */
 #define A12_909_A2
 
 #ifdef A12_906_B1
@@ -28,6 +28,9 @@ typedef enum
     #define HARDWARE_DESCRIPTION     "Vertical Version (2.2A Max)"
 #endif
 #define CONTROL "AGS"
+
+/* 是否限制临时速度 默认不开启 仅r5特殊定制使用! */
+//#define LIMIT_TEMP_SPD
 
 //#define RED4
 //#define RED5
