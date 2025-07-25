@@ -8,8 +8,8 @@
 #endif
 
 #define DESCRIPTION         "Selector Valve"
-#define SOFT_VER            2006        /* 软件版本4AGS */
-#define SOFTWARE_VERSION    "r6"        /* 软件修改版次 */
+#define SOFT_VER            (uint32_t)0x20000007        /* 软件版本4AGS */
+#define SOFTWARE_VERSION    "r7"        /* 软件修改版次 */
 #define SOFT_NAME           "v2.0.0-"
 #define SOFT_VER_C  SOFT_NAME##""##SOFTWARE_VERSION
 //  v2.0.0r0    2024.07.24  修复半通道起始位错误 (TZY)
@@ -25,6 +25,11 @@
 //                          修复10写临时速度会篡改系统速度，方向仍会被篡改
 //  v2.0.0-r6   2025.07.24  恢复10写临时速度，速度不做限制
 //                          添加LIMIT_TEMP_SPD宏开关限制临时速度
+//  v2.0.0-r7   2025.07.25  查版本可以只管看到版本号，不需要进行进制转换 20 00 00 07 
+//                          添加09读速度，添加半通道默认关闭、波特率默认9600、CW/CCW默认0
+//                          优化modbus协议栈，规范术语，新增0E操作地址错误
+//                          
+
 
 //------------------------------------------------------------------------------------------------------------
 #define ADDR_BOARD_ID           0
@@ -96,6 +101,7 @@ typedef struct
     bool    bRdPulse;
     uint32  OptBlockLast;
     uint32_t protectTimeOut;
+//    uint32_t totalCnt;        /* 切换次数 */
 }_SYS_T;
 PEXT _SYS_T syspara;
 

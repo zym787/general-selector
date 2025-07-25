@@ -10,6 +10,7 @@
 #define INIT_SPD            20  /* 初始化找位速度 */
 //#define SPD_VALVE             28                     // 转阀速度
 #define SPD_VALVE           100                     // 转阀速度
+#define SPD_MAX             200     /* 速度最大值 */
 
 #define AXSV                0
 #define SPD_LMT             255
@@ -97,7 +98,7 @@ enum
 #define DEG_DECCEL          40                       // 通道减速区间
 
 #define BYTE_RANGE              255
-#define ADDR_MAX                64
+#define ADDR_MAX                63  /* 地址支持0-63 64为烧机老化地址 */
 
 #define PREPORTCNT              4                       // 预输入端口
 typedef struct

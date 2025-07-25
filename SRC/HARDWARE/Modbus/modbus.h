@@ -14,21 +14,25 @@
 #define MAX_ADDR                    1
 #define	MB_SALVE_DEF_ADDR           1
 //---- 本机支持MODBUS功能代码-------------------------------------------------
-#define CHECK_COIL_bSTATUS			1 		//  读输出位状态
-#define GET_INPUT_bSTATUS			2 		//  读输入位状态
-#define GET_HOLDING_REGT			3		//  读保持寄存器
-#define GET_INPUT_REGT				4		//  读输入寄存器
-#define SET_COIL_SINGLE				5		//  强置单线圈
-#define PRESET_HOLDING_sREGT		6		//  预置单个保持寄存器
-#define SET_COIL_MULTIPLE			15		//  强制多个位输出
-#define PRESET_HOLDING_mREGT		16		//  预置多个保持寄存器
+#define CHECK_COIL_bSTATUS			0x01 		//  读输出位状态
+#define GET_INPUT_bSTATUS			0x02 		//  读输入位状态
+#define GET_HOLDING_REGT			0x03		//  读保持寄存器
+#define GET_INPUT_REGT				0x04		//  读输入寄存器
+#define SET_COIL_SINGLE				0x05		//  强置单线圈
+#define PRESET_HOLDING_sREGT		0x06		//  预置单个保持寄存器
+#define SET_COIL_MULTIPLE			0x0F		//  强制多个位输出
+#define PRESET_HOLDING_mREGT		0x10		//  预置多个保持寄存器
 #define EXTERN_FUNC			        0x52    //  扩展功能
-//---- 不正常的代码值-------------------------------------------------
-#define ERR_NOT						0
-#define ERR_MB_FUN					1		// 不合法功能代码
-#define ERR_MB_ADDR					2		// 不合法数据地址
-#define ERR_MB_DATA					3		// 不合法数据，超出某功能的极限值
-#define ERR_MB_DEVICE				4		// 主模式响应超出等待时间；从模式设备地址出错；包括字符间隔时间 超过1.5个字符
+/* 异常码 */
+#define ERR_NOT						0x00    /* 00 无异常码 成功 */
+#define ERR_MB_FUN					0x01    /* 01 非法功能异常码 */
+#define ERR_MB_ADDR					0x02    /* 02 非法数据地址 */	// 不合法数据地址
+#define ERR_MB_DATA					0x03    /* 03 非法数据值 */	// 不合法数据，超出某功能的极限值
+#define ERR_MB_DEVICE				0x04    /* 04 从站设备故障 */	// 主模式响应超出等待时间；从模式设备地址出错；包括字符间隔时间 超过1.5个字符
+#define ERR_MB_AFFIRM               0x05    /* 05 从设备确认 */
+#define ERR_MB_BUSY                 0x06    /* 06 从设备忙 */
+#define ERR_MB_ERROR                0x07    /* 07 从设备错误 */
+#define ERR_MB_DEVICE_ADDR          0x0E    /* 0E 非法从站设备地址 */
 //---- 通信时间参数-------------------------------------------------
 #define ONE_DATA_BIT				10		// 采用方式1:10bit
 #define BAUD_RATE_9600			    9600L	// MODBUS波特列

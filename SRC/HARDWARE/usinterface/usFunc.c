@@ -299,6 +299,17 @@ void TermPos(char rw)
     int getInt[2] = {0,0};
     if(rw == READ_ACT)
     {
+        /* 就近切换下一通道 */
+        Valve.dir = 0xFF;
+        if(valveFix.fix.portCnt == Valve.portCur)
+        {
+            Valve.portDes = 1;
+        }
+        else
+        {
+            Valve.portDes = Valve.portCur + 1;
+        }
+        printd("\r\n Nearby:%d==>%d", Valve.portCur, Valve.portDes);
     }
     else
     {
@@ -400,6 +411,8 @@ void TermInt(char rw)
     int getInt=0;
     if(rw == READ_ACT)
     {
+        I2CPageRead_Nbytes(ADDR_INTVL, LEN_INTVL, &intCtrl);
+        printd("\r Interval:%d Sec", intCtrl);
     }
     else
     {
@@ -411,7 +424,7 @@ void TermInt(char rw)
         }
         if(getInt&&getInt<=255)
         {
-            printd("\r\n set INT to %d", getInt);
+            printd("\r\n set Interval to %d Sec", getInt);
             intCtrl = getInt;
             I2CPageWrite_Nbytes(ADDR_INTVL, LEN_INTVL, &intCtrl);
         }
@@ -427,7 +440,7 @@ void TermSpd(char rw)
     if(rw == READ_ACT)
     {
         I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
-        printd("\r\n read Spd %d", Valve.spd);
+        printd("\r\n read Spd %d RPM", Valve.spd);
     }
     else
     {
@@ -455,10 +468,9 @@ void TermSN(char rw)
     if(rw == READ_ACT)
     {
         I2CPageRead_Nbytes(ADDR_SN, LEN_SN, Valve.SnCode);
-        printd("\r\n read sn:");
+        printd("\r\n read SN:");
         for(uint8 i=0; i<10; i++)
             printd(" %02x", Valve.SnCode[i]);
-
     }
     else
     {
@@ -483,13 +495,13 @@ void TermProtocal(char rw)
     if(rw == READ_ACT)
     {
         I2CPageRead_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.typeProtocal);
-        if(getInt==MY_MODBUS || getInt==EXT_COMM)
+        if(MY_MODBUS == syspara.typeProtocal)
         {
-            printd("\r\n now protocal is");
-            if(syspara.typeProtocal==MY_MODBUS)
-                printd("\r\n MODBUS");
-            else
-                printd("\r\n EXT PROTCAL");
+            printd("\r\n AGS");
+        }
+        else if(EXT_COMM == syspara.typeProtocal)
+        {
+            printd("\r\n EXTCOM");
         }
         else
         {
@@ -509,14 +521,14 @@ void TermProtocal(char rw)
             syspara.typeProtocal = getInt;
             printd("\r\n set protocal to");
             if(syspara.typeProtocal==MY_MODBUS)
-                printd("\r\n MODBUS");
+                printd("\r\n AGS");
             else
-                printd("\r\n EXT PROTCAL");
+                printd("\r\n EXTCOM");
             I2CPageWrite_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.typeProtocal);
         }
         else
         {
-            printd("\r\n wrong type");
+            printd("\r\n wrong type  0:AGS  1:EXT");
         }
     }
 }
@@ -531,6 +543,9 @@ void TermBaud(char rw)
     int getInt = 0;
     if(rw == READ_ACT)
     {
+        I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
+        printd("\r\n Baud:%d  %s bps", syspara.bdrate, 
+            (syspara.bdrate) == 1 ? "9600" : (syspara.bdrate) == 2 ? "19200" : "Error");
     }
     else
     {
@@ -547,12 +562,12 @@ void TermBaud(char rw)
         }
         if(getInt==9600)
         {
-            printd("\r\n set baud rate to %d", getInt);
+            printd("\r\n set baud rate to %d bps", getInt);
             syspara.bdrate = 1;
         }
         else if(getInt==19200)
         {
-            printd("\r\n set baud rate to %d", getInt);
+            printd("\r\n set baud rate to %d bps", getInt);
             syspara.bdrate = 2;
         }
         I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
@@ -596,7 +611,7 @@ void TermDirCw(char rw)
     int getInt = 0;
     if(rw == READ_ACT)
     {
-        I2CPageWrite_Nbytes(ADDR_DIR_SD, LEN_DIR_SD-1, (uint8 *)&getInt);
+        I2CPageRead_Nbytes(ADDR_DIR_SD, LEN_DIR_SD-1, (uint8 *)&getInt);
         printd("\r\n 顺时针减速值:%d", getInt);
     }
     else
@@ -624,7 +639,7 @@ void TermDirCCw(char rw)
     int getInt = 0;
     if(rw == READ_ACT)
     {
-        I2CPageWrite_Nbytes(ADDR_DIR_SD+1, LEN_DIR_SD-1, (uint8 *)&getInt);
+        I2CPageRead_Nbytes(ADDR_DIR_SD+1, LEN_DIR_SD-1, (uint8 *)&getInt);
         printd("\r\n 逆时针减速值:%d", getInt);
     }
     else
@@ -676,11 +691,16 @@ void TermCnt(char rw)
         printd("\r Err code %d", ret);
         return;
     }
-    if(rw == WRITE_ACT)
+    if(rw == READ_ACT)
+    {
+        I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
+        printd("\r\n portCnt:%d", valveFix.fix.portCnt);
+    }
+    else
     {
         valveFix.fix.portCnt = getInt;
         I2CPageWrite_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
-        printd("\r\n portCnt%d", valveFix.fix.portCnt);
+        printd("\r\n portCnt:%d", valveFix.fix.portCnt);
     }
 }
 
@@ -718,7 +738,8 @@ void TermHalf(char rw)
     if(rw == READ_ACT)
     {
         I2CPageRead_Nbytes(ADDR_HALF_SEAL, LEN_HALF_SEAL, &Valve.bHalfSeal);
-        printd("\r\n read half %d", Valve.bHalfSeal);
+        printd("\r Half Seal:%d  %s", Valve.bHalfSeal, 
+                (Valve.bHalfSeal) == 0 ? "OFF" : "ON");
     }
     else
     {
@@ -728,8 +749,19 @@ void TermHalf(char rw)
             printd("\r Err code %d", ret);
             return;
         }
-        printd("\r\n set half %d", getInt);
-        Valve.bHalfSeal = getInt;
+        if(0 == getInt || 1 == getInt)
+        {
+            printd("\r\n set Half Seal:%d  %s", getInt, 
+                    (getInt) == 0 ? "OFF" : "ON");
+            Valve.bHalfSeal = getInt;
+            
+        }
+        else
+        {
+            printd("\r\n Non-zero valuse MUST BE forced to 1\
+                    \r\n ENABLE Half Seal");
+            Valve.bHalfSeal = 1;
+        }
         I2CPageWrite_Nbytes(ADDR_HALF_SEAL, LEN_HALF_SEAL, &Valve.bHalfSeal);
     }
 }

@@ -16,9 +16,14 @@ void ParameterInit(void)
     {
         printd("\r Read stored data");
 
-        // 地址 0~255
+        // 地址 0~63
         I2CPageRead_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara.mAddrs);
         printd("\r Addr:%d", ModbusPara.mAddrs);
+        
+        /* 波特率 */
+        I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
+        printd("\r Baud:%d  %s bps", syspara.bdrate, 
+            (syspara.bdrate) == 1 ? "9600" : (syspara.bdrate) == 2 ? "19200" : "Error");
 
         // 通道数
         I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
@@ -93,7 +98,7 @@ void ParameterInit(void)
         Valve.fDirCCw = ReadBuf[1];
         (!Valve.fDirCw||Valve.fDirCw>100)?(Valve.fDirCw=1):(Valve.fDirCw);
         (!Valve.fDirCCw||Valve.fDirCCw>100)?(Valve.fDirCCw=1):(Valve.fDirCCw);
-        printd("\r\n 定位减速:%d %d", Valve.fDirCw, Valve.fDirCCw);
+        printd("\r\n 定位减速:CW%d CCW%d", Valve.fDirCw, Valve.fDirCCw);
 
         /* 减速比 */
         I2CPageRead_Nbytes(ADDR_RDC_RATE, LEN_RDC_RATE, &rdc.rate);
@@ -133,7 +138,8 @@ void ParameterInit(void)
         printd("\r Speed:%d RPM", Valve.spd);
         /* 半通道 */
         I2CPageRead_Nbytes(ADDR_HALF_SEAL, LEN_HALF_SEAL, &Valve.bHalfSeal);
-        printd("\r Half Seal:%d", Valve.bHalfSeal);
+        printd("\r Half Seal:%d %s", Valve.bHalfSeal, 
+                (Valve.bHalfSeal) == 0 ? "OFF" : "ON");
     }
     else
     {
@@ -145,6 +151,9 @@ void ParameterInit(void)
         /* 地址 1 */
         ModbusPara .mAddrs = moduleAddrDflt;
         I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara .mAddrs);
+        /* 波特率 1 9600bps */
+        syspara.bdrate = 1;
+        I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
         /* 通道数 10 */
         valveFix.fix.portCnt = valvePortCnt;
         I2CPageWrite_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
@@ -155,6 +164,11 @@ void ParameterInit(void)
         /* 方向补偿 0 */
         valveFix.fix.dirGap = valveFixDir;
         I2CPageWrite_Nbytes(ADDR_DIR_FIX, LEN_DIR_FIX, &valveFix.fix.dirGap);
+        /* CW/CCW补偿 0 */
+        Valve.fDirCw = 0;
+        I2CPageWrite_Nbytes(ADDR_DIR_SD, LEN_DIR_SD-1, &Valve.fDirCw);
+        Valve.fDirCCw = 0;
+        I2CPageWrite_Nbytes(ADDR_DIR_SD+1, LEN_DIR_SD-1, &Valve.fDirCCw);
         /* 老化间隔 5秒 */
         intCtrl = IntDflt;
         I2CPageWrite_Nbytes(ADDR_INTVL, LEN_INTVL, &intCtrl);
@@ -164,6 +178,9 @@ void ParameterInit(void)
         /* 速度 20 */
         Valve.spd = SpdDflt;
         I2CPageWrite_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
+        /* 半通道 0 */
+        Valve.bHalfSeal = 0;
+        I2CPageRead_Nbytes(ADDR_HALF_SEAL, LEN_HALF_SEAL, &Valve.bHalfSeal);
         /* 序列号 */
         memset(Valve.SnCode, 0, sizeof(Valve.SnCode));
         I2CPageWrite_Nbytes(ADDR_SN, LEN_SN, Valve.SnCode);
@@ -285,7 +302,8 @@ int main(void)
 	Stm32_Clock_Init(9);	        //系统时钟设置
 	delay_init(72);	   	 	        //延时初始化
     JTAG_Set(JTAG_SWD_DISABLE);
-
+//    JTAG_Set(SWD_ENABLE);
+    
 	Usart1_Init(72, 115200);	 	//串口初始化为115200
     iic_INIT();
     ConfigValve();
@@ -294,7 +312,7 @@ int main(void)
     GPIOInit();
     delay_ms(100);
     BootInterface();
-    printd("\r\n Version:%s(%d)  Time: %s %s \
+    printd("\r\n Version:%s(%08x)  Time: %s %s \
         \r\n Description:%s (%s)\
         \r\n PCB:%s  %s \r\n", 
     SOFT_VER_C, SOFT_VER, __DATE__, __TIME__, 
@@ -332,7 +350,7 @@ void DebugOut(void)
             Valve.status, Valve.portCur, Valve.portDes, Valve.retryTms, 
             Valve.OptBlock, VALVE_OPT, Valve.bNewInit);
         if(syspara.typeProtocal==MY_MODBUS)
-            printd("  MODBUS");
+            printd("  AGS");
         else
             printd("  EXTCOM %d %d", protext.stepCnt, protext.time);
     }
