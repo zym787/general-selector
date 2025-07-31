@@ -46,6 +46,7 @@ void ParameterInit(void)
         I2CPageRead_Nbytes(ADDR_INTVL, LEN_INTVL, &intCtrl);
         printd("\r Interval:%d Sec", intCtrl);
 
+        /* –Ú¡–∫≈ */
         I2CPageRead_Nbytes(ADDR_SN, LEN_SN, Valve.SnCode);
         I2CPageRead_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.typeProtocal);
 
@@ -312,7 +313,7 @@ int main(void)
     GPIOInit();
     delay_ms(100);
     BootInterface();
-    printd("\r\n Version:%s(%08x)  Time: %s %s \
+    printd("\r\n Version:%s(%08X)  Time: %s %s \
         \r\n Description:%s (%s)\
         \r\n PCB:%s  %s \r\n", 
     SOFT_VER_C, SOFT_VER, __DATE__, __TIME__, 

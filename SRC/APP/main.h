@@ -8,9 +8,11 @@
 #endif
 
 #define DESCRIPTION         "Selector Valve"
-#define SOFT_VER            (uint32_t)0x20000007        /* 软件版本4AGS */
-#define SOFTWARE_VERSION    "r7"        /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r7"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0007    /* 软件修改版次 */
 #define SOFT_NAME           "v2.0.0-"
+#define SOFT_VER_NUM        (uint32_t)0x20000000
+#define SOFT_VER    (SOFT_VER_NUM + SOFT_REVISION)
 #define SOFT_VER_C  SOFT_NAME##""##SOFTWARE_VERSION
 //  v2.0.0r0    2024.07.24  修复半通道起始位错误 (TZY)
 //  v2.0.0r2    2024.08.09  保留半通道或1通道 (TZY)

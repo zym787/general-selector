@@ -254,7 +254,7 @@ void MB_ReadHoldingRegisters(void)
 //        }
         else
         {
-            ModbusPara.sERR = ERR_MB_ADDR;  /* 超出操作地址范围或者操作地址无效 */
+            ModbusPara.sERR = ERR_MB_ADDR;  /* 非法数据地址 */
         }
         /* 拼接 */
         reg_num = ModbusCRC16(&ModbusPara.tBuf[0], byteCount);  /* 获取CRC */
@@ -290,7 +290,7 @@ void MB_PresetSingleHoldingRegister(void)
 
     dvc_addr = ModbusPara.rBuf[0];  /* 第1字节 站号 模块地址 */
     op_addr = ModbusPara.rBuf[2];  /* 第3字节 操作码 操作地址 */
-    if(dvc_addr == ModbusPara.mAddrs || dvc_addr==MB_Broadcast_ADDR)
+    if(dvc_addr == ModbusPara.mAddrs)
     {
         ModbusPara.tBuf[0] = ModbusPara.rBuf[0];    /* 设备地址 */
         ModbusPara.tBuf[1] = ModbusPara.rBuf[1];    /* 功能码 */
