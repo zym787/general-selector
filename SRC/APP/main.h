@@ -8,12 +8,14 @@
 #endif
 
 #define DESCRIPTION         "Selector Valve"
-#define SOFTWARE_VERSION    "r7"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0007    /* 软件修改版次 */
-#define SOFT_NAME           "v2.0.0-"
+#define SOFTWARE_VERSION    "r8"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0008    /* 软件修改版次 */
+#define SOFT_NAME           "v2.0.0"
 #define SOFT_VER_NUM        (uint32_t)0x20000000
+#define BOARD_0     0x88
+#define BOARD_1     0x66
 #define SOFT_VER    (SOFT_VER_NUM + SOFT_REVISION)
-#define SOFT_VER_C  SOFT_NAME##""##SOFTWARE_VERSION
+#define SOFT_VER_C  SOFT_NAME##"-"##SOFTWARE_VERSION
 //  v2.0.0r0    2024.07.24  修复半通道起始位错误 (TZY)
 //  v2.0.0r2    2024.08.09  保留半通道或1通道 (TZY)
 //  v2.0.0r3    2024.10.12  限制繁忙时命令响应 (TZY)
@@ -27,10 +29,12 @@
 //                          修复10写临时速度会篡改系统速度，方向仍会被篡改
 //  v2.0.0-r6   2025.07.24  恢复10写临时速度，速度不做限制
 //                          添加LIMIT_TEMP_SPD宏开关限制临时速度
-//  v2.0.0-r7   2025.07.25  查版本可以只管看到版本号，不需要进行进制转换 20 00 00 07 
+//  v2.0.0-r7   2025.07.25  查版本可以只管看到版本号，不需要进行进制转换 20 00
+//  00 07
 //                          添加09读速度，添加半通道默认关闭、波特率默认9600、CW/CCW默认0
 //                          优化modbus协议栈，规范术语，新增0E操作地址错误
-//                          
+//                          添加07读写波特率
+//  v2.0.0-r8   2025.08.18  波特率支持38400
 
 
 //------------------------------------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 # 选择阀 Valve
 
-- v2.0.0-r7
-- 2025.07.25
+- v2.0.0-r8
+- 2025.08.18
 
 
 # 支持范围
@@ -26,6 +26,7 @@
 7. 修复10写临时速度会篡改系统速度
 8. LIMIT_TEMP_SPD宏开关限制临时速度
 9. 优化AGS协议栈
+10. 支持读写波特率
 
 
 # 修改记录
@@ -54,6 +55,8 @@
 - 添加半通道默认关闭、波特率默认9600、CW/CCW默认0
 - 添加09读速度
 - 优化modbus协议栈，规范术语，新增05 06 07 0E异常码
+## v2.0.0-r8 2025.08.18
+- 波特率支持38400
 
 # 版本号说明
 
@@ -70,7 +73,7 @@
     电路板版本 电路板描述 (最大电流)
 
 ```
- Version:V1.3.1A-r1(1311)  Time: Jul 21 2025 17:29:37
- Description:Switch Valve (232/485+IO)
- PCB:A12-906  Horizontal Version (2.5A Max)
+ Version:v2.0.0-r7(20000007)  Time: Aug 18 2025 16:17:02
+ Description:Selector Valve (AGS)
+ PCB:A12_909_A2  Vertical Version (2.2A Max)
 ```

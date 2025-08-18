@@ -35,12 +35,15 @@
 #define ERR_MB_DEVICE_ADDR          0x0E    /* 0E 非法从站设备地址 */
 //---- 通信时间参数-------------------------------------------------
 #define ONE_DATA_BIT				10		// 采用方式1:10bit
-#define BAUD_RATE_9600			    9600L	// MODBUS波特列
-#define BAUD_RATE_19200			    19200L	// MODBUS波特列
-#define BAUD_RATE_MODBUS			19200L	// MODBUS波特列
+#define BAUD_RATE_9600                  9600
+#define BAUD_RATE_19200                 19200
+#define BAUD_RATE_38400                 38400
+#define BAUD_RATE_115200                115200
+#define BAUD_RATE_MODBUS                19200L  /* MODBUS默认波特率 */
 //每个bit的时间为1/BR，每个字节为8位+停止位+校验位=10位，则每个字节耗时10/BR，半字节为5/BR，转般为us乘以1000000
 #define MODBUS_TIME_9600			(520)		// 520uS=(10/9600)/2
 #define MODBUS_TIME_19200			(260)		// 260uS=(10/19200)/2
+#define MODBUS_TIME_38400			(130)		// 130uS=(10/38400)/2
 #define MODBUS_TIME					(10*1000000/BAUD_RATE_MODBUS/2)		// 260uS=(10/19200)/2
 #define BUS_IDLE_TIME				10		// 帧空闲(开始或结束)超过3.5~4个接收字符时间
 #define FRAME_ERR_TIME				4		// 数据接收超时,接收字符之间 超过1.5~2个接收字符时间
@@ -53,15 +56,15 @@
 #define MB_RECIVE					0X51	// 总线接收
 #define MB_SEND						0X52	// 总线发送
 #define MB_RECIVE_END				0X53	// 总线发送
-#define MB_NO_RESPONSE				0X54	// 主模式响应的当前查询的设备，从模式设备地址出错
+#define MB_NO_RESPONSE				0X54	// 主模式响应的当前查询的设备,从模式设备地址出错
 #define MB_RECIVE_ERR				0X55	// 总线接收过程有出错
-//---- 通信地址参数，此处少改?-------------------------------------------------
-#define MB_Broadcast_ADDR			0xaa	// 广播地址
+//---- 通信地址参数,此处少改?------------------------------------------------
+#define MB_Broadcast_ADDR			0xAA	// 广播地址
 
 #define MB_MAX_ADDR					128		// 模块最大地址
 
-#define MB_REPEAT					2		// 数据传输出错，后重新处理的次数
-#define MB_ADDR_ERR_FLAG			0xFF	// 地址错误，无效标记
+#define MB_REPEAT					2		// 数据传输出错,后重新处理的次数
+#define MB_ADDR_ERR_FLAG			0xFF	// 地址错误,无效标记
 #define MB_ADDR_NULL				0xFF	// 模块不存在
 
 //=====================函数和变量声明=============================
@@ -82,6 +85,13 @@ typedef struct
 	unsigned char	tBuf[LENGTH_MB_DATA];	// 待发送数据
 }_MB_PRAR_T;
 
+/* 波特率 */
+enum {
+    UART_BAUD_DEF       = 0U,   /**< Default 19200bps */
+    UART_BAUD_9600      = 1U,   /**< 9600bps */
+    UART_BAUD_19200     = 2U,   /**< 19200bps */
+    UART_BAUD_38400     = 3U,   /**< 38400bps */
+};
 
 //线圈变量
 #define SUM_COIL_BIT				64		// 线圈的位个数

@@ -7,12 +7,12 @@ uint8_t bRdpDflt = 0;
 
 void ParameterInit(void)
 {
-    uint8 ReadBuf[8]={0,0,0,0,0,0,0,0};
+    uint8 ReadBuf[8]={0, 0, 0, 0, 0, 0, 0, 0};
 
-    // 读取板号判断是否第一次进行初始化
+    /* 读取板号判断是否第一次进行初始化 */
     I2CPageRead_Nbytes(ADDR_BOARD_ID, LEN_BOARD_ID, ReadBuf);
-    // 读取默认参数
-    if(ReadBuf[0]==0x88 && ReadBuf[1]==0x66)
+    /* 读取默认参数 */
+    if(BOARD_0 == ReadBuf[0] && BOARD_1 == ReadBuf[1])
     {
         printd("\r Read stored data");
 
@@ -203,7 +203,7 @@ void ParameterInit(void)
         printd("\r 写入成功,请复位!!!");
     }
     getOptStartStatus();
-    /* 使用初始化速度找原点 */
+    /* 使用初始化速度找原点 20RPM */
     speed[AXSV] = 100;
     accel[AXSV] = 100;
     decel[AXSV] = 200;
@@ -300,25 +300,24 @@ void GPIOInit(void)
 */
 int main(void)
 {
-	Stm32_Clock_Init(9);	        //系统时钟设置
-	delay_init(72);	   	 	        //延时初始化
+    Stm32_Clock_Init(9);            /* 系统时钟设置 */
+    delay_init(72);                 /* 延时初始化 */
     JTAG_Set(JTAG_SWD_DISABLE);
-//    JTAG_Set(SWD_ENABLE);
-    
-	Usart1_Init(72, 115200);	 	//串口初始化为115200
+    delay_ms(100);
+    Usart1_Init(72, 115200);        /* 串口初始化为115200 */
     iic_INIT();
     ConfigValve();
- 	TIM2_Init(999,71);              //10Khz的计数频率
-    TIM4_Init(65535,35);            //X轴脉冲定时器
+    TIM2_Init(999,71);              /* 10Khz的计数频率 */
+    TIM4_Init(65535,35);            /* X轴脉冲定时器 */
     GPIOInit();
     delay_ms(100);
     BootInterface();
     printd("\r\n Version:%s(%08X)  Time: %s %s \
-        \r\n Description:%s (%s)\
-        \r\n PCB:%s  %s \r\n", 
-    SOFT_VER_C, SOFT_VER, __DATE__, __TIME__, 
-    DESCRIPTION, CONTROL, 
-    PCB_VR, HARDWARE_DESCRIPTION);
+            \r\n Description:%s (%s)\
+            \r\n PCB:%s  %s \r\n", 
+        SOFT_VER_C, SOFT_VER, __DATE__, __TIME__, 
+        DESCRIPTION, CONTROL, 
+        PCB_VR, HARDWARE_DESCRIPTION);
     ParameterInit();
     if(syspara.typeProtocal==MY_MODBUS)
         ModbusInit();
@@ -343,7 +342,7 @@ int main(void)
 
 void DebugOut(void)
 {
-    if(timerPara.timeDbg > SEC * 3)
+    if(timerPara.timeDbg > SEC*3)
     {
         timerPara.timeDbg = 0;
         // LED_WORK = !LED_WORK;

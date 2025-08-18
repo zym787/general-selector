@@ -544,8 +544,7 @@ void TermBaud(char rw)
     if(rw == READ_ACT)
     {
         I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
-        printd("\r\n Baud:%d  %s bps", syspara.bdrate, 
-            (syspara.bdrate) == 1 ? "9600" : (syspara.bdrate) == 2 ? "19200" : "Error");
+        printd("\r\n Baud:%d", syspara.bdrate);
     }
     else
     {
