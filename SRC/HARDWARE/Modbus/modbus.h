@@ -7,7 +7,7 @@
 #define PEXT extern
 #endif
 
-#define DEBUG_MODBUS                1
+//#define DEBUG_MODBUS    /* AGS调试输出 */
 
 
 //======================  参数宏定义=================================

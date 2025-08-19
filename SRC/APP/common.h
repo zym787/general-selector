@@ -15,6 +15,11 @@ typedef enum
     true
 }bool;
 
+
+//#define END_HOLE    /* 开机末端孔 */
+
+//#define DEBUG       /* 调试输出 */
+
 // PCB定义
 //#define A12_906_B1    /* 不用 */
 #define A12_909_A2
@@ -27,7 +32,6 @@ typedef enum
     #define PCB_VR                  "A12_909_A2"
     #define HARDWARE_DESCRIPTION     "Vertical Version (2.2A Max)"
 #endif
-#define CONTROL "AGS"
 
 /* 是否限制临时速度 默认不开启 仅r5特殊定制使用! */
 //#define LIMIT_TEMP_SPD

@@ -230,15 +230,17 @@ void ParameterInit(void)
 #define SINGLE_INITING_TIMOUT       14           // 转一圈差不多3秒，复位单次是两圈
 void everySecDo(void)
 {
+#ifndef END_HOLE
     if(!Valve.bHalfSeal)
     {
     	if(!(Valve.status&VALVE_INITING)&&Valve.bNewInit==1)
     	{
     		Valve.dir = CCW;
-    		Valve.portDes = 1;
+    		Valve.portDes = 1;  /* C 开机1号通 */
     		Valve.bNewInit = 0;
     	}
 	}
+#endif
     // 每秒检测一次
     if(timerPara.sec > SEC)
     {
@@ -313,10 +315,10 @@ int main(void)
     delay_ms(100);
     BootInterface();
     printd("\r\n Version:%s(%08X)  Time: %s %s \
-            \r\n Description:%s (%s)\
+            \r\n Description:%s  %s  (%s)\
             \r\n PCB:%s  %s \r\n", 
         SOFT_VER_C, SOFT_VER, __DATE__, __TIME__, 
-        DESCRIPTION, CONTROL, 
+        DESCRIPTION, HOLE_INFO, CONTROL, 
         PCB_VR, HARDWARE_DESCRIPTION);
     ParameterInit();
     if(syspara.typeProtocal==MY_MODBUS)
@@ -329,7 +331,6 @@ int main(void)
             ModbusProces();
         else
             UsartProcess();
-
         InitValve();
         ProcessValve();
 		everySecDo();
@@ -346,6 +347,7 @@ void DebugOut(void)
     {
         timerPara.timeDbg = 0;
         // LED_WORK = !LED_WORK;
+#ifdef DEBUG
         printd("\r\n >>sta:0x%02x  %02x->%02x  retry:%d  OptBlock:%d  Opt:%d  bNewInit:%d",
             Valve.status, Valve.portCur, Valve.portDes, Valve.retryTms, 
             Valve.OptBlock, VALVE_OPT, Valve.bNewInit);
@@ -353,11 +355,14 @@ void DebugOut(void)
             printd("  AGS");
         else
             printd("  EXTCOM %d %d", protext.stepCnt, protext.time);
+#endif
     }
     if(Valve.bPassPort)
     {
         Valve.bPassPort = 0;
+#ifdef DEBUG
         printd("\r\n P %d %d", Valve.portCur, syspara.OptBlockLast);
+#endif
     }
 }
 

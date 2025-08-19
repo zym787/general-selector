@@ -117,7 +117,7 @@ enum
 #define BAUD_MIN            1       /* 最小波特率 */
 #define BAUD_MAX            3       /* 最大波特率 */
 
-#define PREPORTCNT              4                       // 预输入端口
+#define PREPORTCNT          4                       // 预输入端口
 typedef struct
 {
     unsigned char Addr;             //模块地址

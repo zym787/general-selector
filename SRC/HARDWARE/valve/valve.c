@@ -188,12 +188,12 @@ void ProcessValve(void)
                                 Valve.initStep = 0;
                                 Valve.bReInit = 1;
                             }
-                            printd("\r\n short CCW");
+                            printd("\r\n short CCW =>%d", Valve.portDes);
                         }
                         else if(Positive>=Negative)
                         {
                             Valve.dir = CW;
-                            printd("\r\n short CW");
+                            printd("\r\n short CW =>%d", Valve.portDes);
                         }
                         tpFloat = rdc.stepRound;
                         (Valve.dir==CCW)?(tpFloat *= -1):(tpFloat);
@@ -223,7 +223,7 @@ void ProcessValve(void)
                         }
                         if(Valve.dir==CCW)
                         {
-                            printd("\r\n CCW");
+                            printd("\r\n CCW =>%d", Valve.portDes);
                             if(Valve.portDes==valveFix.fix.portCnt)
                             {
                                 VALVE_ENA = ON;
@@ -236,7 +236,7 @@ void ProcessValve(void)
                         }
                         else
                         {
-                            printd("\r\n CW");
+                            printd("\r\n CW =>%d", Valve.portDes);
                         }
                         tpFloat = rdc.stepRound;
                         (Valve.dir==CCW)?(tpFloat *= -1):(tpFloat);
@@ -250,8 +250,10 @@ void ProcessValve(void)
                     Valve.status |= VALVE_RUNNING;      /* 置位运行标志 */
                     Valve.statusLast = VALVE_RUNNING;
                     syspara.protectTimeOut = 0;
+#ifdef DEBUG
                     printd("\r\n %s initstep:%d (%d) ststus:%02x", 
                         __FUNCTION__, Valve.initStep, syspara.protectTimeOut, Valve.status);
+#endif
                 }
                 else
                 {
@@ -512,8 +514,10 @@ void ValveLimitDetect(void)
                     accel[AXSV] *= (rdc.rate);
                     decel[AXSV] *= (Valve.spd);
                     decel[AXSV] *= (rdc.rate);
+#ifdef DEBUG
                     printd("\r\n Restore motion speed  (%d) spd%d acc%d dec%d", 
                         Valve.spd, speed[AXSV], accel[AXSV], decel[AXSV]);
+#endif
 //                    printd("\r\n inited");
                 }
             }

@@ -8,10 +8,19 @@
 #endif
 
 #define DESCRIPTION         "Selector Valve"
+#define CONTROL             "232/485 AGS"
 #define SOFTWARE_VERSION    "r8"                /* 软件修改版次 */
 #define SOFT_REVISION       (uint16_t)0x0008    /* 软件修改版次 */
-#define SOFT_NAME           "v2.0.0"
-#define SOFT_VER_NUM        (uint32_t)0x20000000
+#ifndef END_HOLE    /* v2.0.0C 开机1号通 */
+#define HOLE_INFO           ">First< Hole"
+#define SOFT_NAME           "v2.0.0C"
+#define SOFT_VER_NUM        (uint32_t)0x200C0000    /* C 开机1号通 */
+#else               /* v2.0.0D 开机末位通 */
+#define HOLE_INFO           ">Last< Hole"
+#define SOFT_NAME           "v2.0.0D"
+#define SOFT_VER_NUM        (uint32_t)0x200D0000    /* D 开机末位通 */
+#endif
+
 #define BOARD_0     0x88
 #define BOARD_1     0x66
 #define SOFT_VER    (SOFT_VER_NUM + SOFT_REVISION)
@@ -38,6 +47,10 @@
 //              2025.08.19  AGS添加99读通道数,修复10写临时速度无法使用方向
 //                          06写功能码写通道00,写地址01,复位06,写波特率07,写速度09,序列号08添加写入参数限制
 //                          修复串口2,3无法通信问题,修复错误状态无法回复
+//  v2.0.0CD-r8 2025.08.19  使用宏开关区分开机末端孔及开机1号孔
+//                          屏蔽AGS协议栈及走位调试输出
+//                          优化版本号,C为开机1号孔,D为开机末端孔
+//                          读通道改为63操作码
 
 
 

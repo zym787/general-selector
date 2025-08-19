@@ -271,7 +271,7 @@ void MB_ReadHoldingRegisters(void)
 //            ModbusPara.tBuf[6] = ((uint8*)&syspara.totalCnt)[0];
 //            byteCount = 7;
 //        }
-        else if(0x99 == op_addr)        /* 读通道数 */
+        else if(0x63 == op_addr)        /* 读通道数 */
         {
             I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
             ModbusPara.tBuf[3] = valveFix.fix.portCnt;
@@ -565,7 +565,7 @@ void MB_PresetMultipleHoldingRegisters(void)
             }
 #ifdef DEBUG_MODBUS
             printd("\r s:");
-            for(uint8 i=0; i<byteCount; i++)
+            for(uint8_t i = 0; i < byteCount; i++)
                 printd(" %02x", ModbusPara.tBuf[i]);
 #endif
         }
@@ -584,7 +584,6 @@ void MB_PresetMultipleHoldingRegisters(void)
 
 void ModbusProces(void)
 {
-    uint32_t i = 0;
     if(MB_RECIVE_END == ModbusPara.sRUN)
     {
         if(LEAST_RCV_CNT < ModbusPara.rCnt)
@@ -592,9 +591,9 @@ void ModbusProces(void)
             LED_WORK = !LED_WORK;
             if(0 == ModbusCRC16(&ModbusPara.rBuf[0], ModbusPara.rCnt))
             {
-#if DEBUG_MODBUS
+#ifdef DEBUG_MODBUS
                 printd("\r r:");
-                for(i=0; i<ModbusPara.rCnt; i++)
+                for(uint8_t i = 0; i<ModbusPara.rCnt; i++)
                     printd(" %02x", ModbusPara.rBuf[i]);
 #endif
                 /* 第2字节 功能码 */
