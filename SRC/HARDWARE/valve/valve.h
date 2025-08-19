@@ -113,6 +113,7 @@ enum
 #define SPD_MAX             70     /* 最大速度 */
 #define CHANNEL_MIN         3       /* 最小通道数 */
 #define CHANNEL_MAX         32      /* 最大通道数 */
+#define CHANNEL_DEF         10      /* 默认通道数 */
 #define BAUD_MIN            1       /* 最小波特率 */
 #define BAUD_MAX            3       /* 最大波特率 */
 
