@@ -91,6 +91,13 @@ enum
     VALVE_ERR=0x20,
 };
 
+enum
+{
+    VALVE_DIR_CW = 0x00,
+    VALVE_DIR_CCW = 0x01,
+    VALVE_DIR_NER = 0xFF,
+};
+
 #define RETRY_TIMES         2                       // 重试次数
 #define SIGNAL_SUM          48                      // 码盘检验次数
 #define SIGNAL_LIMIT        4                       // 码盘检验次数

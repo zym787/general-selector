@@ -135,13 +135,12 @@ void ModbusSend(unsigned char length)
     ModbusPara.rCnt = 0;
 }
 
-
 void ModbusReceive(unsigned char res)
 {
     ModbusPara.times = 0;  //重新计时
     if(ModbusPara.sRUN==MB_IDEL && !ModbusPara.rCnt)
     {
-        // 空闲并且数据处理结束，可以进行新的接收
+        // 空闲并且数据处理结束,可以进行新的接收
         if(ModbusPara.mAddrs==res || res==MB_Broadcast_ADDR)
         {
             // 开始接收数据
@@ -152,7 +151,7 @@ void ModbusReceive(unsigned char res)
         }
         else
         {
-            // 非本设备地址，或非当前查询的设备，且非广播地址
+            // 非本设备地址,或非当前查询的设备,且非广播地址
             ModbusPara.sRUN = MB_NO_RESPONSE;
 //            ModbusPara.sERR = ERR_MB_DEVICE_ADDR;
             ModbusPara.sERR = ERR_MB_DEVICE;
@@ -178,7 +177,8 @@ void Modbus_ERROR(void)
 {
     uint16_t temp16;
 
-    if(ModbusPara.sERR==ERR_MB_FUN || ModbusPara.sERR==ERR_MB_ADDR || ModbusPara.sERR==ERR_MB_DATA)
+    if (ERR_MB_FUN == ModbusPara.sERR || ERR_MB_ADDR == ModbusPara.sERR ||
+        ERR_MB_DATA == ModbusPara.sERR || ERR_NOT != ModbusPara.sERR)
     {
         /* 从模式,发送响应数据 */
         ModbusPara.tBuf[0] = ModbusPara.rBuf[0];			// 设备地址
@@ -314,15 +314,15 @@ void MB_PresetSingleHoldingRegister(void)
 
     dvc_addr = ModbusPara.rBuf[0];  /* 第1字节 站号 模块地址 */
     op_addr = ModbusPara.rBuf[2];   /* 第3字节 操作码 操作地址 */
-    if(dvc_addr == ModbusPara.mAddrs)
+    if((dvc_addr == ModbusPara.mAddrs) && BURN_ADDR != dvc_addr)
     {
         ModbusPara.tBuf[0] = ModbusPara.rBuf[0];    /* 设备地址 */
         ModbusPara.tBuf[1] = ModbusPara.rBuf[1];    /* 功能码 */
         ModbusPara.tBuf[2] = ModbusPara.rBuf[2];    /* 操作码/操作地址 */
         if(0x00 == op_addr)             /* 写通道A */
         {
-            if((ModbusPara.rBuf[4] && ModbusPara.rBuf[4] <= valveFix.fix.portCnt) &&
-                0x00 == ModbusPara.rBuf[3] && 7 == ModbusPara.rCnt)
+            if ((0x00 == ModbusPara.rBuf[3] && 7 == ModbusPara.rCnt) && 
+                (ModbusPara.rBuf[4] && ModbusPara.rBuf[4] <= valveFix.fix.portCnt))
             {
                 if(VALVE_RUN_END == Valve.status)
                 {
@@ -488,16 +488,16 @@ void MB_PresetMultipleHoldingRegisters(void)
         ModbusPara.tBuf[2] = ModbusPara.rBuf[2];    /* 操作码/操作地址 */
         if(0x00 == op_addr)
         {
-            if((ModbusPara.rBuf[3] && ModbusPara.rBuf[3] <= valveFix.fix.portCnt) &&
+            if ((ModbusPara.rBuf[3] && ModbusPara.rBuf[3] <= valveFix.fix.portCnt) &&
                 (ModbusPara.rBuf[4] && ModbusPara.rBuf[4] <= SPD_MAX) && 
-                7 == ModbusPara.rCnt)
+                (VALVE_DIR_CW == ModbusPara.rBuf[5] || VALVE_DIR_CCW == ModbusPara.rBuf[5] || 
+                 VALVE_DIR_NER == ModbusPara.rBuf[5]) && 8 == ModbusPara.rCnt)
             {
-                // 通道编号判断OK,开始响应处理。
                 if(Valve.status == VALVE_RUN_END)
                 {
-                    Valve.portDes = ModbusPara.rBuf[3];
+                    Valve.portDes = ModbusPara.rBuf[3]; /* 目标通道 */
                 }
-                else if(Valve.status == VALVE_RUNNING)
+                else if(Valve.status == VALVE_RUNNING) /* 正在运行可记录4条连续指令 */
                 {
                     if(Valve.serialNum < PREPORTCNT)
                     {
