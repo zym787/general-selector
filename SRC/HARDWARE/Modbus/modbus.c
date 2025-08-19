@@ -10,7 +10,7 @@ void ModbusInit(void)
     I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
     if(UART_BAUD_38400 < syspara.bdrate)
     {
-        syspara.bdrate = 2;  /* 19200 */
+        syspara.bdrate = BAUD_RATE_19200;  /* 19200 */
     }
     
     if(UART_BAUD_9600 == syspara.bdrate)         /* 9600 */
@@ -19,7 +19,7 @@ void ModbusInit(void)
         delay_ms(100);
         Usart3_Init(36, BAUD_RATE_9600);   /* UART3 9600bps */
         delay_ms(100);
-        TIM2_Init(MODBUS_TIME_9600, 71);   // 45us--0.45ms
+        TIM3_Init(MODBUS_TIME_9600, 71);   // 45us--0.45ms
     }
     else if(UART_BAUD_38400 == syspara.bdrate)   /* 38400 */
     {
@@ -27,7 +27,7 @@ void ModbusInit(void)
         delay_ms(100);
         Usart3_Init(36, BAUD_RATE_38400);   /* UART3 38400bps */
         delay_ms(100);
-        TIM2_Init(MODBUS_TIME_38400, 71);
+        TIM3_Init(MODBUS_TIME_38400, 71);
     }
     else                                            /* Default 19200 */
     {
@@ -35,7 +35,7 @@ void ModbusInit(void)
         delay_ms(100);
         Usart3_Init(36, BAUD_RATE_19200);   /* UART2 19200bps */
         delay_ms(100);
-        TIM2_Init(MODBUS_TIME_19200, 71);   // 45us--0.45ms
+        TIM3_Init(MODBUS_TIME_19200, 71);   // 45us--0.45ms
     }
     delay_ms(100);
     printd("\r Init AGS UART2/3 Baud:%d", syspara.bdrate);
@@ -271,6 +271,12 @@ void MB_ReadHoldingRegisters(void)
 //            ModbusPara.tBuf[6] = ((uint8*)&syspara.totalCnt)[0];
 //            byteCount = 7;
 //        }
+        else if(0x99 == op_addr)        /* 读通道数 */
+        {
+            I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
+            ModbusPara.tBuf[3] = valveFix.fix.portCnt;
+            byteCount = 4;
+        }
         else
         {
             ModbusPara.sERR = ERR_MB_ADDR;  /* 非法数据地址 */
@@ -315,11 +321,12 @@ void MB_PresetSingleHoldingRegister(void)
         ModbusPara.tBuf[2] = ModbusPara.rBuf[2];    /* 操作码/操作地址 */
         if(0x00 == op_addr)             /* 写通道A */
         {
-            if(ModbusPara.rBuf[3] && ModbusPara.rBuf[3] <= valveFix.fix.portCnt)
+            if((ModbusPara.rBuf[4] && ModbusPara.rBuf[4] <= valveFix.fix.portCnt) &&
+                0x00 == ModbusPara.rBuf[3] && 7 == ModbusPara.rCnt)
             {
-                if(Valve.status == VALVE_RUN_END)
+                if(VALVE_RUN_END == Valve.status)
                 {
-                    Valve.portDes = ModbusPara.rBuf[3];
+                    Valve.portDes = ModbusPara.rBuf[4];
                     Valve.dir = 0xff;       /* 就近切换 */
                     I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
                     if(!Valve.spd || Valve.spd > SPD_LMT)
@@ -349,9 +356,11 @@ void MB_PresetSingleHoldingRegister(void)
         }
         else if(0x01 == op_addr)        /* 写地址 */
         {
-            if(ModbusPara.rBuf[3] <= ADDR_MAX)
+            if((0x00 == ModbusPara.rBuf[3] && 7 == ModbusPara.rCnt &&
+                AGS_ADDR_MIN <= ModbusPara.rBuf[4] && 
+                AGS_ADDR_MAX >= ModbusPara.rBuf[4]))
             {
-                ModbusPara.mAddrs = ModbusPara.rBuf[3];
+                ModbusPara.mAddrs = ModbusPara.rBuf[4];
                 I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara.mAddrs);
             }
             else
@@ -361,23 +370,33 @@ void MB_PresetSingleHoldingRegister(void)
         }
         else if(0x06 == op_addr)        /* 复位*/
         {
-            // 复位指令
-            Valve.status = VALVE_INITING;
-            Valve.initStep = 0;
-            Valve.bNewInit = 0xff;
-            Valve.passByOne = 0;
-            Valve.bReInit = 1;
-            I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
-            (valveFix.fix.portCnt&&valveFix.fix.portCnt>32)?(valveFix.fix.portCnt=10):(valveFix.fix.portCnt);
-            I2CPageRead_Nbytes(ADDR_VALVE_FIX, LEN_VALVE_FIX, &Valve.fixOrg);
-            I2CPageRead_Nbytes(ADDR_DIR_FIX, LEN_DIR_FIX, &valveFix.fix.dirGap);
-
+            if (0x00 == ModbusPara.rBuf[3] && 0x00 == ModbusPara.rBuf[4] && 
+                7 == ModbusPara.rCnt)
+            {
+                // 复位指令
+                Valve.status = VALVE_INITING;
+                Valve.initStep = 0;     /* 复位指令 */
+                Valve.bNewInit = 0xff;
+                Valve.passByOne = 0;
+                Valve.bReInit = 1;
+                Valve.ErrBlinkTime = RETRY_TIME_OUT;
+                I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
+                (valveFix.fix.portCnt&&valveFix.fix.portCnt>32)?(valveFix.fix.portCnt=10):(valveFix.fix.portCnt);
+                I2CPageRead_Nbytes(ADDR_VALVE_FIX, LEN_VALVE_FIX, &Valve.fixOrg);
+                I2CPageRead_Nbytes(ADDR_DIR_FIX, LEN_DIR_FIX, &valveFix.fix.dirGap);
+            }
+            else
+            {
+                ModbusPara.sERR = ERR_MB_DATA;  /* 操作数据无效 */
+            }
         }
         else if(0x07 == op_addr)        /* 写波特率 */
         {
-            if(ModbusPara.rBuf[3] && 3 >= ModbusPara.rBuf[3])
+            if((0x00 == ModbusPara.rBuf[3] && 7 == ModbusPara.rCnt && 
+                UART_BAUD_9600 <= ModbusPara.rBuf[4] && 
+                UART_BAUD_38400 >= ModbusPara.rBuf[4]))
             {
-                syspara.bdrate = ModbusPara.rBuf[3];
+                syspara.bdrate = ModbusPara.rBuf[4];
                 I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
             }
             else
@@ -387,19 +406,26 @@ void MB_PresetSingleHoldingRegister(void)
         }
         else if(0x08 == op_addr)        /* 写序列号 */
         {
-            // 序列码指令
-            Valve.SnCode[0] = ModbusPara.rBuf[3]; 			// 设备地址
-            Valve.SnCode[1] = ModbusPara.rBuf[4];  			// 功能码
-            Valve.SnCode[2] = ModbusPara.rBuf[5];  			// 端口编号
-            Valve.SnCode[3] = ModbusPara.rBuf[6];  			// 补偿值
-            Valve.SnCode[4] = ModbusPara.rBuf[7];  			// 补偿值
-            I2CPageWrite_Nbytes(ADDR_SN, LEN_SN, Valve.SnCode);
+            if (10 == ModbusPara.rCnt)
+            {
+                Valve.SnCode[0] = ModbusPara.rBuf[3];
+                Valve.SnCode[1] = ModbusPara.rBuf[4];
+                Valve.SnCode[2] = ModbusPara.rBuf[5];
+                Valve.SnCode[3] = ModbusPara.rBuf[6];
+                Valve.SnCode[4] = ModbusPara.rBuf[7];
+                I2CPageWrite_Nbytes(ADDR_SN, LEN_SN, Valve.SnCode);
+            }
+            else
+            {
+                ModbusPara.sERR = ERR_MB_DATA;   /* 操作数据无效 */
+            }
         }
         else if(0x09 == op_addr)        /* 写速度 */
         {
-            if(ModbusPara.rBuf[3] && SPD_MAX >= ModbusPara.rBuf[3])
+            if((0x00 == ModbusPara.rBuf[3] && 7 == ModbusPara.rCnt && 
+                SPD_MIN <= ModbusPara.rBuf[4] && SPD_MAX >= ModbusPara.rBuf[4]))
             {
-                Valve.spd = ModbusPara.rBuf[3];
+                Valve.spd = ModbusPara.rBuf[4];
                 I2CPageWrite_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
             }
             else
@@ -455,7 +481,7 @@ void MB_PresetMultipleHoldingRegisters(void)
 
     dvc_addr = ModbusPara.rBuf[0];		//模块地址
     op_addr = ModbusPara.rBuf[2];		//端口编号
-    if(dvc_addr <= ADDR_MAX)
+    if(dvc_addr <= AGS_ADDR_MAX)
     {
         ModbusPara.tBuf[0] = ModbusPara.rBuf[0];    /* 设备地址 */
         ModbusPara.tBuf[1] = ModbusPara.rBuf[1];    /* 功能码 */
@@ -463,7 +489,8 @@ void MB_PresetMultipleHoldingRegisters(void)
         if(0x00 == op_addr)
         {
             if((ModbusPara.rBuf[3] && ModbusPara.rBuf[3] <= valveFix.fix.portCnt) &&
-                (ModbusPara.rBuf[4] && ModbusPara.rBuf[4] <= SPD_MAX))
+                (ModbusPara.rBuf[4] && ModbusPara.rBuf[4] <= SPD_MAX) && 
+                7 == ModbusPara.rCnt)
             {
                 // 通道编号判断OK,开始响应处理。
                 if(Valve.status == VALVE_RUN_END)
