@@ -6,13 +6,13 @@ void ModbusInit(void)
 {
     unsigned char cnt;
     RX_EN();        /* 开机为接收模式 */
-    
+
     I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
     if(UART_BAUD_38400 < syspara.bdrate)
     {
         syspara.bdrate = BAUD_RATE_19200;  /* 19200 */
     }
-    
+
     if(UART_BAUD_9600 == syspara.bdrate)         /* 9600 */
     {
         Usart2_Init(36, BAUD_RATE_9600);   /* UART2 9600bps */
@@ -178,7 +178,7 @@ void Modbus_ERROR(void)
     uint16_t temp16;
 
     if (ERR_MB_FUN == ModbusPara.sERR || ERR_MB_ADDR == ModbusPara.sERR ||
-        ERR_MB_DATA == ModbusPara.sERR || ERR_NOT != ModbusPara.sERR)
+            ERR_MB_DATA == ModbusPara.sERR || ERR_NOT != ModbusPara.sERR)
     {
         /* 从模式,发送响应数据 */
         ModbusPara.tBuf[0] = ModbusPara.rBuf[0];			// 设备地址
@@ -288,9 +288,9 @@ void MB_ReadHoldingRegisters(void)
         ModbusPara.tBuf[byteCount] = reg_num ;
         byteCount++;
         /* 只有当地址不为广播地址且无报错时才回复 可以通过广播地址02查地址 */
-        if(((ModbusPara.tBuf[0] != MB_Broadcast_ADDR) || 
-            (ModbusPara.tBuf[0] == MB_Broadcast_ADDR) && 
-            0x02 == op_addr) && (ERR_NOT == ModbusPara.sERR))
+        if(((ModbusPara.tBuf[0] != MB_Broadcast_ADDR) ||
+                (ModbusPara.tBuf[0] == MB_Broadcast_ADDR) &&
+                0x02 == op_addr) && (ERR_NOT == ModbusPara.sERR))
         {
             ModbusSend(byteCount);   /* 回复 */
         }
@@ -321,8 +321,8 @@ void MB_PresetSingleHoldingRegister(void)
         ModbusPara.tBuf[2] = ModbusPara.rBuf[2];    /* 操作码/操作地址 */
         if(0x00 == op_addr)             /* 写通道A */
         {
-            if ((ModbusPara.rBuf[3] && valveFix.fix.portCnt >= ModbusPara.rBuf[3]) && 
-                (6 == ModbusPara.rCnt))
+            if ((ModbusPara.rBuf[3] && valveFix.fix.portCnt >= ModbusPara.rBuf[3]) &&
+                    (6 == ModbusPara.rCnt))
             {
                 if(VALVE_RUN_END == Valve.status)
                 {
@@ -356,9 +356,9 @@ void MB_PresetSingleHoldingRegister(void)
         }
         else if(0x01 == op_addr)        /* 写地址 */
         {
-            if((AGS_ADDR_MIN <= ModbusPara.rBuf[3] && 
-                AGS_ADDR_MAX >= ModbusPara.rBuf[3]) && 
-                (6 == ModbusPara.rCnt))
+            if((AGS_ADDR_MIN <= ModbusPara.rBuf[3] &&
+                    AGS_ADDR_MAX >= ModbusPara.rBuf[3]) &&
+                    (6 == ModbusPara.rCnt))
             {
                 ModbusPara.mAddrs = ModbusPara.rBuf[3];
                 I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara.mAddrs);
@@ -380,10 +380,10 @@ void MB_PresetSingleHoldingRegister(void)
                 Valve.bReInit = 1;
                 Valve.ErrBlinkTime = RETRY_TIME_OUT;
                 I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
-                (CHANNEL_MIN > valveFix.fix.portCnt || 
-                    CHANNEL_MAX < valveFix.fix.portCnt) ? 
-                        (valveFix.fix.portCnt = CHANNEL_DEF) : 
-                            (valveFix.fix.portCnt);
+                (CHANNEL_MIN > valveFix.fix.portCnt ||
+                 CHANNEL_MAX < valveFix.fix.portCnt) ?
+                (valveFix.fix.portCnt = CHANNEL_DEF) :
+                (valveFix.fix.portCnt);
                 I2CPageRead_Nbytes(ADDR_VALVE_FIX, LEN_VALVE_FIX, &Valve.fixOrg);
                 I2CPageRead_Nbytes(ADDR_DIR_FIX, LEN_DIR_FIX, &valveFix.fix.dirGap);
             }
@@ -394,9 +394,9 @@ void MB_PresetSingleHoldingRegister(void)
         }
         else if(0x07 == op_addr)        /* 写波特率 */
         {
-            if((UART_BAUD_9600 <= ModbusPara.rBuf[3] && 
-                UART_BAUD_38400 >= ModbusPara.rBuf[3]) && 
-                6 == ModbusPara.rCnt)
+            if((UART_BAUD_9600 <= ModbusPara.rBuf[3] &&
+                    UART_BAUD_38400 >= ModbusPara.rBuf[3]) &&
+                    6 == ModbusPara.rCnt)
             {
                 syspara.bdrate = ModbusPara.rBuf[3];
                 I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
@@ -425,7 +425,7 @@ void MB_PresetSingleHoldingRegister(void)
         else if(0x09 == op_addr)        /* 写速度 */
         {
             if((SPD_MIN <= ModbusPara.rBuf[3] && SPD_MAX >= ModbusPara.rBuf[3]) &&
-                6 == ModbusPara.rCnt)
+                    6 == ModbusPara.rCnt)
             {
                 Valve.spd = ModbusPara.rBuf[3];
                 I2CPageWrite_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
@@ -457,7 +457,7 @@ void MB_PresetSingleHoldingRegister(void)
         byteCount++;
         /* 只有当地址不为广播地址且无报错时才回复 */
         if((ModbusPara.tBuf[0] != MB_Broadcast_ADDR) &&
-            (ERR_NOT == ModbusPara.sERR))
+                (ERR_NOT == ModbusPara.sERR))
         {
             ModbusSend(byteCount);   /* 回复 */
         }
@@ -469,31 +469,30 @@ void MB_PresetSingleHoldingRegister(void)
     }
     else
     {
-        /* 非法从站设备地址 */
-        ModbusPara.sERR = ERR_MB_DEVICE_ADDR;
+        ModbusPara.sERR = ERR_MB_DEVICE_ADDR;   /* 非法从站设备地址 */
     }
 }
 
-
+/* 功能码 0x10 */
 void MB_PresetMultipleHoldingRegisters(void)
 {
-    // 功能码16
     unsigned short reg_num;
     unsigned char dvc_addr, op_addr, byteCount;
 
-    dvc_addr = ModbusPara.rBuf[0];		//模块地址
-    op_addr = ModbusPara.rBuf[2];		//端口编号
+    dvc_addr = ModbusPara.rBuf[0];      /* 模块地址 */
+    op_addr = ModbusPara.rBuf[2];       /* 端口编号 */
     if(dvc_addr <= AGS_ADDR_MAX)
     {
         ModbusPara.tBuf[0] = ModbusPara.rBuf[0];    /* 设备地址 */
         ModbusPara.tBuf[1] = ModbusPara.rBuf[1];    /* 功能码 */
         ModbusPara.tBuf[2] = ModbusPara.rBuf[2];    /* 操作码/操作地址 */
+
         if(0x00 == op_addr)
         {
             if ((ModbusPara.rBuf[3] && ModbusPara.rBuf[3] <= valveFix.fix.portCnt) &&
-                (ModbusPara.rBuf[4] && ModbusPara.rBuf[4] <= SPD_MAX) && 
-                (VALVE_DIR_CW == ModbusPara.rBuf[5] || VALVE_DIR_CCW == ModbusPara.rBuf[5] || 
-                 VALVE_DIR_NER == ModbusPara.rBuf[5]) && 8 == ModbusPara.rCnt)
+                    (ModbusPara.rBuf[4] && ModbusPara.rBuf[4] <= SPD_MAX) &&
+                    (VALVE_DIR_CW == ModbusPara.rBuf[5] || VALVE_DIR_CCW == ModbusPara.rBuf[5] ||
+                     VALVE_DIR_NER == ModbusPara.rBuf[5]) && 8 == ModbusPara.rCnt)
             {
                 if(Valve.status == VALVE_RUN_END)
                 {
@@ -559,7 +558,7 @@ void MB_PresetMultipleHoldingRegisters(void)
             byteCount++;
             /* 只有当地址不为广播地址且无报错时才回复 */
             if((ModbusPara.tBuf[0] != MB_Broadcast_ADDR) &&
-                (ERR_NOT == ModbusPara.sERR))
+                    (ERR_NOT == ModbusPara.sERR))
             {
                 ModbusSend(byteCount);   /* 回复 */
             }

@@ -74,19 +74,20 @@
 #define LEAST_RCV_CNT               3       // 最小接收字节数
 typedef struct
 {
-	unsigned char 	sRUN;					// 总线运行状态
-	unsigned char 	sERR;					// 总线出错状态
-	unsigned char 	rCnt;					// 总线接收计数
-	unsigned char 	HostRept;				// 作为主设备的重复次数
-	unsigned short 	times;					// 总线计时1
-	unsigned char	mAddrs;					// 设备地址
-	unsigned char	res;				    // 保留---凑2的倍数
-	unsigned char	rBuf[LENGTH_MB_DATA];	// 待解析的接收数据
-	unsigned char	tBuf[LENGTH_MB_DATA];	// 待发送数据
-}_MB_PRAR_T;
+    unsigned char 	sRUN;					// 总线运行状态
+    unsigned char 	sERR;					// 总线出错状态
+    unsigned char 	rCnt;					// 总线接收计数
+    unsigned char 	HostRept;				// 作为主设备的重复次数
+    unsigned short 	times;					// 总线计时1
+    unsigned char	mAddrs;					// 设备地址
+    unsigned char	res;				    // 保留---凑2的倍数
+    unsigned char	rBuf[LENGTH_MB_DATA];	// 待解析的接收数据
+    unsigned char	tBuf[LENGTH_MB_DATA];	// 待发送数据
+} _MB_PRAR_T;
 
 /* 波特率 */
-enum {
+enum
+{
     UART_BAUD_DEF       = 0U,   /**< Default 19200bps */
     UART_BAUD_9600      = 1U,   /**< 9600bps */
     UART_BAUD_19200     = 2U,   /**< 19200bps */
@@ -165,5 +166,3 @@ PEXT void ModbusRequest(unsigned char style, unsigned char sAdd,unsigned short v
 
 #undef PEXT
 #endif
-
-

@@ -1,13 +1,18 @@
 #define _MAIN_H_GLOBALS_
 #include "common.h"
 
-uint8_t moduleAddrDflt = 1, valveFixDflt = 0, valveFixDir=0, 
-    valvePortCnt=10, IntDflt=5, SpdDflt=INIT_SPD, protocalDflt=MY_MODBUS;
-uint8_t bRdpDflt = 0;
+uint8_t moduleAddrDflt  = 1, 
+        valveFixDflt    = 0, 
+        valveFixDir     = 0,
+        valvePortCnt    = 10, 
+        IntDflt         = 5, 
+        SpdDflt         = INIT_SPD, 
+        protocalDflt    = MY_MODBUS, 
+        bRdpDflt        = 0;
 
 void ParameterInit(void)
 {
-    uint8 ReadBuf[8]={0, 0, 0, 0, 0, 0, 0, 0};
+    uint8 ReadBuf[8]= {0, 0, 0, 0, 0, 0, 0, 0};
 
     /* 读取板号判断是否第一次进行初始化 */
     I2CPageRead_Nbytes(ADDR_BOARD_ID, LEN_BOARD_ID, ReadBuf);
@@ -19,17 +24,17 @@ void ParameterInit(void)
         // 地址 0~63
         I2CPageRead_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara.mAddrs);
         printd("\r Addr:%d", ModbusPara.mAddrs);
-        
+
         /* 波特率 */
         I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
-        printd("\r Baud:%d  %s bps", syspara.bdrate, 
-            (syspara.bdrate) == 1 ? "9600" : (syspara.bdrate) == 2 ? "19200" : "Error");
+        printd("\r Baud:%d  %s bps", syspara.bdrate,
+               (syspara.bdrate) == 1 ? "9600" : (syspara.bdrate) == 2 ? "19200" : "Error");
 
         // 通道数
         I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
         (valveFix.fix.portCnt&&valveFix.fix.portCnt>32)?(valveFix.fix.portCnt=10):(valveFix.fix.portCnt);
         printd("\r Port Cnt:%d", valveFix.fix.portCnt);
- 
+
         // 原点补偿
         I2CPageRead_Nbytes(ADDR_VALVE_FIX, LEN_VALVE_FIX, &Valve.fixOrg);
         printd("\r Fix Org:%d DEG", Valve.fixOrg);
@@ -61,7 +66,7 @@ void ParameterInit(void)
         for(uint8 i=0; i<valveFix.fix.portCnt; i++)
             printd(" %d", sig.arrCount[i]);
         I2CPageRead_Nbytes(ADDR_SYMBOL, LEN_SYMBOL, ReadBuf);
-        
+
         sig.pulseBlock[0] = ReadBuf[0];
         sig.pulseBlock[0] <<= 8;
         sig.pulseBlock[0] |= ReadBuf[1];
@@ -91,8 +96,8 @@ void ParameterInit(void)
         temp = sig.pulseGap[0]*PERCENT_TOLL;
         sig.pulseGap[1] = temp/PERCENT;
         printd("\r\n Symbol %d %d %d %d %d %d %d %d",
-            sig.pulseBlock[0], sig.pulseBlock[3], sig.pulseBlock[1], sig.pulseBlock[4],
-            sig.pulseBlock[2], sig.pulseBlock[5], sig.pulseGap[0], sig.pulseGap[1]);
+               sig.pulseBlock[0], sig.pulseBlock[3], sig.pulseBlock[1], sig.pulseBlock[4],
+               sig.pulseBlock[2], sig.pulseBlock[5], sig.pulseGap[0], sig.pulseGap[1]);
 
         I2CPageRead_Nbytes(ADDR_DIR_SD, LEN_DIR_SD, ReadBuf);
         Valve.fDirCw = ReadBuf[0];
@@ -139,8 +144,8 @@ void ParameterInit(void)
         printd("\r Speed:%d RPM", Valve.spd);
         /* 半通道 */
         I2CPageRead_Nbytes(ADDR_HALF_SEAL, LEN_HALF_SEAL, &Valve.bHalfSeal);
-        printd("\r Half Seal:%d %s", Valve.bHalfSeal, 
-                (Valve.bHalfSeal) == 0 ? "OFF" : "ON");
+        printd("\r Half Seal:%d %s", Valve.bHalfSeal,
+               (Valve.bHalfSeal) == 0 ? "OFF" : "ON");
     }
     else
     {
@@ -213,8 +218,8 @@ void ParameterInit(void)
     accel[AXSV] *= (rdc.rate);
     decel[AXSV] *= (INIT_SPD);
     decel[AXSV] *= (rdc.rate);
-    printd("\r\n Init motion!  Slow Down!  (%d) spd%d acc%d dec%d", 
-        INIT_SPD, speed[AXSV], accel[AXSV], decel[AXSV]);
+    printd("\r\n Init motion!  Slow Down!  (%d) spd%d acc%d dec%d",
+           INIT_SPD, speed[AXSV], accel[AXSV], decel[AXSV]);
     VALVE_ENA = ON;
     Valve.status = VALVE_INITING;
     Valve.ErrBlinkTime = NORMAL_BLINK;
@@ -233,13 +238,13 @@ void everySecDo(void)
 #ifndef END_HOLE
     if(!Valve.bHalfSeal)
     {
-    	if(!(Valve.status&VALVE_INITING)&&Valve.bNewInit==1)
-    	{
-    		Valve.dir = CCW;
-    		Valve.portDes = 1;  /* C 开机1号通 */
-    		Valve.bNewInit = 0;
-    	}
-	}
+        if(!(Valve.status&VALVE_INITING)&&Valve.bNewInit==1)
+        {
+            Valve.dir = CCW;
+            Valve.portDes = 1;  /* C 开机1号通 */
+            Valve.bNewInit = 0;
+        }
+    }
 #endif
     // 每秒检测一次
     if(timerPara.sec > SEC)
@@ -247,10 +252,10 @@ void everySecDo(void)
         timerPara.sec = 0;
         // 超时报错
         // 单通道间做5秒的超时处理，避免长时间堵转烧坏电路
-        if((Valve.status == VALVE_RUNNING && 
-            syspara.protectTimeOut > SINGLE_RUN_TIMEOUT*SEC) ||
-            (Valve.status&VALVE_INITING && 
-            syspara.protectTimeOut > SINGLE_INITING_TIMOUT*SEC))
+        if((Valve.status == VALVE_RUNNING &&
+                syspara.protectTimeOut > SINGLE_RUN_TIMEOUT*SEC) ||
+                (Valve.status&VALVE_INITING &&
+                 syspara.protectTimeOut > SINGLE_INITING_TIMOUT*SEC))
         {
             if(!(Valve.status&VALVE_ERR))
             {
@@ -262,8 +267,8 @@ void everySecDo(void)
             {
                 VALVE_ENA = DISABLE;
             }
-            printd("\r\n time out error! (initstep%d,%dms)", 
-                Valve.initStep, syspara.protectTimeOut);
+            printd("\r\n time out error! (initstep%d,%dms)",
+                   Valve.initStep, syspara.protectTimeOut);
             Valve.ErrBlinkTime = RETRY_TIME_OUT;
         }
         // 15秒超时锁机
@@ -271,8 +276,8 @@ void everySecDo(void)
         {
             Valve.status = VALVE_ERR;
             VALVE_ENA = DISABLE;
-            printd("\r\n %d Timeout protection! (initstep%d,%dms)", 
-                SINGLE_INITING_TIMOUT+1, Valve.initStep, syspara.protectTimeOut);
+            printd("\r\n %d Timeout protection! (initstep%d,%dms)",
+                   SINGLE_INITING_TIMOUT+1, Valve.initStep, syspara.protectTimeOut);
             Valve.ErrBlinkTime = RETRY_TIME_OUT;
         }
     }
@@ -294,7 +299,7 @@ void GPIOInit(void)
     RCC->APB2ENR |= (RCC_APB2Periph_GPIOB);
     GPIOB->CRL &= (GPIO_Crl_P1);
     GPIOB->CRL |= (GPIO_Mode_Out_PP_50MHz_P1);
-	RX_EN();			                        // 开机为接收模式
+    RX_EN();			                        // 开机为接收模式
 }
 
 /*
@@ -317,32 +322,32 @@ int main(void)
 #ifndef LIMIT_TEMP_SPD  /* 不开启临时速度限制 */
     printd("\r\n Version:%s(%08X)  Time: %s %s \
             \r\n Description:%s  %s  (%s)\
-            \r\n PCB:%s  %s \r\n", 
-        SOFT_VER_C, SOFT_VER, __DATE__, __TIME__, 
-        DESCRIPTION, HOLE_INFO, CONTROL, 
-        PCB_VR, HARDWARE_DESCRIPTION);
+            \r\n PCB:%s  %s \r\n",
+           SOFT_VER_C, SOFT_VER, __DATE__, __TIME__,
+           DESCRIPTION, HOLE_INFO, CONTROL,
+           PCB_VR, HARDWARE_DESCRIPTION);
 #else                   /* 开启临时速度限制 */
     printd("\r\n Version:%s(%08X)  Time: %s %s \
             \r\n Description:%s  %s  (%s) %s\
-            \r\n PCB:%s  %s \r\n", 
-        SOFT_VER_C, SOFT_VER, __DATE__, __TIME__, 
-        DESCRIPTION, HOLE_INFO, CONTROL, LTS, 
-        PCB_VR, HARDWARE_DESCRIPTION);
+            \r\n PCB:%s  %s \r\n",
+           SOFT_VER_C, SOFT_VER, __DATE__, __TIME__,
+           DESCRIPTION, HOLE_INFO, CONTROL, LTS,
+           PCB_VR, HARDWARE_DESCRIPTION);
 #endif
     ParameterInit();
     if(syspara.typeProtocal==MY_MODBUS)
         ModbusInit();
     else
         CommInit();
-	while(1)
-	{
+    while(1)
+    {
         if(syspara.typeProtocal==MY_MODBUS)
             ModbusProces();
         else
             UsartProcess();
         InitValve();
         ProcessValve();
-		everySecDo();
+        everySecDo();
         SignalScan();
         TestBurn();
         DebugOut();
@@ -358,8 +363,8 @@ void DebugOut(void)
         // LED_WORK = !LED_WORK;
 #ifdef DEBUG
         printd("\r\n >>sta:0x%02x  %02x->%02x  retry:%d  OptBlock:%d  Opt:%d  bNewInit:%d",
-            Valve.status, Valve.portCur, Valve.portDes, Valve.retryTms, 
-            Valve.OptBlock, VALVE_OPT, Valve.bNewInit);
+               Valve.status, Valve.portCur, Valve.portDes, Valve.retryTms,
+               Valve.OptBlock, VALVE_OPT, Valve.bNewInit);
         if(syspara.typeProtocal==MY_MODBUS)
             printd("  AGS");
         else

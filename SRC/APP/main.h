@@ -9,8 +9,8 @@
 
 #define DESCRIPTION         "Selector Valve"
 #define CONTROL             "232/485 AGS"
-#define SOFTWARE_VERSION    "r8"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0008    /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r9"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0009    /* 软件修改版次 */
 #ifndef END_HOLE    /* v2.0.0C 开机1号通 */
 #define HOLE_INFO           ">First< Hole"
 #define SOFT_NAME           "v2.0.0C"
@@ -51,6 +51,8 @@
 //                          屏蔽AGS协议栈及走位调试输出
 //                          优化版本号,2.0.0r4->C为开机1号孔,2.0.0r0->D为开机末端孔
 //                          读通道改为63操作码
+//  v2.0.0CD-r9 2025.08.20  修复下载口参数无法设置38400波特率
+//                          写入通道数限制,写入速度限制,写入减速比限制
 
 
 

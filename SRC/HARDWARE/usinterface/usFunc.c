@@ -394,11 +394,18 @@ void TermAddr(char rw)
             printd("\r\n Err code %d", ret);
             return;
         }
-        if(getInt<=64)
+        if(AGS_ADDR_MIN <= getInt && BURN_ADDR >= getInt)
         {
-            I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, (uint8*)&getInt);
             ModbusPara.mAddrs = getInt;
+            printd("\r\n Set Addr to %d", ModbusPara.mAddrs);
         }
+        else
+        {
+            printd("\r\n %d Address out of range (%d-%d)", getInt, AGS_ADDR_MIN, BURN_ADDR);
+            ModbusPara.mAddrs = AGS_ADDR_DEF;
+            printd("\r\n Use default Address %d", ModbusPara.mAddrs);
+        }
+        I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara.mAddrs);
     }
 }
 
@@ -450,11 +457,18 @@ void TermSpd(char rw)
             printd("\r\n Err code %d", ret);
             return;
         }
-        if(getInt&&getInt<=100)
+        if(SPD_MIN <= getInt && SPD_MAX >= getInt)
         {
-            printd("\r\n set Spd to %d", getInt);
-            I2CPageWrite_Nbytes(ADDR_SPD, LEN_SPD, (uint8*)&getInt);
+            Valve.spd = getInt;
+            printd("\r\n set Spd to %d", Valve.spd);
         }
+        else
+        {
+            printd("\r\n %d Speed out of range (%d-%d)", getInt, SPD_MIN, SPD_MAX);
+            Valve.spd = INIT_SPD;
+            printd("\r\n Use default Speed %d", Valve.spd);
+        }
+        I2CPageWrite_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
     }
 }
 
@@ -568,6 +582,11 @@ void TermBaud(char rw)
         {
             printd("\r\n set baud rate to %d bps", getInt);
             syspara.bdrate = 2;
+        }
+        else if(getInt==38400)
+        {
+            printd("\r\n set baud rate to %d bps", getInt);
+            syspara.bdrate = 3;
         }
         I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
     }
@@ -697,9 +716,18 @@ void TermCnt(char rw)
     }
     else
     {
-        valveFix.fix.portCnt = getInt;
+        if(CHANNEL_MIN <= getInt && CHANNEL_MAX >= getInt)
+        {
+            valveFix.fix.portCnt = getInt;
+            printd("\r\n set Channel to %d", valveFix.fix.portCnt);
+        }
+        else
+        {
+            printd("\r\n %d Channel out of range (%d-%d)", getInt, CHANNEL_MIN, CHANNEL_MAX);
+            valveFix.fix.portCnt = CHANNEL_DEF;
+            printd("\r\n Use default Channel %d", valveFix.fix.portCnt);
+        }
         I2CPageWrite_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
-        printd("\r\n portCnt:%d", valveFix.fix.portCnt);
     }
 }
 
@@ -722,8 +750,17 @@ void TermRDCR(char rw)
             printd("\r Err code %d", ret);
             return;
         }
-        printd("\r\n set rate %d", getInt);
-        rdc.rate = getInt;
+        if (RDCR_1 == getInt || RDCR_4 == getInt || RDCR_10 == getInt || 
+            RDCR_16 == getInt)
+        {
+            rdc.rate = getInt;
+            printd("\r\n set Rate to %d", rdc.rate);
+        }
+        else
+        {
+            printd("\r\n %d Speed out of range. Use default Rate %d", getInt, rdc.rate);
+            rdc.rate = RDCR_4;
+        }
         I2CPageWrite_Nbytes(ADDR_RDC_RATE, LEN_RDC_RATE, &rdc.rate);
     }
 }

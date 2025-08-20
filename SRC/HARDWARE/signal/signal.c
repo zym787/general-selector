@@ -1,9 +1,6 @@
 #define _SIGNAL_GLOBALS_
 #include "common.h"
 
-
-
-
 static bool optStaLst=false;
 void getOptStartStatus(void)
 {
@@ -253,8 +250,3 @@ void SignalScan(void)
             break;
     }
 }
-
-
-
-
-
