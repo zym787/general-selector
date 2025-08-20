@@ -12,12 +12,13 @@
 #define SPD_VALVE           100                     // ×ª·§ËÙ¶È
 
 #define AXSV                0
-#define SPD_LMT             255
+
 #define I_26A               0x00
 #define I_22A               0x01
 #define I_18A               0x02
 #define I_16A               0x03
 #define I_05A               0x04
+
 #ifdef A12_909_A2
 #define LED_WORK            PCout(15)
 #define VALVE_OPT           PAin(15)

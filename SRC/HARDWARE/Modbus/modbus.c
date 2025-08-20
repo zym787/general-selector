@@ -532,7 +532,7 @@ void MB_PresetMultipleHoldingRegisters(void)
                 tempSpd = ModbusPara.rBuf[4];
 #endif
                 Valve.dir = ModbusPara.rBuf[5];     /* 方向 */
-                if(!tempSpd || tempSpd > SPD_LMT)
+                if(!tempSpd || tempSpd > SPD_MAX)
                 {
                     tempSpd = INIT_SPD; /* 默认速度强制为20 */
                 }

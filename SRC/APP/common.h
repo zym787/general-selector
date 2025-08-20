@@ -15,8 +15,11 @@ typedef enum
     true
 }bool;
 
-
+/* 是否开机末端孔 默认不开启 ! */
 //#define END_HOLE    /* 开机末端孔 */
+
+/* 是否限制临时速度 默认不开启 仅r5特殊定制使用! */
+//#define LIMIT_TEMP_SPD
 
 //#define DEBUG       /* 调试输出 */
 
@@ -33,8 +36,9 @@ typedef enum
     #define HARDWARE_DESCRIPTION     "Vertical Version (2.2A Max)"
 #endif
 
-/* 是否限制临时速度 默认不开启 仅r5特殊定制使用! */
-//#define LIMIT_TEMP_SPD
+#ifdef LIMIT_TEMP_SPD
+    #define LTS                     "LTS"
+#endif
 
 //#define RED4
 //#define RED5

@@ -302,7 +302,7 @@ void NormalAction(void)
     	if(!Valve.spd)
     	{
             I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
-            if(!Valve.spd || Valve.spd>SPD_LMT)
+            if(!Valve.spd || Valve.spd>SPD_MAX)
                 Valve.spd = INIT_SPD;
         }
         Itemp = protext.usartBuf[3];
@@ -333,7 +333,7 @@ void CWAction(void)
     	if(!Valve.spd)
     	{
             I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
-            if(!Valve.spd || Valve.spd>SPD_LMT)
+            if(!Valve.spd || Valve.spd>SPD_MAX)
                 Valve.spd = INIT_SPD;
         }
         Itemp = protext.usartBuf[3];
@@ -365,7 +365,7 @@ void CCWAction(void)
     	if(!Valve.spd)
     	{
             I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
-            if(!Valve.spd || Valve.spd>SPD_LMT)
+            if(!Valve.spd || Valve.spd>SPD_MAX)
                 Valve.spd = INIT_SPD;
         }
         Itemp = protext.usartBuf[3];

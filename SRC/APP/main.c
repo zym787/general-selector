@@ -134,7 +134,7 @@ void ParameterInit(void)
         printd("\r Rate:%d Round:%d", rdc.rate, rdc.stepRound);
         /* 速度 */
         I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
-        if(!Valve.spd || Valve.spd>SPD_LMT)
+        if(!Valve.spd || Valve.spd>SPD_MAX)
             Valve.spd = INIT_SPD;
         printd("\r Speed:%d RPM", Valve.spd);
         /* 半通道 */
@@ -314,12 +314,21 @@ int main(void)
     GPIOInit();
     delay_ms(100);
     BootInterface();
+#ifndef LIMIT_TEMP_SPD  /* 不开启临时速度限制 */
     printd("\r\n Version:%s(%08X)  Time: %s %s \
             \r\n Description:%s  %s  (%s)\
             \r\n PCB:%s  %s \r\n", 
         SOFT_VER_C, SOFT_VER, __DATE__, __TIME__, 
         DESCRIPTION, HOLE_INFO, CONTROL, 
         PCB_VR, HARDWARE_DESCRIPTION);
+#else                   /* 开启临时速度限制 */
+    printd("\r\n Version:%s(%08X)  Time: %s %s \
+            \r\n Description:%s  %s  (%s) %s\
+            \r\n PCB:%s  %s \r\n", 
+        SOFT_VER_C, SOFT_VER, __DATE__, __TIME__, 
+        DESCRIPTION, HOLE_INFO, CONTROL, LTS, 
+        PCB_VR, HARDWARE_DESCRIPTION);
+#endif
     ParameterInit();
     if(syspara.typeProtocal==MY_MODBUS)
         ModbusInit();
