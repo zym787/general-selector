@@ -457,16 +457,34 @@ void TermSpd(char rw)
             printd("\r\n Err code %d", ret);
             return;
         }
-        if(SPD_MIN <= getInt && SPD_MAX >= getInt)
+        if(RDCR_20 == rdc.rate)
         {
-            Valve.spd = getInt;
-            printd("\r\n set Spd to %d", Valve.spd);
+            if(SPD_MIN_RDCR20 <= getInt && SPD_MAX_RDCR20 >= getInt)
+            {
+                Valve.spd = getInt;
+                printd("\r\n set speed to %d", Valve.spd);
+            }
+            else
+            {
+                printd("\r\n %d Speed out of range (%dRDCR: %d-%d)", 
+                    getInt, rdc.rate, SPD_MIN_RDCR20, SPD_MAX_RDCR20);
+                Valve.spd = INIT_SPD / 2;
+                printd("\r\n Use default Speed %d", Valve.spd);
+            }
         }
         else
         {
-            printd("\r\n %d Speed out of range (%d-%d)", getInt, SPD_MIN, SPD_MAX);
-            Valve.spd = INIT_SPD;
-            printd("\r\n Use default Speed %d", Valve.spd);
+            if(SPD_MIN <= getInt && SPD_MAX >= getInt)
+            {
+                Valve.spd = getInt;
+                printd("\r\n set Spd to %d", Valve.spd);
+            }
+            else
+            {
+                printd("\r\n %d Speed out of range (%d-%d)", getInt, SPD_MIN, SPD_MAX);
+                Valve.spd = INIT_SPD;
+                printd("\r\n Use default Speed %d", Valve.spd);
+            }
         }
         I2CPageWrite_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
     }
@@ -573,21 +591,25 @@ void TermBaud(char rw)
             printd("\r\n baud rate %d not exist", getInt);
             return;
         }
-        if(getInt==9600)
+        
+        if(9600 == getInt)
         {
-            printd("\r\n set baud rate to %d bps", getInt);
             syspara.bdrate = 1;
         }
-        else if(getInt==19200)
+        else if(19200 == getInt)
         {
-            printd("\r\n set baud rate to %d bps", getInt);
             syspara.bdrate = 2;
         }
-        else if(getInt==38400)
+        else if(38400 == getInt)
         {
-            printd("\r\n set baud rate to %d bps", getInt);
             syspara.bdrate = 3;
         }
+        else
+        {
+            printd("\r\n baud rate overflow");
+            return;
+        }
+        printd("\r set baud rate to %d %dbps", syspara.bdrate, getInt);
         I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
     }
 }
@@ -749,17 +771,17 @@ void TermRDCR(char rw)
         {
             printd("\r Err code %d", ret);
             return;
-        }
+        }        
         if (RDCR_1 == getInt || RDCR_4 == getInt || RDCR_10 == getInt || 
-            RDCR_16 == getInt)
+            RDCR_16 == getInt || RDCR_20 == getInt)
         {
             rdc.rate = getInt;
             printd("\r\n set Rate to %d", rdc.rate);
         }
         else
         {
-            printd("\r\n %d Speed out of range. Use default Rate %d", getInt, rdc.rate);
             rdc.rate = RDCR_4;
+            printd("\r\n %d Rate out of range. Use default Rate %d", getInt, rdc.rate);
         }
         I2CPageWrite_Nbytes(ADDR_RDC_RATE, LEN_RDC_RATE, &rdc.rate);
     }

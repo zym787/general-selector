@@ -111,17 +111,22 @@ enum
 #define BURN_ADDR           64      /* 老化地址 64 */
 #define AGS_ADDR_DEF        1       /* 默认地址 1 */
 #define INIT_SPD            20      /* 初始化找位速度 */
-#define SPD_MIN             10      /* 最小速度 */
+#define SPD_MIN             1       /* 最小速度 */
 #define SPD_MAX             70      /* 最大速度 */
+#define SPD_MIN_RDCR20      1       /* 20减速比 最小速度 */
+#define SPD_MAX_RDCR20      50      /* 20减速比 最大速度 */
 #define CHANNEL_MIN         3       /* 最小通道数 */
 #define CHANNEL_MAX         32      /* 最大通道数 */
 #define CHANNEL_DEF         10      /* 默认通道数 */
 #define BAUD_MIN            1       /* 最小波特率 */
 #define BAUD_MAX            3       /* 最大波特率 */
+#define BAUD_DEF            2       /* 默认波特率 */
+
 #define RDCR_1              1       /* 减速比 1 */
 #define RDCR_4              4       /* 减速比 4 */
 #define RDCR_10             10      /* 减速比 10 */
 #define RDCR_16             16      /* 减速比 16 */
+#define RDCR_20             20      /* 减速比 20 */
 
 #define PREPORTCNT          4       /* 预输入端口 */
 typedef struct

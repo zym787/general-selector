@@ -177,8 +177,8 @@ void Modbus_ERROR(void)
 {
     uint16_t temp16;
 
-    if (ERR_MB_FUN == ModbusPara.sERR || ERR_MB_ADDR == ModbusPara.sERR ||
-            ERR_MB_DATA == ModbusPara.sERR || ERR_NOT != ModbusPara.sERR)
+    if (ERR_MB_FUN == ModbusPara.sERR || ERR_MB_ADDR == ModbusPara.sERR || 
+        ERR_MB_DATA == ModbusPara.sERR)
     {
         /* 从模式,发送响应数据 */
         ModbusPara.tBuf[0] = ModbusPara.rBuf[0];			// 设备地址
