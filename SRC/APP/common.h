@@ -21,7 +21,16 @@ typedef enum
 /* 是否限制临时速度 默认不开启 仅r5特殊定制使用! */
 //#define LIMIT_TEMP_SPD
 
-//#define DEBUG       /* 调试输出 */
+/* 发行模式 屏蔽调试输出 */
+#define RELEASE
+
+#ifdef RELEASE
+#undef DEBUG
+#undef DEBUG_MODBUS
+#else
+#define DEBUG           /* 调试输出 */
+#define DEBUG_MODBUS    /* AGS调试输出 */
+#endif
 
 // PCB定义
 //#define A12_906_B1    /* 不用 */

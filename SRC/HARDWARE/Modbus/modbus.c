@@ -288,9 +288,9 @@ void MB_ReadHoldingRegisters(void)
         ModbusPara.tBuf[byteCount] = reg_num ;
         byteCount++;
         /* 只有当地址不为广播地址且无报错时才回复 可以通过广播地址02查地址 */
-        if(((ModbusPara.tBuf[0] != MB_Broadcast_ADDR) ||
-                (ModbusPara.tBuf[0] == MB_Broadcast_ADDR) &&
-                0x02 == op_addr) && (ERR_NOT == ModbusPara.sERR))
+        if(((MB_Broadcast_ADDR != ModbusPara.tBuf[0]) ||
+                ((MB_Broadcast_ADDR == ModbusPara.tBuf[0]) && 0x02 == op_addr)) && 
+                (ERR_NOT == ModbusPara.sERR))
         {
             ModbusSend(byteCount);   /* 回复 */
         }
@@ -356,9 +356,8 @@ void MB_PresetSingleHoldingRegister(void)
         }
         else if(0x01 == op_addr)        /* 写地址 */
         {
-            if((AGS_ADDR_MIN <= ModbusPara.rBuf[3] &&
-                    AGS_ADDR_MAX >= ModbusPara.rBuf[3]) &&
-                    (6 == ModbusPara.rCnt))
+            if((AGS_ADDR_MIN <= ModbusPara.rBuf[3] && AGS_ADDR_MAX >= ModbusPara.rBuf[3]) && 
+                (6 == ModbusPara.rCnt))
             {
                 ModbusPara.mAddrs = ModbusPara.rBuf[3];
                 I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara.mAddrs);

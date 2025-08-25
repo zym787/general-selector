@@ -1,8 +1,7 @@
 #define _MAIN_H_GLOBALS_
 #include "common.h"
 
-uint8_t moduleAddrDflt  = 1, 
-        valveFixDflt    = 0, 
+uint8_t valveFixDflt    = 0, 
         valveFixDir     = 0,
         valvePortCnt    = 10, 
         IntDflt         = 5, 
@@ -155,8 +154,8 @@ void ParameterInit(void)
         ReadBuf[1] = 0x66;
         I2CPageWrite_Nbytes(ADDR_BOARD_ID, LEN_BOARD_ID, ReadBuf);
         /* µÿ÷∑ 1 */
-        ModbusPara .mAddrs = moduleAddrDflt;
-        I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara .mAddrs);
+        ModbusPara.mAddrs = AGS_ADDR_DEF;
+        I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara.mAddrs);
         /* ≤®Ãÿ¬  1 9600bps */
         syspara.bdrate = 1;
         I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
@@ -334,11 +333,11 @@ int main(void)
            DESCRIPTION, HOLE_INFO, CONTROL, LTS,
            PCB_VR, HARDWARE_DESCRIPTION);
 #endif
-    ParameterInit();
     if(syspara.typeProtocal==MY_MODBUS)
         ModbusInit();
     else
         CommInit();
+    ParameterInit();
     while(1)
     {
         if(syspara.typeProtocal==MY_MODBUS)

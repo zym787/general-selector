@@ -9,8 +9,8 @@
 
 #define DESCRIPTION         "Selector Valve"
 #define CONTROL             "232/485 AGS"
-#define SOFTWARE_VERSION    "r10"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0010    /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r11"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0011    /* 软件修改版次 */
 #ifndef END_HOLE    /* v2.0.0C 开机1号通 */
 #define HOLE_INFO           ">First< Hole"
 #define SOFT_NAME           "v2.0.0C"

@@ -383,8 +383,8 @@ void TermAddr(char rw)
     int getInt=0;
     if(rw == READ_ACT)
     {
-        I2CPageRead_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, (uint8*)&getInt);
-        printd("\r\n Addr:%d", getInt);
+        I2CPageRead_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara.mAddrs);
+        printd("\r\n Addr:%d", ModbusPara.mAddrs);
     }
     else
     {
