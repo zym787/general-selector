@@ -607,6 +607,16 @@
             </File>
           </Files>
         </Group>
+        <Group>
+          <GroupName>Doc</GroupName>
+          <Files>
+            <File>
+              <FileName>Valve_v2.0.0修改说明.md</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Doc\Valve_v2.0.0修改说明.md</FilePath>
+            </File>
+          </Files>
+        </Group>
       </Groups>
     </Target>
   </Targets>

@@ -26,8 +26,9 @@ void ParameterInit(void)
 
         /* 波特率 */
         I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
-        printd("\r Baud:%d  %s bps", syspara.bdrate,
-               (syspara.bdrate) == 1 ? "9600" : (syspara.bdrate) == 2 ? "19200" : "Error");
+        printd("\r Baud:%d  %s bps", syspara.bdrate, 
+            (syspara.bdrate) == 1 ? "9600" : (syspara.bdrate) == 2 ? "19200" : 
+            (syspara.bdrate) == 3 ? "38400" : "Error");
 
         // 通道数
         I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);

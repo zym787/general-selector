@@ -606,7 +606,7 @@ void TermBaud(char rw)
         }
         else
         {
-            printd("\r\n baud rate overflow");
+            printd("\r\n baud rate %d overflow", getInt);
             return;
         }
         printd("\r set baud rate to %d %dbps", syspara.bdrate, getInt);

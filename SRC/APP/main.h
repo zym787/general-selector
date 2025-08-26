@@ -9,8 +9,8 @@
 
 #define DESCRIPTION         "Selector Valve"
 #define CONTROL             "232/485 AGS"
-#define SOFTWARE_VERSION    "r11"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0011    /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r12"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0012    /* 软件修改版次 */
 #ifndef END_HOLE    /* v2.0.0C 开机1号通 */
 #define HOLE_INFO           ">First< Hole"
 #define SOFT_NAME           "v2.0.0C"
@@ -54,6 +54,8 @@
 //                              写入通道数限制,写入速度限制,写入减速比限制
 //  v2.0.0CD-r10    2025.08.21  添加20减速比支持,20减速比速度限制在1-50,正常速度限制1-70
 //                              修复AGS地址错误时无法访问问题
+//  v2.0.0CD-r11    2025.08.25  修复地址被篡改错误
+//  v2.0.0CD-r12    2025.08.26  修复38400波特率打印错误
 
 
 //------------------------------------------------------------------------------------------------------------
