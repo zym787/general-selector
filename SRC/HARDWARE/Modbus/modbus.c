@@ -329,8 +329,8 @@ void MB_PresetSingleHoldingRegister(void)
                     Valve.portDes = ModbusPara.rBuf[3];
                     Valve.dir = 0xff;       /* 就近切换 */
                     I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
-                    if(!Valve.spd || Valve.spd > SPD_MAX)
-                        Valve.spd = INIT_SPD;
+                    if(tBoundary.spd_min > Valve.spd || tBoundary.spd_max < Valve.spd)
+                        Valve.spd = tBoundary.spd_min;
                     speed[AXSV] = accel[AXSV] = 100;
                     decel[AXSV] = 200;
                     speed[AXSV] *= (Valve.spd);
@@ -423,14 +423,19 @@ void MB_PresetSingleHoldingRegister(void)
         }
         else if(0x09 == op_addr)        /* 写速度 */
         {
-            if((SPD_MIN <= ModbusPara.rBuf[3] && SPD_MAX >= ModbusPara.rBuf[3]) &&
-                    6 == ModbusPara.rCnt)
+            if((tBoundary.spd_min <= ModbusPara.rBuf[3] && tBoundary.spd_max >= ModbusPara.rBuf[3]) && 
+                6 == ModbusPara.rCnt)
             {
                 Valve.spd = ModbusPara.rBuf[3];
                 I2CPageWrite_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
             }
-            else
+            else if(0 == ModbusPara.rBuf[3])
             {
+                Valve.spd = tBoundary.spd_min;
+                I2CPageWrite_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
+            }
+            else
+            { 
                 ModbusPara.sERR = ERR_MB_DATA;  /* 操作数据无效 */
             }
         }
@@ -486,12 +491,14 @@ void MB_PresetMultipleHoldingRegisters(void)
         ModbusPara.tBuf[1] = ModbusPara.rBuf[1];    /* 功能码 */
         ModbusPara.tBuf[2] = ModbusPara.rBuf[2];    /* 操作码/操作地址 */
 
+        /* 地址  10功能码  00操作码  通道  速度  方向  CRC*2 */
         if(0x00 == op_addr)
         {
-            if ((ModbusPara.rBuf[3] && ModbusPara.rBuf[3] <= valveFix.fix.portCnt) &&
-                    (ModbusPara.rBuf[4] && ModbusPara.rBuf[4] <= SPD_MAX) &&
-                    (VALVE_DIR_CW == ModbusPara.rBuf[5] || VALVE_DIR_CCW == ModbusPara.rBuf[5] ||
-                     VALVE_DIR_NER == ModbusPara.rBuf[5]) && 8 == ModbusPara.rCnt)
+            if ((ModbusPara.rBuf[3] && valveFix.fix.portCnt >= ModbusPara.rBuf[3]) && 
+                ((tBoundary.spd_min <= ModbusPara.rBuf[4] && tBoundary.spd_max >= ModbusPara.rBuf[4]) || 
+                0 == ModbusPara.rBuf[4]) && 
+                (VALVE_DIR_CW == ModbusPara.rBuf[5] || VALVE_DIR_CCW == ModbusPara.rBuf[5] ||
+                 VALVE_DIR_NER == ModbusPara.rBuf[5]) && 8 == ModbusPara.rCnt)
             {
                 if(Valve.status == VALVE_RUN_END)
                 {
@@ -514,26 +521,30 @@ void MB_PresetMultipleHoldingRegisters(void)
                     ModbusPara.sERR = ERR_MB_BUSY;  /* 从设备忙 */
                 }
                 uint8_t tempSpd = 0;
-                /* 临时速度 */
-#ifdef LIMIT_TEMP_SPD
-                /* 限制临时速度 仅r5特殊定制使用! */
-                if(30 <= ModbusPara.rBuf[4])
+                if(0 == ModbusPara.rBuf[4])
                 {
-                    tempSpd = ModbusPara.rBuf[4];
+                    /* 小于最小速度均按最小速度处理 */
+                    tempSpd = tBoundary.spd_min;
                 }
                 else
                 {
-                    /* 临时速度超过30部分限制 */
-                    tempSpd = 30 + (ModbusPara.rBuf[4] - 30) / 2;
-                }
+                    /* 临时速度 */
+#ifdef LIMIT_TEMP_SPD
+                    /* 限制临时速度 仅D版特殊定制使用! */
+                    if(30 <= ModbusPara.rBuf[4])
+                    {
+                        tempSpd = ModbusPara.rBuf[4];
+                    }
+                    else
+                    {
+                        /* 临时速度超过30部分限制 */
+                        tempSpd = 30 + (ModbusPara.rBuf[4] - 30) / 2;
+                    }
 #else
-                tempSpd = ModbusPara.rBuf[4];
+                    tempSpd = ModbusPara.rBuf[4];
 #endif
-                Valve.dir = ModbusPara.rBuf[5];     /* 方向 */
-                if(!tempSpd || tempSpd > SPD_MAX)
-                {
-                    tempSpd = INIT_SPD; /* 默认速度强制为20 */
                 }
+                Valve.dir = ModbusPara.rBuf[5];     /* 方向 */
                 speed[AXSV] = accel[AXSV] = 100;
                 decel[AXSV] = 200;
                 speed[AXSV] *= (tempSpd);

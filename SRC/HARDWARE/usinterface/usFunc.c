@@ -457,34 +457,18 @@ void TermSpd(char rw)
             printd("\r\n Err code %d", ret);
             return;
         }
-        if(RDCR_20 == rdc.rate)
+        
+        if(tBoundary.spd_min <= getInt && tBoundary.spd_max >= getInt)
         {
-            if(SPD_MIN_RDCR20 <= getInt && SPD_MAX_RDCR20 >= getInt)
-            {
-                Valve.spd = getInt;
-                printd("\r\n set speed to %d", Valve.spd);
-            }
-            else
-            {
-                printd("\r\n %d Speed out of range (%dRDCR: %d-%d)", 
-                    getInt, rdc.rate, SPD_MIN_RDCR20, SPD_MAX_RDCR20);
-                Valve.spd = INIT_SPD / 2;
-                printd("\r\n Use default Speed %d", Valve.spd);
-            }
+            Valve.spd = getInt;
+            printd("\r\n set speed to %d", Valve.spd);
         }
         else
         {
-            if(SPD_MIN <= getInt && SPD_MAX >= getInt)
-            {
-                Valve.spd = getInt;
-                printd("\r\n set Spd to %d", Valve.spd);
-            }
-            else
-            {
-                printd("\r\n %d Speed out of range (%d-%d)", getInt, SPD_MIN, SPD_MAX);
-                Valve.spd = INIT_SPD;
-                printd("\r\n Use default Speed %d", Valve.spd);
-            }
+            printd("\r\n %d Speed out of range (%dRDCR: %d-%d)", 
+                getInt, rdc.rate, tBoundary.spd_min, tBoundary.spd_max);
+            Valve.spd = tBoundary.spd_min;
+            printd("\r\n Use default Speed %d", Valve.spd);
         }
         I2CPageWrite_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
     }
@@ -780,7 +764,7 @@ void TermRDCR(char rw)
         }
         else
         {
-            rdc.rate = RDCR_4;
+            rdc.rate = RDCR_10;
             printd("\r\n %d Rate out of range. Use default Rate %d", getInt, rdc.rate);
         }
         I2CPageWrite_Nbytes(ADDR_RDC_RATE, LEN_RDC_RATE, &rdc.rate);

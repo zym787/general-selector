@@ -5,7 +5,7 @@ uint8_t valveFixDflt    = 0,
         valveFixDir     = 0,
         valvePortCnt    = 10, 
         IntDflt         = 5, 
-        SpdDflt         = INIT_SPD, 
+        SpdDflt         = SPD_MIN, 
         protocalDflt    = MY_MODBUS, 
         bRdpDflt        = 0;
 
@@ -110,25 +110,29 @@ void ParameterInit(void)
         I2CPageRead_Nbytes(ADDR_RDC_RATE, LEN_RDC_RATE, &rdc.rate);
         switch(rdc.rate)
         {
-            case RDC01:
+            case RDCR_1:
                 rdc.stepP1dgr = STEPS_1_DEGREE_RD01;
                 rdc.stepP01dgr = STEPS_01_DEGREE_RD01;
                 break;
-            case RDC04:
+            case RDCR_4:
                 rdc.stepP1dgr = STEPS_1_DEGREE_RD04;
                 rdc.stepP01dgr = STEPS_01_DEGREE_RD04;
                 break;
-            case RDC10:
+            case RDCR_10:
                 rdc.stepP1dgr = STEPS_1_DEGREE_RD10;
                 rdc.stepP01dgr = STEPS_01_DEGREE_RD10;
                 break;
-            case RDC16:
+            case RDCR_16:
+                rdc.stepP1dgr = STEPS_1_DEGREE_RD16;
+                rdc.stepP01dgr = STEPS_01_DEGREE_RD16;
+                break;
+            case RDCR_20:
                 rdc.stepP1dgr = STEPS_1_DEGREE_RD16;
                 rdc.stepP01dgr = STEPS_01_DEGREE_RD16;
                 break;
             default:
-                printd("\r 减速比参数错误,缺省写入%d", RDC10);
-                rdc.rate = RDC10;
+                printd("\r 减速比参数错误,缺省写入%d", RDCR_10);
+                rdc.rate = RDCR_10;
                 rdc.stepP1dgr = STEPS_1_DEGREE_RD10;
                 rdc.stepP01dgr = STEPS_01_DEGREE_RD10;
                 break;
@@ -137,11 +141,6 @@ void ParameterInit(void)
         rdc.stepRound *= SCALE;     // 细分
         rdc.stepRound *= rdc.rate;  // 减速比
         printd("\r Rate:%d Round:%d", rdc.rate, rdc.stepRound);
-        /* 速度 */
-        I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
-        if(!Valve.spd || Valve.spd>SPD_MAX)
-            Valve.spd = INIT_SPD;
-        printd("\r Speed:%d RPM", Valve.spd);
         /* 半通道 */
         I2CPageRead_Nbytes(ADDR_HALF_SEAL, LEN_HALF_SEAL, &Valve.bHalfSeal);
         printd("\r Half Seal:%d %s", Valve.bHalfSeal,
@@ -179,9 +178,9 @@ void ParameterInit(void)
         intCtrl = IntDflt;
         I2CPageWrite_Nbytes(ADDR_INTVL, LEN_INTVL, &intCtrl);
         /* 减速比 10 */
-        rdc.rate = RDC10;
+        rdc.rate = RDCR_10;
         I2CPageWrite_Nbytes(ADDR_RDC_RATE, LEN_RDC_RATE, &rdc.rate);
-        /* 速度 20 */
+        /* 速度 */
         Valve.spd = SpdDflt;
         I2CPageWrite_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
         /* 半通道 0 */
@@ -208,18 +207,27 @@ void ParameterInit(void)
         printd("\r 写入成功,请复位!!!");
     }
     getOptStartStatus();
-    /* 使用初始化速度找原点 20RPM */
+    /* 设置速度范围 */
+    tBoundary.spd_min =  (RDCR_20 == rdc.rate) ? (SPD_MIN_RDCR20) : (SPD_MIN), 
+    tBoundary.spd_max = (RDCR_20 == rdc.rate) ? (SPD_MAX_RDCR20) : (SPD_MAX);
+    /* 速度 */
+    I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
+    if(tBoundary.spd_min > Valve.spd || tBoundary.spd_max < Valve.spd)
+        Valve.spd = tBoundary.spd_min;
+    printd("\r Speed:%d RPM", Valve.spd);
+    
+    /* 使用最小速度找原点 */
     speed[AXSV] = 100;
     accel[AXSV] = 100;
     decel[AXSV] = 200;
-    speed[AXSV] *= (INIT_SPD);
+    speed[AXSV] *= (tBoundary.spd_min);
     speed[AXSV] *= (rdc.rate);
-    accel[AXSV] *= (INIT_SPD);
+    accel[AXSV] *= (tBoundary.spd_min);
     accel[AXSV] *= (rdc.rate);
-    decel[AXSV] *= (INIT_SPD);
+    decel[AXSV] *= (tBoundary.spd_min);
     decel[AXSV] *= (rdc.rate);
     printd("\r\n Init motion!  Slow Down!  (%d) spd%d acc%d dec%d",
-           INIT_SPD, speed[AXSV], accel[AXSV], decel[AXSV]);
+        tBoundary.spd_min, speed[AXSV], accel[AXSV], decel[AXSV]);
     VALVE_ENA = ON;
     Valve.status = VALVE_INITING;
     Valve.ErrBlinkTime = NORMAL_BLINK;

@@ -7,7 +7,6 @@
 #define PEXT extern
 #endif
 
-#define INIT_SPD            20  /* 初始化找位速度 */
 //#define SPD_VALVE             28                     // 转阀速度
 #define SPD_VALVE           100                     // 转阀速度
 
@@ -48,12 +47,6 @@
     M_ISET_2=(val>>1&0x01);\
     M_ISET_3=(val>>2&0x01);
 
-
-#define RDC01					1
-#define RDC04					4
-#define RDC10					10
-#define RDC16					16
-    
 #ifdef A12_909_A2
 #define SCALE               64                      //当前细分数为64
 #endif
@@ -110,11 +103,11 @@ enum
 #define AGS_ADDR_MAX        63      /* AGS地址最大 63 */
 #define BURN_ADDR           64      /* 老化地址 64 */
 #define AGS_ADDR_DEF        1       /* 默认地址 1 */
-#define INIT_SPD            20      /* 初始化找位速度 */
-#define SPD_MIN             1       /* 最小速度 */
+#define INIT_SPD            SPD_MIN /* 初始化找位速度 */
+#define SPD_MIN             15      /* 最小速度 */
 #define SPD_MAX             70      /* 最大速度 */
-#define SPD_MIN_RDCR20      1       /* 20减速比 最小速度 */
-#define SPD_MAX_RDCR20      50      /* 20减速比 最大速度 */
+#define SPD_MIN_RDCR20      8       /* 20减速比 最小速度 */
+#define SPD_MAX_RDCR20      35      /* 20减速比 最大速度 */
 #define CHANNEL_MIN         3       /* 最小通道数 */
 #define CHANNEL_MAX         32      /* 最大通道数 */
 #define CHANNEL_DEF         10      /* 默认通道数 */
@@ -179,6 +172,13 @@ typedef struct
 }RDC_T;
 PEXT RDC_T rdc;
 
+/* 限制值 */
+typedef struct
+{
+    uint8_t spd_min;/* 速度最小值 */
+    uint8_t spd_max;/* 速度最大值 */
+} Boundary_T;
+PEXT Boundary_T tBoundary;
 
 typedef struct
 {
