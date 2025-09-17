@@ -19,7 +19,7 @@ typedef enum
 //#define END_HOLE    /* 开机末端孔 */
 
 /* 是否限制临时速度 默认不开启 仅r5特殊定制使用! */
-//#define LIMIT_TEMP_SPD
+#define LIMIT_TEMP_SPD
 
 /* 发行模式 屏蔽调试输出 */
 #define RELEASE
@@ -34,7 +34,7 @@ typedef enum
 
 // PCB定义
 //#define A12_906_B1    /* 不用 */
-#define A12_909_A2
+#define A12_909_A2  /* 901-C1套用 */
 
 #ifdef A12_906_B1
     #define PCB_VR                  "A12_906_B1"

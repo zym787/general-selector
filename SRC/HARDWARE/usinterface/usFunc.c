@@ -808,6 +808,31 @@ void TermHalf(char rw)
     }
 }
 
+/*
+ * 点检模式：打印出所有关键参数
+ */
+void TermInspection(char rw)
+{
+    printd("\r\n");
+    /* 点检参数 */
+    printd("\r\n VR   : %s", SOFT_VER_C);               /* 版本号 */
+    printd("\r\n PCB  : %s", PCB_VR);                   /* PCB版本号 */
+    printd("\r\n TIME : %s %s", __DATE__, __TIME__);    /* 时间 */
+    printd("\r\n ADDR : %d", ModbusPara.mAddrs);        /* 地址 */
+    printd("\r\n CNT  : %d", valveFix.fix.portCnt);     /* 通道数 */
+    printd("\r\n BAUD : %d", syspara.bdrate);           /* 波特率 */
+    printd("\r\n SPD  : %d", Valve.spd);                /* 速度 */
+    printd("\r\n RDCR : %d", rdc.rate);                 /* 减速比 */
+    printd("\r\n HALF : %d", Valve.bHalfSeal);          /* 半通道 */
+    printd("\r\n CW   : %d", Valve.fDirCw);
+    printd("\r\n CCW  : %d", Valve.fDirCCw);
+    printd("\r\n FIXO : %d", Valve.fixOrg);         /* 原点补偿 */
+    printd("\r\n FIXG : %d", valveFix.fix.dirGap);      /* 方向补偿 */
+    /* 序列号 */
+    printd("\r\n SN   : %02X %02X %02X %02X %02X", 
+        Valve.SnCode[0], Valve.SnCode[1], Valve.SnCode[2], Valve.SnCode[3], Valve.SnCode[4]);
+    printd("\r\n");
+}
 
 //-------------------------界面相关定制函数-------------------------//
 _TAB_T TermTab[]=
@@ -836,6 +861,7 @@ _TAB_T TermTab[]=
     {21,    (*TermCnt)},
     {22,    (*TermRDCR)},
     {23,    (*TermHalf)},
+    {24,    (*TermInspection)},
 };
 
 /*
@@ -956,6 +982,11 @@ void ChRUN(char *cmdName)
     {
         (!strcasecmp(cmdName, "HALF"))?(bRw = READ_ACT):(bRw = WRITE_ACT);
         FuncIndex = 23;
+    }
+    else if(!strcasecmp(cmdName, "INSP") || !strncasecmp(cmdName, "INSP", 4))
+    {
+        (!strcasecmp(cmdName, "INSP"))?(bRw = READ_ACT):(bRw = WRITE_ACT);
+        FuncIndex = 24;
     }
     else
     {

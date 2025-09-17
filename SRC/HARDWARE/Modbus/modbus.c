@@ -10,26 +10,10 @@ void ModbusInit(void)
     I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
     if(UART_BAUD_38400 < syspara.bdrate)
     {
-        syspara.bdrate = BAUD_RATE_19200;  /* 19200 */
+        syspara.bdrate = UART_BAUD_9600;    /* 9600 */
     }
 
-    if(UART_BAUD_9600 == syspara.bdrate)         /* 9600 */
-    {
-        Usart2_Init(36, BAUD_RATE_9600);   /* UART2 9600bps */
-        delay_ms(100);
-        Usart3_Init(36, BAUD_RATE_9600);   /* UART3 9600bps */
-        delay_ms(100);
-        TIM3_Init(MODBUS_TIME_9600, 71);   // 45us--0.45ms
-    }
-    else if(UART_BAUD_38400 == syspara.bdrate)   /* 38400 */
-    {
-        Usart2_Init(36, BAUD_RATE_38400);   /* UART2 38400bps */
-        delay_ms(100);
-        Usart3_Init(36, BAUD_RATE_38400);   /* UART3 38400bps */
-        delay_ms(100);
-        TIM3_Init(MODBUS_TIME_38400, 71);
-    }
-    else                                            /* Default 19200 */
+    if(UART_BAUD_19200 == syspara.bdrate)       /* 19200 */
     {
         Usart2_Init(36, BAUD_RATE_19200);   /* UART2 19200bps */
         delay_ms(100);
@@ -37,12 +21,25 @@ void ModbusInit(void)
         delay_ms(100);
         TIM3_Init(MODBUS_TIME_19200, 71);   // 45us--0.45ms
     }
+    else if(UART_BAUD_38400 == syspara.bdrate)  /* 38400 */
+    {
+        Usart2_Init(36, BAUD_RATE_38400);   /* UART2 38400bps */
+        delay_ms(100);
+        Usart3_Init(36, BAUD_RATE_38400);   /* UART3 38400bps */
+        delay_ms(100);
+        TIM3_Init(MODBUS_TIME_38400, 71);
+    }
+    else                                        /* Default 9600 */
+    {
+        syspara.bdrate = UART_BAUD_9600;
+        Usart2_Init(36, BAUD_RATE_9600);   /* UART2 9600bps */
+        delay_ms(100);
+        Usart3_Init(36, BAUD_RATE_9600);   /* UART3 9600bps */
+        delay_ms(100);
+        TIM3_Init(MODBUS_TIME_9600, 71);   // 45us--0.45ms
+    }
     delay_ms(100);
     printd("\r Init AGS UART2/3 Baud:%d", syspara.bdrate);
-
-//	Usart2_Init(36, BAUD_RATE_MODBUS);	        // 串口2 232初始化为115200
-//	Usart3_Init(36, BAUD_RATE_MODBUS);	        // 串口2 485初始化为115200
-//	TIM3_Init(MODBUS_TIME,71);	                // 45us--0.45ms
 
     // 参数配置
     ModbusPara.sRUN =  MB_IDEL;

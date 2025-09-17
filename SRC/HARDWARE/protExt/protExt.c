@@ -1,30 +1,36 @@
 #define _PROTEXT_GLOBALS_
 #include "common.h"
 
-
-
 void CommInit(void)
 {
     protext.stepCnt = PROTOCOL_HEAD;
     protext.rxCount = 0;
     protext.rxTimeOn = 0;
     protext.rxTimeCnt = 0;
-	I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
-    if(syspara.bdrate==2)
+    I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
+    if(syspara.bdrate == UART_BAUD_19200)
     {
-        Usart2_Init(36, BAUD_RATE_19200);				//串口初始化默认为19200
-    	delay_ms(100);
-    	Usart3_Init(36, BAUD_RATE_19200);	            // 串口2 485初始化为19200
-    	delay_ms(100);
+        Usart2_Init(36, BAUD_RATE_19200);   // 串口2 232 初始化默认为19200
+        delay_ms(100);
+        Usart3_Init(36, BAUD_RATE_19200);   // 串口3 485初始化为19200
+        delay_ms(100);
+    }
+    else if(syspara.bdrate == UART_BAUD_38400)
+    {
+        Usart2_Init(36, BAUD_RATE_38400);   // 串口2 232 初始化默认为38400
+        delay_ms(100);
+        Usart3_Init(36, BAUD_RATE_38400);   // 串口3 485初始化为38400
+        delay_ms(100);
     }
     else
     {
-        Usart2_Init(36, BAUD_RATE_9600);				//串口初始化默认为9600
-    	delay_ms(100);
-    	Usart3_Init(36, BAUD_RATE_9600);	        // 串口2 485初始化为9600
-    	delay_ms(100);
+        syspara.bdrate = UART_BAUD_9600;
+        Usart2_Init(36, BAUD_RATE_9600);    // 串口2 232 初始化默认为9600
+        delay_ms(100);
+        Usart3_Init(36, BAUD_RATE_9600);    // 串口3 485初始化为9600
+        delay_ms(100);
     }
-	delay_ms(100);
+    delay_ms(100);
 }
 
 /*

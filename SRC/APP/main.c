@@ -11,7 +11,8 @@ uint8_t valveFixDflt    = 0,
 
 void ParameterInit(void)
 {
-    uint8 ReadBuf[8]= {0, 0, 0, 0, 0, 0, 0, 0};
+  uint8 ReadBuf[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+  static uint8_t __bFirstInit = 0;
 
     /* 读取板号判断是否第一次进行初始化 */
     I2CPageRead_Nbytes(ADDR_BOARD_ID, LEN_BOARD_ID, ReadBuf);
@@ -27,8 +28,8 @@ void ParameterInit(void)
         /* 波特率 */
         I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
         printd("\r Baud:%d  %s bps", syspara.bdrate, 
-            (syspara.bdrate) == 1 ? "9600" : (syspara.bdrate) == 2 ? "19200" : 
-            (syspara.bdrate) == 3 ? "38400" : "Error");
+            (syspara.bdrate) == UART_BAUD_9600 ? "9600" : (syspara.bdrate) == UART_BAUD_19200 ? "19200" : 
+            (syspara.bdrate) == UART_BAUD_38400 ? "38400" : "Error");
 
         // 通道数
         I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
@@ -144,10 +145,14 @@ void ParameterInit(void)
         /* 半通道 */
         I2CPageRead_Nbytes(ADDR_HALF_SEAL, LEN_HALF_SEAL, &Valve.bHalfSeal);
         printd("\r Half Seal:%d %s", Valve.bHalfSeal,
-               (Valve.bHalfSeal) == 0 ? "OFF" : "ON");
+            (Valve.bHalfSeal) == 0 ? "OFF" : "ON");
     }
     else
     {
+        __bFirstInit = 1;
+        Valve.bReInit = 0;
+        /* 锁定驱动后再写入参数 */
+        VALVE_ENA = DISABLE;
         printd("\r\n Write default data");
         /* 板号 */
         ReadBuf[0] = 0x88;
@@ -158,7 +163,7 @@ void ParameterInit(void)
         I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara.mAddrs);
         /* 波特率 1 9600bps */
         syspara.bdrate = 1;
-        I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
+        I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
         /* 通道数 10 */
         valveFix.fix.portCnt = valvePortCnt;
         I2CPageWrite_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
@@ -185,7 +190,7 @@ void ParameterInit(void)
         I2CPageWrite_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
         /* 半通道 0 */
         Valve.bHalfSeal = 0;
-        I2CPageRead_Nbytes(ADDR_HALF_SEAL, LEN_HALF_SEAL, &Valve.bHalfSeal);
+        I2CPageWrite_Nbytes(ADDR_HALF_SEAL, LEN_HALF_SEAL, &Valve.bHalfSeal);
         /* 序列号 */
         memset(Valve.SnCode, 0, sizeof(Valve.SnCode));
         I2CPageWrite_Nbytes(ADDR_SN, LEN_SN, Valve.SnCode);
@@ -199,11 +204,9 @@ void ParameterInit(void)
         else
             printd("\r\n disable pulse read");
 
-        I2CPageRead_Nbytes(ADDR_SIG, LEN_SIG, sig.arrCount);
+        I2CPageWrite_Nbytes(ADDR_SIG, LEN_SIG, sig.arrCount);
         sig.sum = SigSum(sig.arrCount, valveFix.fix.portCnt);
         printd("\r\n SIG:");
-        for(uint8 i=0; i<valveFix.fix.portCnt; i++)
-            printd(" %d", sig.arrCount[i]);
         printd("\r 写入成功,请复位!!!");
     }
     getOptStartStatus();
@@ -232,7 +235,10 @@ void ParameterInit(void)
     Valve.status = VALVE_INITING;
     Valve.ErrBlinkTime = NORMAL_BLINK;
     Valve.passByOne = 0;
-    Valve.bReInit = 1;
+    if (0 == __bFirstInit)
+    {
+        Valve.bReInit = 1;
+    }
     Valve.bNewInit = 0xff;
 }
 
@@ -343,9 +349,9 @@ int main(void)
            PCB_VR, HARDWARE_DESCRIPTION);
 #endif
     if(syspara.typeProtocal==MY_MODBUS)
-        ModbusInit();
+        ModbusInit();   // AGS协议
     else
-        CommInit();
+        CommInit();     // HX协议
     ParameterInit();
     while(1)
     {

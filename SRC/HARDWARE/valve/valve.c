@@ -97,15 +97,15 @@ void getPrePort(void)
 
 
 /*
-
-*/
+ * ∑ß√≈≥ı ºªØ
+ */
 void InitValve(void)
 {
     if(Valve.status&VALVE_INITING && !MotionStatus[AXSV])
     {
         if(Valve.bReInit)
         {
-            if(Valve.retryTms<RETRY_TIMES)
+            if(RETRY_TIMES > Valve.retryTms)
             {
                 printd("\r\n start round");
                 VALVE_ENA = ENABLE;
@@ -495,7 +495,7 @@ void ValveLimitDetect(void)
                         Valve.status &= ~(VALVE_INITING|VALVE_RUNNING);
                         Valve.portCur = valveFix.fix.portCnt;
                     }
-                    try.times = 3;
+                    //try.times = 3;
                     Valve.portDes = 0;
                     Valve.dirLast = CCW;
                     Valve.passByOne = 0;
