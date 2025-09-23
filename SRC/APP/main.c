@@ -204,10 +204,13 @@ void ParameterInit(void)
         else
             printd("\r\n disable pulse read");
 
-        I2CPageWrite_Nbytes(ADDR_SIG, LEN_SIG, sig.arrCount);
-        sig.sum = SigSum(sig.arrCount, valveFix.fix.portCnt);
-        printd("\r\n SIG:");
+//        I2CPageWrite_Nbytes(ADDR_SIG, LEN_SIG, sig.arrCount);
+//        sig.sum = SigSum(sig.arrCount, valveFix.fix.portCnt);
+        // 写入参数后 锁定驱动
+        VALVE_ENA = DISABLE;
+//        printd("\r\n SIG:");
         printd("\r 写入成功,请复位!!!");
+        
     }
     getOptStartStatus();
     /* 设置速度范围 */
