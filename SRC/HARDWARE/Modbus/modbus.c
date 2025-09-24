@@ -528,7 +528,7 @@ void MB_PresetMultipleHoldingRegisters(void)
                     /* 临时速度 */
 #ifdef LIMIT_TEMP_SPD
                     /* 限制临时速度 仅D版特殊定制使用! */
-                    if(30 <= ModbusPara.rBuf[4])
+                    if(ModbusPara.rBuf[4] <= 30)
                     {
                         tempSpd = ModbusPara.rBuf[4];
                     }
@@ -537,8 +537,11 @@ void MB_PresetMultipleHoldingRegisters(void)
                         /* 临时速度超过30部分限制 */
                         tempSpd = 30 + (ModbusPara.rBuf[4] - 30) / 2;
                     }
+                    printd("\r\n (LTS) Input:%d =Down=> tempSpd:%d ", 
+                        ModbusPara.rBuf[4], tempSpd);
 #else
                     tempSpd = ModbusPara.rBuf[4];
+                    printd("\r\n tempSpd:%d ", tempSpd);
 #endif
                 }
                 Valve.dir = ModbusPara.rBuf[5];     /* 方向 */

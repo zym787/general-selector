@@ -229,8 +229,8 @@ void SignalScan(void)
                 }
                 else
                 {
-                    sig.sum = SigSum(sig.arrCount, valveFix.fix.portCnt);
-                    I2CPageWrite_Nbytes(ADDR_SIG, LEN_SIG, sig.arrCount);
+//                    sig.sum = SigSum(sig.arrCount, valveFix.fix.portCnt);
+//                    I2CPageWrite_Nbytes(ADDR_SIG, LEN_SIG, sig.arrCount);
                     sig.stpScan = 4;
                 }
             }
@@ -238,9 +238,9 @@ void SignalScan(void)
         case 3:
             if(Valve.status==VALVE_RUN_END)
             {
-                sig.arrCount[pos-1] = sig.scanCount;
-                sig.pulse[pos-1] = sig.basicPulse;
-                printd("\r\n pos%d sig %d", pos, sig.arrCount[pos-1]);
+//                sig.arrCount[pos-1] = sig.scanCount;
+//                sig.pulse[pos-1] = sig.basicPulse;
+                printd("\r\n pos%d", pos);
                 sig.scanCount = 0;
                 sig.stpScan = 2;
             }

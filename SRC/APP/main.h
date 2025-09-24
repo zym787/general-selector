@@ -9,8 +9,8 @@
 
 #define DESCRIPTION         "Selector Valve"
 #define CONTROL             "232/485 AGS"
-#define SOFTWARE_VERSION    "r15"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0015    /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r16"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0016    /* 软件修改版次 */
 #ifndef END_HOLE    /* v2.0.0C 开机1号通 */
 #define HOLE_INFO           ">First< Hole"
 #define SOFT_NAME           "v2.0.0C"
@@ -68,6 +68,8 @@
 //                              修复AGS协议波特率设置支持,修复HX协议波特率设置,支持38400
 //  v2.0.0CD-r15    2025.09.23  默认开启限制临时速度
 //                              写入默认参数后锁定驱动,必须再次复位才可生效
+//  v2.0.0CD-r16    2025.09.24  修复临时速度判断条件错误
+//                              屏蔽未使用的Fix SIG参数
 
 //------------------------------------------------------------------------------------------------------------
 #define ADDR_BOARD_ID           0

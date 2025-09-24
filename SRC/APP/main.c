@@ -44,9 +44,9 @@ void ParameterInit(void)
         I2CPageRead_Nbytes(ADDR_DIR_FIX, LEN_DIR_FIX, &valveFix.fix.dirGap);
         printd("\r Fix Dir:%d (0.1)DEG", valveFix.fix.dirGap);
 
-        printd("\r Fix:");
-        for(uint32 i=0; i<valveFix.fix.portCnt; i++)
-            printd(" %d", valveFix.array[i]);
+//        printd("\r Fix:");
+//        for(uint32 i=0; i<valveFix.fix.portCnt; i++)
+//            printd(" %d", valveFix.array[i]);
 
         // 烧机间隔
         I2CPageRead_Nbytes(ADDR_INTVL, LEN_INTVL, &intCtrl);
@@ -54,20 +54,28 @@ void ParameterInit(void)
 
         /* 序列号 */
         I2CPageRead_Nbytes(ADDR_SN, LEN_SN, Valve.SnCode);
+        printd("\r\n SN:");
+        for(uint8_t i = 0; i < 5; ++i)
+            printd(" %02X", *(Valve.SnCode + i));
+        
+        // 控制协议
         I2CPageRead_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.typeProtocal);
+        printd("\r\n Protocal:%d %s", syspara.typeProtocal,
+            (syspara.typeProtocal) == MY_MODBUS ? "AGS" : "EXTCOM_HX");
 
         I2CPageRead_Nbytes(ADDR_RDP, LEN_RDP, &syspara.bRdPulse);
         if(syspara.bRdPulse==true)
-            printd("\r\n enable pulse read");
+            printd("\r\n (%d) enable pulse read", syspara.bRdPulse);
         else
-            printd("\r\n disable pulse read");
-        I2CPageRead_Nbytes(ADDR_SIG, LEN_SIG, sig.arrCount);
-        sig.sum = SigSum(sig.arrCount, valveFix.fix.portCnt);
-        printd("\r\n SIG:");
-        for(uint8 i=0; i<valveFix.fix.portCnt; i++)
-            printd(" %d", sig.arrCount[i]);
+            printd("\r\n (%d) disable pulse read", syspara.bRdPulse);
+        
+//        I2CPageRead_Nbytes(ADDR_SIG, LEN_SIG, sig.arrCount);
+//        sig.sum = SigSum(sig.arrCount, valveFix.fix.portCnt);
+//        printd("\r\n SIG:");
+//        for(uint8 i=0; i<valveFix.fix.portCnt; i++)
+//            printd(" %d", sig.arrCount[i]);
+        // 扫描标志
         I2CPageRead_Nbytes(ADDR_SYMBOL, LEN_SYMBOL, ReadBuf);
-
         sig.pulseBlock[0] = ReadBuf[0];
         sig.pulseBlock[0] <<= 8;
         sig.pulseBlock[0] |= ReadBuf[1];
@@ -105,7 +113,7 @@ void ParameterInit(void)
         Valve.fDirCCw = ReadBuf[1];
         (!Valve.fDirCw||Valve.fDirCw>100)?(Valve.fDirCw=1):(Valve.fDirCw);
         (!Valve.fDirCCw||Valve.fDirCCw>100)?(Valve.fDirCCw=1):(Valve.fDirCCw);
-        printd("\r\n 定位减速:CW%d CCW%d", Valve.fDirCw, Valve.fDirCCw);
+        printd("\r\n 定位减速:CW%d  CCW%d", Valve.fDirCw, Valve.fDirCCw);
 
         /* 减速比 */
         I2CPageRead_Nbytes(ADDR_RDC_RATE, LEN_RDC_RATE, &rdc.rate);
@@ -199,10 +207,6 @@ void ParameterInit(void)
         I2CPageWrite_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.typeProtocal);
         /* 读脉冲标志 */
         syspara.bRdPulse = (bool)bRdpDflt;
-        if(syspara.bRdPulse==true)
-            printd("\r\n enable pulse read");
-        else
-            printd("\r\n disable pulse read");
 
 //        I2CPageWrite_Nbytes(ADDR_SIG, LEN_SIG, sig.arrCount);
 //        sig.sum = SigSum(sig.arrCount, valveFix.fix.portCnt);
@@ -391,9 +395,7 @@ void DebugOut(void)
     if(Valve.bPassPort)
     {
         Valve.bPassPort = 0;
-#ifdef DEBUG
-        printd("\r\n P %d %d", Valve.portCur, syspara.OptBlockLast);
-#endif
+        printd("\r\n P %d  B %d", Valve.portCur, syspara.OptBlockLast);
     }
 }
 
