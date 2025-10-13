@@ -247,6 +247,7 @@ void ParameterInit(void)
         Valve.bReInit = 1;
     }
     Valve.bNewInit = 0xff;
+    syspara.burnCnt = 0;    // 清空单次开机老化次数
 }
 
 // 检测任务
@@ -383,7 +384,7 @@ void DebugOut(void)
         timerPara.timeDbg = 0;
         // LED_WORK = !LED_WORK;
 #ifdef DEBUG
-        printd("\r\n >>sta:0x%02x  %02x->%02x  retry:%d  OptBlock:%d  Opt:%d  bNewInit:%d",
+        printd("\r\n >>状态:0x%02x,%02x->%02x,retry:%d,OptBlock:%d,Opt:%d,bNewInit:%d",
                Valve.status, Valve.portCur, Valve.portDes, Valve.retryTms,
                Valve.OptBlock, VALVE_OPT, Valve.bNewInit);
         if(syspara.typeProtocal==MY_MODBUS)

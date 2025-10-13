@@ -9,8 +9,8 @@
 
 #define DESCRIPTION         "Selector Valve"
 #define CONTROL             "232/485 AGS"
-#define SOFTWARE_VERSION    "r16"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0016    /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r17"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0017    /* 软件修改版次 */
 #ifndef END_HOLE    /* v2.0.0C 开机1号通 */
 #define HOLE_INFO           ">First< Hole"
 #define SOFT_NAME           "v2.0.0C"
@@ -70,6 +70,8 @@
 //                              写入默认参数后锁定驱动,必须再次复位才可生效
 //  v2.0.0CD-r16    2025.09.24  修复临时速度判断条件错误
 //                              屏蔽未使用的Fix SIG参数
+//  v2.0.0CD-r17    2025.10.13  修复老化时无法切换方向问题,现为就近切换通道老化,通道先递增后递减周而复始
+//                              增加单次开机老化计数,断电不保存
 
 //------------------------------------------------------------------------------------------------------------
 #define ADDR_BOARD_ID           0
@@ -142,6 +144,7 @@ typedef struct
     uint32  OptBlockLast;
     uint32_t protectTimeOut;
 //    uint32_t totalCnt;        /* 切换次数 */
+    uint32_t burnCnt;       // 烧机次数
 }_SYS_T;
 PEXT _SYS_T syspara;
 
