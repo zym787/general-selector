@@ -38,11 +38,11 @@ void ParameterInit(void)
 
         // 原点补偿
         I2CPageRead_Nbytes(ADDR_VALVE_FIX, LEN_VALVE_FIX, &Valve.fixOrg);
-        printd("\r Fix Org:%d DEG", Valve.fixOrg);
+        printd("\r Fix Org:%d 度", Valve.fixOrg);
 
         // 方向补偿
         I2CPageRead_Nbytes(ADDR_DIR_FIX, LEN_DIR_FIX, &valveFix.fix.dirGap);
-        printd("\r Fix Dir:%d (0.1)DEG", valveFix.fix.dirGap);
+        printd("\r Fix Dir:%d (0.1)度", valveFix.fix.dirGap);
 
 //        printd("\r Fix:");
 //        for(uint32 i=0; i<valveFix.fix.portCnt; i++)
@@ -113,7 +113,7 @@ void ParameterInit(void)
         Valve.fDirCCw = ReadBuf[1];
         (!Valve.fDirCw||Valve.fDirCw>100)?(Valve.fDirCw=1):(Valve.fDirCw);
         (!Valve.fDirCCw||Valve.fDirCCw>100)?(Valve.fDirCCw=1):(Valve.fDirCCw);
-        printd("\r\n 定位减速:CW%d  CCW%d", Valve.fDirCw, Valve.fDirCCw);
+        printd("\r\n 定位减速:CW%d  CCW%d (0.1)度", Valve.fDirCw, Valve.fDirCCw);
 
         /* 减速比 */
         I2CPageRead_Nbytes(ADDR_RDC_RATE, LEN_RDC_RATE, &rdc.rate);
@@ -250,61 +250,6 @@ void ParameterInit(void)
     syspara.burnCnt = 0;    // 清空单次开机老化次数
 }
 
-// 检测任务
-// 1 半通道
-// 2 超时检测任务(1s)
-#define SINGLE_RUN_TIMEOUT          5           // 运行5秒超时
-#define SINGLE_INITING_TIMOUT       14           // 转一圈差不多3秒，复位单次是两圈
-void everySecDo(void)
-{
-#ifndef END_HOLE
-    if(!Valve.bHalfSeal)
-    {
-        if(!(Valve.status&VALVE_INITING)&&Valve.bNewInit==1)
-        {
-            Valve.dir = CCW;
-            Valve.portDes = 1;  /* C 开机1号通 */
-            Valve.bNewInit = 0;
-        }
-    }
-#endif
-    // 每秒检测一次
-    if(timerPara.sec > SEC)
-    {
-        timerPara.sec = 0;
-        // 超时报错
-        // 单通道间做5秒的超时处理，避免长时间堵转烧坏电路
-        if((Valve.status == VALVE_RUNNING &&
-                syspara.protectTimeOut > SINGLE_RUN_TIMEOUT*SEC) ||
-                (Valve.status&VALVE_INITING &&
-                 syspara.protectTimeOut > SINGLE_INITING_TIMOUT*SEC))
-        {
-            if(!(Valve.status&VALVE_ERR))
-            {
-                Valve.portDes = 0;
-                Valve.status = VALVE_ERR;
-                VALVE_ENA = DISABLE;
-            }
-            else
-            {
-                VALVE_ENA = DISABLE;
-            }
-            printd("\r\n time out error! (initstep%d,%dms)",
-                   Valve.initStep, syspara.protectTimeOut);
-            Valve.ErrBlinkTime = RETRY_TIME_OUT;
-        }
-        // 15秒超时锁机
-        if(syspara.protectTimeOut > (SINGLE_INITING_TIMOUT+1)*SEC)
-        {
-            Valve.status = VALVE_ERR;
-            VALVE_ENA = DISABLE;
-            printd("\r\n %d Timeout protection! (initstep%d,%dms)",
-                   SINGLE_INITING_TIMOUT+1, Valve.initStep, syspara.protectTimeOut);
-            Valve.ErrBlinkTime = RETRY_TIME_OUT;
-        }
-    }
-}
-
 /*
     GPIO初始化
 */
@@ -324,81 +269,6 @@ void GPIOInit(void)
     RX_EN();			                        // 开机为接收模式
 }
 
-/*
-
-*/
-int main(void)
-{
-    Stm32_Clock_Init(9);            /* 系统时钟设置 */
-    delay_init(72);                 /* 延时初始化 */
-    JTAG_Set(JTAG_SWD_DISABLE);
-    delay_ms(100);
-    Usart1_Init(72, 115200);        /* 串口初始化为115200 */
-    iic_INIT();
-    ConfigValve();
-    TIM2_Init(999,71);              /* 10Khz的计数频率 */
-    TIM4_Init(65535,35);            /* X轴脉冲定时器 */
-    GPIOInit();
-    delay_ms(100);
-    BootInterface();
-#ifndef LIMIT_TEMP_SPD  /* 不开启临时速度限制 */
-    printd("\r\n Version:%s(%08X)  Time: %s %s \
-            \r\n Description:%s  %s  (%s)\
-            \r\n PCB:%s  %s \r\n",
-           SOFT_VER_C, SOFT_VER, __DATE__, __TIME__,
-           DESCRIPTION, HOLE_INFO, CONTROL,
-           PCB_VR, HARDWARE_DESCRIPTION);
-#else                   /* 开启临时速度限制 */
-    printd("\r\n Version:%s(%08X)  Time: %s %s \
-            \r\n Description:%s  %s  (%s) %s\
-            \r\n PCB:%s  %s \r\n",
-           SOFT_VER_C, SOFT_VER, __DATE__, __TIME__,
-           DESCRIPTION, HOLE_INFO, CONTROL, LTS,
-           PCB_VR, HARDWARE_DESCRIPTION);
-#endif
-    if(syspara.typeProtocal==MY_MODBUS)
-        ModbusInit();   // AGS协议
-    else
-        CommInit();     // HX协议
-    ParameterInit();
-    while(1)
-    {
-        if(syspara.typeProtocal==MY_MODBUS)
-            ModbusProces();
-        else
-            UsartProcess();
-        InitValve();
-        ProcessValve();
-        everySecDo();
-        SignalScan();
-        TestBurn();
-        DebugOut();
-        ErrBlink();
-    }
-}
-
-void DebugOut(void)
-{
-    if(timerPara.timeDbg > SEC*3)
-    {
-        timerPara.timeDbg = 0;
-        // LED_WORK = !LED_WORK;
-#ifdef DEBUG
-        printd("\r\n >>状态:0x%02x,%02x->%02x,retry:%d,OptBlock:%d,Opt:%d,bNewInit:%d",
-               Valve.status, Valve.portCur, Valve.portDes, Valve.retryTms,
-               Valve.OptBlock, VALVE_OPT, Valve.bNewInit);
-        if(syspara.typeProtocal==MY_MODBUS)
-            printd("  AGS");
-        else
-            printd("  EXTCOM %d %d", protext.stepCnt, protext.time);
-#endif
-    }
-    if(Valve.bPassPort)
-    {
-        Valve.bPassPort = 0;
-        printd("\r\n P %d  B %d", Valve.portCur, syspara.OptBlockLast);
-    }
-}
 
 void ErrBlink(void)
 {
@@ -449,12 +319,143 @@ void errProcRun(void)
         else
         {
             if (errActionImme())
-                printd("\r\n reShift times out");
+                printd("\r\n 重试超时!");
         }
     }
     else
     {
         if (errActionImme())
-            printd("\r\n initing err");
+            printd("\r\n 初始化错误");
+    }
+}
+
+// 检测任务
+// 1 半通道
+// 2 超时检测任务(1s)
+#define SINGLE_RUN_TIMEOUT 5     // 运行5秒超时
+#define SINGLE_INITING_TIMOUT 14 // 转一圈差不多3秒，复位单次是两圈
+void everySecDo(void)
+{
+#ifndef END_HOLE
+    if (!Valve.bHalfSeal)
+    {
+        if (!(Valve.status & VALVE_INITING) && Valve.bNewInit == 1)
+        {
+            Valve.dir = CCW;
+            Valve.portDes = 1; /* C 开机1号通 */
+            Valve.bNewInit = 0;
+        }
+    }
+#endif
+    // 每秒检测一次
+    if (timerPara.sec > SEC)
+    {
+        timerPara.sec = 0;
+        // 超时报错
+        // 单通道间做5秒的超时处理，避免长时间堵转烧坏电路
+        if ((Valve.status == VALVE_RUNNING && syspara.protectTimeOut > SINGLE_RUN_TIMEOUT * SEC) ||
+            (Valve.status & VALVE_INITING && syspara.protectTimeOut > SINGLE_INITING_TIMOUT * SEC))
+        {
+            if (!(Valve.status & VALVE_ERR))
+            {
+                Valve.portDes = 0;
+                Valve.status = VALVE_ERR;
+                VALVE_ENA = DISABLE;
+            }
+            else
+            {
+                VALVE_ENA = DISABLE;
+            }
+            printd("\r\n 运行超时! (initstep%d,%dms)",
+                   Valve.initStep, syspara.protectTimeOut);
+            Valve.ErrBlinkTime = RETRY_TIME_OUT;
+        }
+        // 15秒超时锁机
+        if (syspara.protectTimeOut > (SINGLE_INITING_TIMOUT + 1) * SEC)
+        {
+            Valve.status = VALVE_ERR;
+            VALVE_ENA = DISABLE;
+            printd("\r\n %d 超时保护! (initstep%d,%dms)",
+                   SINGLE_INITING_TIMOUT + 1, Valve.initStep, syspara.protectTimeOut);
+            Valve.ErrBlinkTime = RETRY_TIME_OUT;
+        }
+    }
+}
+
+/*
+
+*/
+int main(void)
+{
+    Stm32_Clock_Init(9); /* 系统时钟设置 */
+    delay_init(72);      /* 延时初始化 */
+    JTAG_Set(JTAG_SWD_DISABLE);
+    delay_ms(100);
+    Usart1_Init(72, 115200); /* 串口初始化为115200 */
+    iic_INIT();
+    ConfigValve();
+    TIM2_Init(999, 71);   /* 10Khz的计数频率 */
+    TIM4_Init(65535, 35); /* X轴脉冲定时器 */
+    GPIOInit();
+    delay_ms(100);
+    BootInterface();
+#ifndef LIMIT_TEMP_SPD /* 不开启临时速度限制 */
+    printd("\r\n Version:%s(%08X)  Time: %s %s \
+            \r\n Description:%s  %s  (%s)\
+            \r\n PCB:%s  %s \r\n",
+           SOFT_VER_C, SOFT_VER, __DATE__, __TIME__,
+           DESCRIPTION, HOLE_INFO, CONTROL,
+           PCB_VR, HARDWARE_DESCRIPTION);
+#else /* 开启临时速度限制 */
+    printd("\r\n Version:%s(%08X)  Time: %s %s \
+            \r\n Description:%s  %s  (%s) %s\
+            \r\n PCB:%s  %s \r\n",
+           SOFT_VER_C, SOFT_VER, __DATE__, __TIME__,
+           DESCRIPTION, HOLE_INFO, CONTROL, LTS,
+           PCB_VR, HARDWARE_DESCRIPTION);
+#endif
+    if (syspara.typeProtocal == MY_MODBUS)
+        ModbusInit(); // AGS协议
+    else
+        CommInit(); // HX协议
+    ParameterInit();
+    while (1)
+    {
+        if (syspara.typeProtocal == MY_MODBUS)
+            ModbusProces();
+        else
+            UsartProcess();
+        InitValve();
+        ProcessValve();
+        everySecDo();
+        SignalScan();
+        TestBurn();
+        DebugOut();
+        ErrBlink();
+    }
+}
+
+void DebugOut(void)
+{
+
+    if (Valve.bPassPort)
+    {
+        Valve.bPassPort = 0;
+        printd("\r\n P %d  B %d", Valve.portCur, syspara.OptBlockLast);
+    }
+    if (timerPara.timeDbg > SEC * 3)
+    {
+        timerPara.timeDbg = 0;
+        // LED_WORK = !LED_WORK;
+#ifdef DEBUG
+        printd("\r\n >>重试:%d,OptBlock:%d,Opt:%d,bNewInit:%d",
+                Valve.retryTms, Valve.OptBlock, VALVE_OPT, Valve.bNewInit);
+        printd("\r\n 状态:0x%02x,当前位:%d,目标位:%d,方向:%d",
+               Valve.status, Valve.portCur, Valve.portDes, srd[0].dir);
+        if (syspara.typeProtocal == MY_MODBUS)
+            printd("  AGS");
+        else
+            printd("  EXTCOM %d %d", protext.stepCnt, protext.time);
+#endif
     }
 }

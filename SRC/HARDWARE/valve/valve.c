@@ -120,7 +120,7 @@ void InitValve(void)
                 VALVE_ENA = DISABLE;
                 Valve.status = VALVE_ERR;
                 Valve.bReInit = 0;
-                printd("\r\n Inited retry time out");
+                printd("\r\n 初始化超时");
             }
         }
     }
@@ -193,7 +193,7 @@ void ProcessValve(void)
                         else if(Positive>=Negative)
                         {
                             Valve.dir = CW;
-                            printd("\r\n short CW =>%d", Valve.portDes);
+                            printd("\r\n 就近顺时针 =>%d", Valve.portDes);
                         }
                         tpFloat = rdc.stepRound;
                         (Valve.dir==CCW)?(tpFloat *= -1):(tpFloat);
@@ -223,7 +223,7 @@ void ProcessValve(void)
                         }
                         if(Valve.dir==CCW)
                         {
-                            printd("\r\n CCW =>%d", Valve.portDes);
+                            printd("\r\n 电机逆时针 =>%d", Valve.portDes);
                             if(Valve.portDes==valveFix.fix.portCnt)
                             {
                                 VALVE_ENA = ON;
@@ -236,7 +236,7 @@ void ProcessValve(void)
                         }
                         else
                         {
-                            printd("\r\n CW =>%d", Valve.portDes);
+                            printd("\r\n 电机顺时针 =>%d", Valve.portDes);
                         }
                         tpFloat = rdc.stepRound;
                         (Valve.dir==CCW)?(tpFloat *= -1):(tpFloat);
@@ -267,8 +267,9 @@ void ProcessValve(void)
                     if(Valve.bGetPort==1)
                     {
                         Valve.bGetPort = 0;
-                        printd("\r\n get port");
                         Valve.portCur = Valve.portDes;
+                        printd("\r\n get port %d", Valve.portCur);
+                        printd("\r\n get port %d", Valve.portCur);
                         Valve.portDes = 0;
                         Valve.retryTms = 0;
                         Valve.statusLast = 0;
@@ -283,7 +284,7 @@ void ProcessValve(void)
                             Valve.ErrBlinkTime = RETRY_TIME_OUT;
                             Valve.status = VALVE_ERR;
                             VALVE_ENA = DISABLE;
-                            printd("\r\n Valve ERR");
+                            printd("\r\n 阀错位");
                             // errProcRun();
                             return;
                         }
@@ -502,7 +503,6 @@ void ValveLimitDetect(void)
                         Valve.status &= ~(VALVE_INITING|VALVE_RUNNING);
                         Valve.portCur = valveFix.fix.portCnt;
                     }
-                    //try.times = 3;
                     Valve.portDes = 0;
                     Valve.dirLast = CCW;
                     Valve.passByOne = 0;
