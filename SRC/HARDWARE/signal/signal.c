@@ -128,42 +128,52 @@ void SignalScan(void)
                 AxisMoveRel(AXSV, -(int)rdc.stepRound*13/12, accel[AXSV]/2, decel[AXSV]/2, speed[AXSV]/2);
                 memset(sig.pulseGap, 0, SIGNAL_CNT*2);
                 memset(sig.pulseBlock, 0, SIGNAL_CNT*2);
-                printd("\r\n scanning and reset buffer");
+                printd("\r\n 信号总数:%d", SIGNAL_CNT);
+                printd("\r\n 重置扫描寄存器");
                 sig.stpScan = 102;
             }
             break;
         case 102:
             if(!MotionStatus[AXSV])
             {
+                printd("\r\n 计算并存储特征值");
                 sig.bRdPulse = false;
                 BubbleWord(sig.pulseGap, SIGNAL_CNT);
                 BubbleWord(sig.pulseBlock, SIGNAL_CNT);
+                // Gap 缺口
+                printd("\r\n G:");
                 for(i=0; i<SIGNAL_CNT; i++)
                 {
+                    printd(" %d", *(sig.pulseGap+i));
                     if(!*(sig.pulseGap+i))
                         break;
                 }
-                printd("\r\n num=%d", i);
-                rwBuff[4] = sig.pulseGap[i-1]>>8;
-                rwBuff[5] = sig.pulseGap[i-1];
+                printd("\r\n Gap num=%d", i);
+                // Block 挡块
+                printd("\r\n B:");
                 for(i=0; i<SIGNAL_CNT; i++)
                 {
+                    printd(" %d", *(sig.pulseBlock+i));
                     if(!*(sig.pulseBlock+i))
                         break;
                 }
-                printd("\r\n num=%d", i);
+                printd("\r\n Block num=%d", i);
+
+                // Block 取均值
                 sig.pulseBlock[i-3] = AverageN(sig.pulseBlock, i-2);
                 rwBuff[0] = sig.pulseBlock[i-3]>>8;
                 rwBuff[1] = sig.pulseBlock[i-3];
                 rwBuff[2] = sig.pulseBlock[i-2]>>8;
                 rwBuff[3] = sig.pulseBlock[i-2];
+                rwBuff[4] = sig.pulseGap[i - 1] >> 8;
+                rwBuff[5] = sig.pulseGap[i - 1];
                 rwBuff[6] = sig.pulseBlock[i-1]>>8;
                 rwBuff[7] = sig.pulseBlock[i-1];
 
-                printd("\r\n mainblock%d, second block%d, lit block%d, gap%d",
+                printd("\r\n 主挡片%d, 次挡片%d, 小挡片%d, 缺口%d",
                 sig.pulseBlock[i-3], sig.pulseBlock[i-2], sig.pulseBlock[i-1], sig.pulseGap[i-1]);
                 I2CPageWrite_Nbytes(ADDR_SYMBOL, LEN_SYMBOL, rwBuff);
-                printd("\r\n start inited");
+                printd("\r\n 启动复位");
                 sig.stpScan = 1;
             }
             break;
@@ -171,11 +181,13 @@ void SignalScan(void)
         case 4:
             if(sig.stpScan==1)
             {
+                printd("\r\n 读取特征值");
                 I2CPageRead_Nbytes(ADDR_SYMBOL, LEN_SYMBOL, rwBuff);
+                // 重新排序,B0为主挡片,B1次挡片,B2为小挡片,B3为主挡块误差,B4为次挡片误差,B5为小挡片误差
                 sig.pulseBlock[0] = rwBuff[0];
                 sig.pulseBlock[0] <<= 8;
                 sig.pulseBlock[0] |= rwBuff[1];
-                // normal blade 8 percent
+                // normal blade 10 percent
                 uint32 temp=0;
                 temp = sig.pulseBlock[0]*PERCENT_TOLL;
                 sig.pulseBlock[3] = temp/PERCENT;
@@ -194,12 +206,16 @@ void SignalScan(void)
                 temp = sig.pulseBlock[2]*PERCENT_TOLL;
                 sig.pulseBlock[5] = temp/PERCENT;
 
+                // G0为缺口,G1为缺口误差
                 sig.pulseGap[0] = rwBuff[4];
                 sig.pulseGap[0] <<= 8;
                 sig.pulseGap[0] |= rwBuff[5];
                 // normal Gap 20 percent
                 temp = sig.pulseGap[0]*PERCENT_TOLL;
                 sig.pulseGap[1] = temp/PERCENT;
+                printd("\r\n B:%d, %d, %d", sig.pulseBlock[0], sig.pulseBlock[1], sig.pulseBlock[2]);
+                printd(", Err:%d, %d, %d", sig.pulseBlock[3], sig.pulseBlock[4], sig.pulseBlock[5]);
+                printd("\r\n G:%d, Err:%d", sig.pulseGap[0], sig.pulseGap[1]);
             }
             VALVE_ENA = ON;
             Valve.status = VALVE_INITING;
@@ -241,6 +257,7 @@ void SignalScan(void)
 //                sig.arrCount[pos-1] = sig.scanCount;
 //                sig.pulse[pos-1] = sig.basicPulse;
                 printd("\r\n pos%d", pos);
+                printd("\r\n pos%d sig %d", pos, sig.arrCount[pos - 1]);
                 sig.scanCount = 0;
                 sig.stpScan = 2;
             }

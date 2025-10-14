@@ -7,7 +7,7 @@
 #define PEXT extern
 #endif
 
-#define PERCENT_TOLL    10
+#define PERCENT_TOLL    20
 #define PERCENT         100
 
 #define SIGNAL_CNT          32

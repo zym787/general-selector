@@ -9,8 +9,8 @@
 
 #define DESCRIPTION         "Selector Valve"
 #define CONTROL             "232/485 AGS"
-#define SOFTWARE_VERSION    "r17"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0017    /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r20"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0020     /* 软件修改版次 */
 #ifndef END_HOLE    /* v2.0.0C 开机1号通 */
 #define HOLE_INFO           ">First< Hole"
 #define SOFT_NAME           "v2.0.0C"
@@ -72,6 +72,8 @@
 //                              屏蔽未使用的Fix SIG参数
 //  v2.0.0CD-r17    2025.10.13  修复老化时无法切换方向问题,现为就近切换通道老化,通道先递增后递减周而复始
 //                              增加单次开机老化计数,断电不保存
+//  v2.0.0CD-r18    2025.10.13  支援出错重走
+//  v2.0.0CD-r20    2025.10.14  支援扫描时打印脉冲宽度
 
 //------------------------------------------------------------------------------------------------------------
 #define ADDR_BOARD_ID           0
@@ -155,16 +157,7 @@ PEXT int main(void);
 PEXT void DebugOut(void);
 PEXT void UsrLimit(void);
 PEXT void ErrBlink(void);
-
+PEXT void errProcRun(void);
 
 #undef PEXT
 #endif
-
-
-
-
-
-
-
-
-

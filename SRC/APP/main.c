@@ -104,7 +104,7 @@ void ParameterInit(void)
         // mini Gap 8 percent
         temp = sig.pulseGap[0]*PERCENT_TOLL;
         sig.pulseGap[1] = temp/PERCENT;
-        printd("\r\n Symbol %d %d %d %d %d %d %d %d",
+        printd("\r\n B(Err): %d(%d) %d(%d) %d(%d) G(Err): %d(%d)",
                sig.pulseBlock[0], sig.pulseBlock[3], sig.pulseBlock[1], sig.pulseBlock[4],
                sig.pulseBlock[2], sig.pulseBlock[5], sig.pulseGap[0], sig.pulseGap[1]);
 
@@ -407,5 +407,54 @@ void ErrBlink(void)
     {
         timerPara.timeOut = 0;
         LED_WORK = !LED_WORK;
+    }
+}
+
+// 出错响应立即停机
+uint8_t errActionImme(void)
+{
+    if (Valve.status != VALVE_ERR)
+    {
+        srd[AXSV].accel_count = -1;
+        srd[AXSV].run_state = DECEL;
+        Valve.portDes = 0;
+        Valve.ErrBlinkTime = RETRY_TIME_OUT;
+        Valve.status = VALVE_ERR;
+        VALVE_ENA = DISABLE;
+        return 1;
+    }
+    return 0;
+}
+
+void errProcRun(void)
+{
+    if (!(Valve.status & VALVE_INITING))
+    {
+        // 复位时不做重新找位动作
+        srd[AXSV].accel_count = -1;
+        srd[AXSV].run_state = DECEL;
+        if (Valve.retryTms < RETRY_TIMES)
+        {
+            VALVE_ENA = ON;
+            Valve.status = VALVE_INITING;
+            Valve.ErrBlinkTime = NORMAL_BLINK;
+            Valve.passByOne = 0;
+            Valve.bReInit = 1;
+            Valve.bNewInit = 1;
+            Valve.portCur = 0;
+            Valve.initStep = 0;
+            syspara.protectTimeOut = 0;
+            printd("\r\n %d重试 ->%d", Valve.retryTms, Valve.portDes);
+        }
+        else
+        {
+            if (errActionImme())
+                printd("\r\n reShift times out");
+        }
+    }
+    else
+    {
+        if (errActionImme())
+            printd("\r\n initing err");
     }
 }

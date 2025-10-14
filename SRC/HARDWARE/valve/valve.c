@@ -109,7 +109,7 @@ void InitValve(void)
             {
                 printd("\r\n start round");
                 VALVE_ENA = ENABLE;
-//                ++Valve.retryTms;
+                // ++Valve.retryTms;
                 position[AXSV] = HomePos[AXSV];     // 清除当前的计步
                 AxisMoveAbs(AXSV, -(int)rdc.stepRound*3, accel[AXSV], decel[AXSV], speed[AXSV]);
                 Valve.status |= VALVE_RUNNING;                  // 置位运行标志
@@ -284,6 +284,7 @@ void ProcessValve(void)
                             Valve.status = VALVE_ERR;
                             VALVE_ENA = DISABLE;
                             printd("\r\n Valve ERR");
+                            // errProcRun();
                             return;
                         }
                     }
@@ -321,10 +322,13 @@ void ValveLimitDetect(void)
         if(Valve.OptBlock)
         {// 此时处理挡片
 #ifdef PULSE_CNT_EN
-            printd("\r\nB%d", Valve.OptBlock);
+            
 #endif
             if(sig.bRdPulse==true)
+            {
+                printd("\r\nB%d", Valve.OptBlock);
                 sig.pulseBlock[sig.num] = Valve.OptBlock;
+            }
             else
             {
                 /* 较大的特征挡片后必是位置定位孔 */
@@ -443,10 +447,13 @@ void ValveLimitDetect(void)
         if(Valve.OptGap)
         {// 此处处理缺口
 #ifdef PULSE_CNT_EN
-            printd("\r\nG%d",Valve.OptGap);
+            
 #endif
             if(sig.bRdPulse==true)
+            {
+                printd("\r\nG%d", Valve.OptGap);
                 sig.pulseGap[sig.num++] = Valve.OptGap;
+            }
             else
             {
                 if(Valve.OptGap>(sig.pulseGap[0]-sig.pulseGap[1]) && Valve.OptGap<(sig.pulseGap[0]+sig.pulseGap[1]))

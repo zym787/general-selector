@@ -56,7 +56,6 @@ typedef enum
 
 //#define HALF_CHN
 //#define NEW_SCALE
-//#define PULSE_CNT_EN
 
 #include <stm32f10x.h>
 #include "sys.h"
