@@ -5,7 +5,7 @@ void ConfigValve(void)
 {
     RCC->APB2ENR |= (RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC);
 
-    #ifdef A12_909_A2
+    #ifdef A12_909
     //LED
     GPIOC->CRH &= (GPIO_Crh_P15);
     GPIOC->CRH |= (GPIO_Mode_Out_PP_50MHz_P15);
@@ -27,7 +27,7 @@ void ConfigValve(void)
     GPIOA->ODR |= (GPIO_Pin_11);
 
     #endif
-    #ifdef A12_906_B1
+    #ifdef A12_906
     //LED
     GPIOC->CRH &= (GPIO_Crh_P14);
     GPIOC->CRH |= (GPIO_Mode_Out_PP_50MHz_P14);
@@ -271,13 +271,13 @@ void ProcessValve(void)
                     {
                         Valve.bGetPort = 0;
                         Valve.portCur = Valve.portDes;
-                        printd("\r\n 获取位置 %d", Valve.portCur);
                         Valve.portDes = 0;
                         Valve.retryTms = 0;
                         Valve.statusLast = 0;
                         Valve.status = VALVE_RUN_END;
                         syspara.bCountLastTime = false;
                         getPrePort();
+                        printd("\r\n 获取位置: %d   切换时间: %dms", Valve.portCur, syspara.lastTime);
                     }
                     else
                     {

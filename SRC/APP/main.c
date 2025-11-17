@@ -5,7 +5,7 @@ uint8_t valveFixDflt    = 0,
         valveFixDir     = 0,
         valvePortCnt    = 10, 
         IntDflt         = 5, 
-        SpdDflt         = SPD_MIN, 
+        SpdDflt         = INIT_SPD, 
         protocalDflt    = MY_MODBUS, 
         bRdpDflt        = 0;
 
@@ -218,8 +218,9 @@ void ParameterInit(void)
     }
     getOptStartStatus();
     /* 设置速度范围 */
-    tBoundary.spd_min =  (RDCR_20 == rdc.rate) ? (SPD_MIN_RDCR20) : (SPD_MIN), 
-    tBoundary.spd_max = (RDCR_20 == rdc.rate) ? (SPD_MAX_RDCR20) : (SPD_MAX);
+    tBoundary.spd_min =  SPD_MIN * 10 / rdc.rate;
+    tBoundary.spd_max = SPD_MAX * 10 / rdc.rate;
+    tBoundary.spd_init = INIT_SPD;
     /* 速度 */
     I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
     if(tBoundary.spd_min > Valve.spd || tBoundary.spd_max < Valve.spd)
@@ -230,14 +231,14 @@ void ParameterInit(void)
     speed[AXSV] = 100;
     accel[AXSV] = 100;
     decel[AXSV] = 200;
-    speed[AXSV] *= (tBoundary.spd_min);
+    speed[AXSV] *= (tBoundary.spd_init);
     speed[AXSV] *= (rdc.rate);
-    accel[AXSV] *= (tBoundary.spd_min);
+    accel[AXSV] *= (tBoundary.spd_init);
     accel[AXSV] *= (rdc.rate);
-    decel[AXSV] *= (tBoundary.spd_min);
+    decel[AXSV] *= (tBoundary.spd_init);
     decel[AXSV] *= (rdc.rate);
-    printd("\r\n Init motion!  Slow Down!  (%d) spd%d acc%d dec%d",
-        tBoundary.spd_min, speed[AXSV], accel[AXSV], decel[AXSV]);
+    printd("\r\n Init motion!  Slow Down!  (%dRPM) spd%d acc%d dec%d",
+        tBoundary.spd_init, speed[AXSV], accel[AXSV], decel[AXSV]);
     VALVE_ENA = ON;
     Valve.status = VALVE_INITING;
     Valve.ErrBlinkTime = NORMAL_BLINK;

@@ -2,15 +2,15 @@
 #include "common.h"
 
 //IO操作函数
-#ifdef A12_909_A2
+#ifdef A12_909
 #define iic_scl		PBout(15) //SCL ---PC3
 #define iic_sda		PBout(14) //SDA ---PA0
 #define READ_SDA   	PBin(14)  //输入SDA
 #endif
-#ifdef A12_906_B1
-#define iic_scl     PAout(0) //SCL
-#define iic_sda     PAout(1) //SDA
-#define READ_SDA    PAin(1)  //输入SDA
+#ifdef A12_906
+#define iic_scl     PAout(1) //SCL
+#define iic_sda     PAout(0) //SDA
+#define READ_SDA    PAin(0)  //输入SDA
 #endif
 
 #define  EEP_sck_Set()   	( iic_scl = 1)      			//Pa0
@@ -34,7 +34,7 @@
 // -----------------------------------------------------------
 void iic_INIT(void)
 {
-    #ifdef A12_909_A2
+    #ifdef A12_909
 	RCC->APB2ENR |= (RCC_APB2Periph_GPIOB) ;    			//使能PORTA,PORTC时钟
 
 	GPIOB->CRH &= GPIO_Crh_P14;
@@ -45,7 +45,7 @@ void iic_INIT(void)
 	GPIOB->CRH |= GPIO_Mode_Out_PP_50MHz_P15;
     GPIOB->ODR |= GPIO_Pin_15; 													//输出高
     #endif
-    #ifdef A12_906_B1
+    #ifdef A12_906
 	RCC->APB2ENR |= (RCC_APB2Periph_GPIOA) ;    			//使能PORTA,PORTC时钟
 
 	GPIOA->CRL &= GPIO_Crl_P0;
@@ -60,12 +60,12 @@ void iic_INIT(void)
 
 void EEP_da_in(void )
 {
-    #ifdef A12_909_A2
+    #ifdef A12_909
 	GPIOB->CRH &= GPIO_Crh_P14;
 	GPIOB->CRH |= GPIO_Mode_IN_PU_PD_P14;
     GPIOB->ODR |= GPIO_Pin_14; 													//输入上拉
     #endif
-    #ifdef A12_906_B1
+    #ifdef A12_906
 	GPIOA->CRL &= GPIO_Crl_P0;
 	GPIOA->CRL |= GPIO_Mode_IN_PU_PD_P0;
     GPIOA->ODR |= GPIO_Pin_0; 													//输入上拉
@@ -74,12 +74,12 @@ void EEP_da_in(void )
 
 void EEP_da_out(void)
 {
-    #ifdef A12_909_A2
+    #ifdef A12_909
 	GPIOB->CRH &= GPIO_Crh_P14;
 	GPIOB->CRH |= GPIO_Mode_Out_PP_50MHz_P14;
     GPIOB->ODR |= GPIO_Pin_14; 													//输出高
     #endif
-    #ifdef A12_906_B1
+    #ifdef A12_906
 	GPIOA->CRL &= GPIO_Crl_P0;
 	GPIOA->CRL |= GPIO_Mode_Out_PP_50MHz_P0;
     GPIOA->ODR |= GPIO_Pin_0; 													//输出高

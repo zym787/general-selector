@@ -149,6 +149,8 @@ void SignalScan(void)
                         break;
                 }
                 printd("\r\n Gap num=%d", i);
+                rwBuff[4] = sig.pulseGap[i - 1] >> 8;
+                rwBuff[5] = sig.pulseGap[i - 1];
                 // Block µ²¿é
                 printd("\r\n B:");
                 for(i=0; i<SIGNAL_CNT; i++)
@@ -165,8 +167,6 @@ void SignalScan(void)
                 rwBuff[1] = sig.pulseBlock[i-3];
                 rwBuff[2] = sig.pulseBlock[i-2]>>8;
                 rwBuff[3] = sig.pulseBlock[i-2];
-                rwBuff[4] = sig.pulseGap[i - 1] >> 8;
-                rwBuff[5] = sig.pulseGap[i - 1];
                 rwBuff[6] = sig.pulseBlock[i-1]>>8;
                 rwBuff[7] = sig.pulseBlock[i-1];
 

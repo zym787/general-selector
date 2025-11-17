@@ -30,6 +30,10 @@ void TIM2_IRQHandler(void)
         ++timerPara.sec;
         if(VALVE_INITING == Valve.status || VALVE_RUNNING == Valve.status)
             ++syspara.protectTimeOut;
+        if (true == syspara.bCountLastTime)
+        {
+            syspara.lastTime++;
+        }
         if(protext.stepCnt)
         {
             if(++protext.time>500)

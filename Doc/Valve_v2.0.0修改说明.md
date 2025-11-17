@@ -126,5 +126,5 @@
 ```
  Version:v2.0.0-r7(20000007)  Time: Aug 18 2025 16:17:02
  Description:Selector Valve (AGS)
- PCB:A12_909_A2  Vertical Version (2.2A Max)
+ PCB:A12-909  Vertical Version (2.2A Max)
 ```
