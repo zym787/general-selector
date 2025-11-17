@@ -231,14 +231,14 @@ void ParameterInit(void)
     speed[AXSV] = 100;
     accel[AXSV] = 100;
     decel[AXSV] = 200;
-    speed[AXSV] *= (tBoundary.spd_min);
+    speed[AXSV] *= (tBoundary.spd_init);
     speed[AXSV] *= (rdc.rate);
-    accel[AXSV] *= (tBoundary.spd_min);
+    accel[AXSV] *= (tBoundary.spd_init);
     accel[AXSV] *= (rdc.rate);
-    decel[AXSV] *= (tBoundary.spd_min);
+    decel[AXSV] *= (tBoundary.spd_init);
     decel[AXSV] *= (rdc.rate);
-    printd("\r\n Init motion!  Slow Down!  (%d) spd%d acc%d dec%d",
-        tBoundary.spd_min, speed[AXSV], accel[AXSV], decel[AXSV]);
+    printd("\r\n Init motion!  Slow Down!  (%dRPM) spd%d acc%d dec%d",
+           tBoundary.spd_init, speed[AXSV], accel[AXSV], decel[AXSV]);
     VALVE_ENA = ON;
     Valve.status = VALVE_INITING;
     Valve.ErrBlinkTime = NORMAL_BLINK;
