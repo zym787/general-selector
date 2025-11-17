@@ -61,7 +61,8 @@ void ConfigValve(void)
     //-----------------------------------------------------------------------------
     srd[AXSV].SearchOrg = ValveLimitDetect;
     srd[AXSV].bEmgStop = NULL;
-    /* 电流设置 906/909  0 最大 */
+
+    ///电流设置 906/909  0 最大
     ISET(I_26A);
 }
 
@@ -274,14 +275,13 @@ void ProcessValve(void)
                     {
                         Valve.bGetPort = 0;
                         Valve.portCur = Valve.portDes;
-                        printd("\r\n 获取位置 %d", Valve.portCur);
                         Valve.portDes = 0;
                         Valve.retryTms = 0;
                         Valve.statusLast = 0;
                         Valve.status = VALVE_RUN_END;
                         syspara.bCountLastTime = false;
                         getPrePort();
-                        VALVE_ENA = DISABLE;
+                        // VALVE_ENA = DISABLE;
                         printd("\r\n 获取位置: %d   切换时间: %dms", Valve.portCur, syspara.lastTime);
                     }
                     else
