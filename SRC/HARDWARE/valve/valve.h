@@ -18,7 +18,7 @@
 #define I_16A               0x03
 #define I_05A               0x04
 
-#ifdef A12_909_A2
+#ifdef A12_909
 #define LED_WORK            PCout(15)
 #define VALVE_OPT           PAin(15)
 #define VALVE_ENA		    PAout(4)
@@ -30,7 +30,7 @@
 #define M_ISET_2           PBout(12)
 #define M_ISET_3           PAout(11)
 #endif
-#ifdef A12_906_B1
+#ifdef A12_906
 #define LED_WORK            PCout(14)
 #define VALVE_OPT           PCin(15)
 #define VALVE_ENA		    PAout(6)
@@ -47,15 +47,15 @@
     M_ISET_2=(val>>1&0x01);\
     M_ISET_3=(val>>2&0x01);
 
-#ifdef A12_909_A2
+#ifdef A12_909
 #define SCALE               64                      //当前细分数为64
 #endif
-#ifdef A12_906_B1
+#ifdef A12_906
 #define SCALE               16                      //当前细分数为64
 #endif
 #define P_ROUND                 200                     //每圈大步数为200
 
-#ifdef A12_909_A2
+#ifdef A12_909
 #define STEPS_1_DEGREE_RD01      (35.6)                 //每度需走的步数为12800/360=35.555~
 #define STEPS_01_DEGREE_RD01     (3.6)                  //每0.1度需走的步数为12800/3600=3.555~
 #define STEPS_1_DEGREE_RD04      (142.2)                 //每度需走的步数为12800/360=35.555~
@@ -65,7 +65,7 @@
 #define STEPS_1_DEGREE_RD16      (568.9)                 //每度需走的步数为12800/360=35.555~
 #define STEPS_01_DEGREE_RD16     (56.9)                  //每0.1度需走的步数为12800/3600=3.555~
 #endif
-#ifdef A12_906_B1
+#ifdef A12_906   /* A12_906 16细分 16*200=3200 */
 #define STEPS_1_DEGREE_RD01      (8.9)                 //每度需走的步数为12800/360=35.555~
 #define STEPS_01_DEGREE_RD01     (0.9)                  //每0.1度需走的步数为12800/3600=3.555~
 #define STEPS_1_DEGREE_RD04      (35.6)                 //每度需走的步数为12800/360=35.555~
@@ -103,9 +103,9 @@ enum
 #define AGS_ADDR_MAX        63      /* AGS地址最大 63 */
 #define BURN_ADDR           64      /* 老化地址 64 */
 #define AGS_ADDR_DEF        1       /* 默认地址 1 */
-#define INIT_SPD            SPD_MIN /* 初始化找位速度 */
-#define SPD_MIN             15      /* 最小速度 */
-#define SPD_MAX             70      /* 最大速度 */
+#define INIT_SPD            15      /* 初始化找位速度 */
+#define SPD_MIN             1       /* 最小速度 */
+#define SPD_MAX             100      /* 最大速度 */
 #define SPD_MIN_RDCR20      8       /* 20减速比 最小速度 */
 #define SPD_MAX_RDCR20      35      /* 20减速比 最大速度 */
 #define CHANNEL_MIN         3       /* 最小通道数 */
@@ -177,6 +177,7 @@ typedef struct
 {
     uint8_t spd_min;/* 速度最小值 */
     uint8_t spd_max;/* 速度最大值 */
+    uint8_t spd_init;/* 初始化速度 */
 } Boundary_T;
 PEXT Boundary_T tBoundary;
 

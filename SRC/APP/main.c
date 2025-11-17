@@ -194,7 +194,7 @@ void ParameterInit(void)
         rdc.rate = RDCR_10;
         I2CPageWrite_Nbytes(ADDR_RDC_RATE, LEN_RDC_RATE, &rdc.rate);
         /* 速度 */
-        Valve.spd = SpdDflt;
+        Valve.spd = INIT_SPD;
         I2CPageWrite_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
         /* 半通道 0 */
         Valve.bHalfSeal = 0;
@@ -218,8 +218,9 @@ void ParameterInit(void)
     }
     getOptStartStatus();
     /* 设置速度范围 */
-    tBoundary.spd_min =  (RDCR_20 == rdc.rate) ? (SPD_MIN_RDCR20) : (SPD_MIN), 
-    tBoundary.spd_max = (RDCR_20 == rdc.rate) ? (SPD_MAX_RDCR20) : (SPD_MAX);
+    tBoundary.spd_min = SPD_MIN * 10 / rdc.rate;
+    tBoundary.spd_max = SPD_MAX * 10 / rdc.rate;
+    tBoundary.spd_init = INIT_SPD; /* 初始化速度默认情况为最小速度 */
     /* 速度 */
     I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
     if(tBoundary.spd_min > Valve.spd || tBoundary.spd_max < Valve.spd)

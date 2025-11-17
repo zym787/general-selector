@@ -33,15 +33,15 @@ typedef enum
 #endif
 
 // PCB定义
-//#define A12_906_B1    /* 不用 */
-#define A12_909_A2  /* 901-C1套用 */
+// #define A12_906    /* 不用 */
+#define A12_909  /* 901-C1套用 */
 
-#ifdef A12_906_B1
-    #define PCB_VR                  "A12_906_B1"
+#ifdef A12_906
+    #define PCB_VR                  "A12-906"
     #define HARDWARE_DESCRIPTION    "Horizontal Version (2.5A Max)"
 #endif
-#ifdef A12_909_A2
-    #define PCB_VR                  "A12_909_A2"
+#ifdef A12_909
+    #define PCB_VR                  "A12-909"
     #define HARDWARE_DESCRIPTION     "Vertical Version (2.2A Max)"
 #endif
 
