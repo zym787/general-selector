@@ -5,7 +5,7 @@ uint8_t valveFixDflt    = 0,
         valveFixDir     = 0,
         valvePortCnt    = 10, 
         IntDflt         = 5, 
-        SpdDflt         = INIT_SPD, 
+        SpdDflt         = SPD_MIN, 
         protocalDflt    = MY_MODBUS, 
         bRdpDflt        = 0;
 
@@ -220,7 +220,7 @@ void ParameterInit(void)
     /* 设置速度范围 */
     tBoundary.spd_min = SPD_MIN * 10 / rdc.rate;
     tBoundary.spd_max = SPD_MAX * 10 / rdc.rate;
-    tBoundary.spd_init = INIT_SPD;  /* 初始化速度默认情况为最小速度 */
+    tBoundary.spd_init = INIT_SPD; /* 初始化速度默认情况为最小速度 */
     /* 速度 */
     I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
     if(tBoundary.spd_min > Valve.spd || tBoundary.spd_max < Valve.spd)
@@ -238,7 +238,7 @@ void ParameterInit(void)
     decel[AXSV] *= (tBoundary.spd_init);
     decel[AXSV] *= (rdc.rate);
     printd("\r\n Init motion!  Slow Down!  (%dRPM) spd%d acc%d dec%d",
-        tBoundary.spd_init, speed[AXSV], accel[AXSV], decel[AXSV]);
+           tBoundary.spd_init, speed[AXSV], accel[AXSV], decel[AXSV]);
     VALVE_ENA = ENABLE;
     Valve.status = VALVE_INITING;
     Valve.ErrBlinkTime = NORMAL_BLINK;
@@ -306,7 +306,7 @@ void errProcRun(void)
         srd[AXSV].run_state = DECEL;
         if (Valve.retryTms < RETRY_TIMES)
         {
-            VALVE_ENA = ON;
+            VALVE_ENA = ENABLE;
             Valve.status = VALVE_INITING;
             Valve.ErrBlinkTime = NORMAL_BLINK;
             Valve.passByOne = 0;

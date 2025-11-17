@@ -186,7 +186,7 @@ void ProcessValve(void)
                             Valve.dir = CCW;
                             if (Valve.portDes == valveFix.fix.portCnt)
                             {
-                                VALVE_ENA = ON;
+                                VALVE_ENA = ENABLE;
                                 Valve.status = VALVE_INITING;
                                 Valve.ErrBlinkTime = NORMAL_BLINK;
                                 Valve.passByOne = 0;
@@ -232,7 +232,7 @@ void ProcessValve(void)
                         printd("\r\n µç»úÄæÊ±Õë =>%d", Valve.portDes);
                         if (Valve.portDes == valveFix.fix.portCnt)
                         {
-                            VALVE_ENA = ON;
+                            VALVE_ENA = ENABLE;
                             Valve.status = VALVE_INITING;
                             Valve.ErrBlinkTime = NORMAL_BLINK;
                             Valve.passByOne = 0;

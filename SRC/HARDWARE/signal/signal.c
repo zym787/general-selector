@@ -123,7 +123,7 @@ void SignalScan(void)
         case 101:
             if(!MotionStatus[AXSV])
             {
-                VALVE_ENA = ON;
+                VALVE_ENA = ENABLE;
                 sig.bRdPulse = true;
                 AxisMoveRel(AXSV, -(int)rdc.stepRound*13/12, accel[AXSV]/2, decel[AXSV]/2, speed[AXSV]/2);
                 memset(sig.pulseGap, 0, SIGNAL_CNT*2);
@@ -217,7 +217,7 @@ void SignalScan(void)
                 printd(", Err:%d, %d, %d", sig.pulseBlock[3], sig.pulseBlock[4], sig.pulseBlock[5]);
                 printd("\r\n G:%d, Err:%d", sig.pulseGap[0], sig.pulseGap[1]);
             }
-            VALVE_ENA = ON;
+            VALVE_ENA = ENABLE;
             Valve.status = VALVE_INITING;
             Valve.ErrBlinkTime = NORMAL_BLINK;
             Valve.passByOne = 0;
