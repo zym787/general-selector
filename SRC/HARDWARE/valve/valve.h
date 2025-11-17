@@ -55,7 +55,7 @@
 #endif
 #define P_ROUND                 200                     //每圈大步数为200
 
-#ifdef A12_909
+#ifdef A12_909  /* A12_909 64细分 64*200=12800 */
 #define STEPS_1_DEGREE_RD01      (35.6)                 //每度需走的步数为12800/360=35.555~
 #define STEPS_01_DEGREE_RD01     (3.6)                  //每0.1度需走的步数为12800/3600=3.555~
 #define STEPS_1_DEGREE_RD04      (142.2)                 //每度需走的步数为12800/360=35.555~
@@ -65,7 +65,7 @@
 #define STEPS_1_DEGREE_RD16      (568.9)                 //每度需走的步数为12800/360=35.555~
 #define STEPS_01_DEGREE_RD16     (56.9)                  //每0.1度需走的步数为12800/3600=3.555~
 #endif
-#ifdef A12_906
+#ifdef A12_906  /* A12_906 16细分 16*200=3200 */
 #define STEPS_1_DEGREE_RD01      (8.9)                 //每度需走的步数为12800/360=35.555~
 #define STEPS_01_DEGREE_RD01     (0.9)                  //每0.1度需走的步数为12800/3600=3.555~
 #define STEPS_1_DEGREE_RD04      (35.6)                 //每度需走的步数为12800/360=35.555~
@@ -103,7 +103,7 @@ enum
 #define AGS_ADDR_MAX        63      /* AGS地址最大 63 */
 #define BURN_ADDR           64      /* 老化地址 64 */
 #define AGS_ADDR_DEF        1       /* 默认地址 1 */
-#define INIT_SPD            15 /* 初始化找位速度 */
+#define INIT_SPD            15      /* 初始化找位速度 */
 #define SPD_MIN             1       /* 最小速度 */
 #define SPD_MAX             100     /* 最大速度 */
 #define SPD_MIN_RDCR20      8       /* 20减速比 最小速度 */

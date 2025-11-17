@@ -5,7 +5,7 @@ void ConfigValve(void)
 {
     RCC->APB2ENR |= (RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC);
 
-    #ifdef A12_909
+#ifdef A12_909
     //LED
     GPIOC->CRH &= (GPIO_Crh_P15);
     GPIOC->CRH |= (GPIO_Mode_Out_PP_50MHz_P15);
@@ -25,9 +25,9 @@ void ConfigValve(void)
     GPIOA->CRH &= (GPIO_Crh_P11);
     GPIOA->CRH |= (GPIO_Mode_IN_PU_PD_P11);
     GPIOA->ODR |= (GPIO_Pin_11);
+#endif
 
-    #endif
-    #ifdef A12_906
+#ifdef A12_906
     //LED
     GPIOC->CRH &= (GPIO_Crh_P14);
     GPIOC->CRH |= (GPIO_Mode_Out_PP_50MHz_P14);
@@ -47,8 +47,8 @@ void ConfigValve(void)
     GPIOA->CRH &= (GPIO_Crh_P11);
     GPIOA->CRH |= (GPIO_Mode_IN_PU_PD_P11);
     GPIOA->ODR |= (GPIO_Pin_11);
+#endif
 
-    #endif
     VALVE_RST = 0;
     delay_ms(10);
     VALVE_RST = 1;
@@ -61,6 +61,9 @@ void ConfigValve(void)
     //-----------------------------------------------------------------------------
     srd[AXSV].SearchOrg = ValveLimitDetect;
     srd[AXSV].bEmgStop = NULL;
+
+    ///电流设置 906/909  0 最大
+    ISET(I_26A);
 }
 
 
@@ -327,7 +330,9 @@ void ValveLimitDetect(void)
         {// 此时处理挡片
             if(sig.bRdPulse==true)
             {
+#ifdef DEBUG
                 printd("\r\nB%d", Valve.OptBlock);
+#endif
                 sig.pulseBlock[sig.num] = Valve.OptBlock;
             }
             else
@@ -449,7 +454,9 @@ void ValveLimitDetect(void)
         {// 此处处理缺口
             if(sig.bRdPulse==true)
             {
+#ifdef DEBUG
                 printd("\r\nG%d", Valve.OptGap);
+#endif
                 sig.pulseGap[sig.num++] = Valve.OptGap;
             }
             else
