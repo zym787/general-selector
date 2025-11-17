@@ -136,25 +136,27 @@ void ProcessValve(void)
 {
     float tpFloat=0;
     if(!(Valve.status&VALVE_INITING))
-	{
+    {
         if(!MotionStatus[AXSV])
         {
             if(Valve.status==VALVE_RUN_END)
-        	{
+            {
                 //BEGIN:
-                if(Valve.portCur!=Valve.portDes && Valve.portDes && Valve.portDes<=valveFix.fix.portCnt)
-        	    {
+                if(Valve.portCur !=Valve.portDes && Valve.portDes && Valve.portDes<=valveFix.fix.portCnt)
+                {
+                    syspara.lastTime = 0;
+                    syspara.bCountLastTime = true;
                     Valve.OptBlock = 0;
                     Valve.OptGap = 0;
-                    if(Valve.dir==0xff)
-                    {// 就近原则妹位
+                    if (Valve.dir == 0xff)
+                    { // 就近原则妹位
                         // 找出最近方向
-                        int Positive=0, Negative=0;     // 正向与反向差值
-                        if(Valve.bHalfSeal)
+                        int Positive = 0, Negative = 0; // 正向与反向差值
+                        if (Valve.bHalfSeal)
                         {
-                            if(Valve.bNewInit==1)
-                            {// 复位后首次找位置，需要把1号或者10号的半通道步数补上
-                                if(Valve.portDes>valveFix.fix.portCnt/2)
+                            if (Valve.bNewInit == 1)
+                            { // 复位后首次找位置，需要把1号或者10号的半通道步数补上
+                                if (Valve.portDes > valveFix.fix.portCnt / 2)
                                 {
                                     Valve.portCur = 1;
                                     printd("\r\n reset to 1");
@@ -166,20 +168,20 @@ void ProcessValve(void)
                                 }
                             }
                         }
-                        if(Valve.portDes>Valve.portCur)
+                        if (Valve.portDes > Valve.portCur)
                         {
-                            Positive = Valve.portDes-Valve.portCur;
-                            Negative = Valve.portCur-Valve.portDes+valveFix.fix.portCnt;
+                            Positive = Valve.portDes - Valve.portCur;
+                            Negative = Valve.portCur - Valve.portDes + valveFix.fix.portCnt;
                         }
                         else
                         {
-                            Positive = Valve.portDes-Valve.portCur+valveFix.fix.portCnt;
-                            Negative = Valve.portCur-Valve.portDes;
+                            Positive = Valve.portDes - Valve.portCur + valveFix.fix.portCnt;
+                            Negative = Valve.portCur - Valve.portDes;
                         }
-                        if(Positive<Negative)
+                        if (Positive < Negative)
                         {
                             Valve.dir = CCW;
-                            if(Valve.portDes==valveFix.fix.portCnt)
+                            if (Valve.portDes == valveFix.fix.portCnt)
                             {
                                 VALVE_ENA = ON;
                                 Valve.status = VALVE_INITING;
@@ -188,15 +190,15 @@ void ProcessValve(void)
                                 Valve.initStep = 0;
                                 Valve.bReInit = 1;
                             }
-                            printd("\r\n short CCW =>%d", Valve.portDes);
+                            printd("\r\n 就近逆时针 =>%d", Valve.portDes);
                         }
-                        else if(Positive>=Negative)
+                        else if (Positive >= Negative)
                         {
                             Valve.dir = CW;
                             printd("\r\n 就近顺时针 =>%d", Valve.portDes);
                         }
                         tpFloat = rdc.stepRound;
-                        (Valve.dir==CCW)?(tpFloat *= -1):(tpFloat);
+                        (Valve.dir == CCW) ? (tpFloat *= -1) : (tpFloat);
                         // 清空计数，避免数据暂留
 //                        Valve.OptBlock = 0;
 //                        Valve.OptGap = 0;
@@ -204,12 +206,12 @@ void ProcessValve(void)
                         Valve.dirLast = Valve.direct;
                     }
                     else
-                    {// 指定方向寻位
-                        if(Valve.bHalfSeal)
+                    { // 指定方向寻位
+                        if (Valve.bHalfSeal)
                         {
-                            if(Valve.bNewInit==1)
-                            {// 复位后首次找位置，需要把1号或者10号的半通道步数补上
-                                if(Valve.dir==CCW)
+                            if (Valve.bNewInit == 1)
+                            { // 复位后首次找位置，需要把1号或者10号的半通道步数补上
+                                if (Valve.dir == CCW)
                                 {
                                     Valve.portCur = valveFix.fix.portCnt;
                                     printd("\r\n reset to cnt");
@@ -221,10 +223,11 @@ void ProcessValve(void)
                                 }
                             }
                         }
-                        if(Valve.dir==CCW)
+
+                        if (Valve.dir == CCW)
                         {
                             printd("\r\n 电机逆时针 =>%d", Valve.portDes);
-                            if(Valve.portDes==valveFix.fix.portCnt)
+                            if (Valve.portDes == valveFix.fix.portCnt)
                             {
                                 VALVE_ENA = ON;
                                 Valve.status = VALVE_INITING;
@@ -239,7 +242,7 @@ void ProcessValve(void)
                             printd("\r\n 电机顺时针 =>%d", Valve.portDes);
                         }
                         tpFloat = rdc.stepRound;
-                        (Valve.dir==CCW)?(tpFloat *= -1):(tpFloat);
+                        (Valve.dir == CCW) ? (tpFloat *= -1) : (tpFloat);
                         // 清空计数，避免数据暂留
 //                        Valve.OptBlock = 0;
 //                        Valve.OptGap = 0;
@@ -251,8 +254,8 @@ void ProcessValve(void)
                     Valve.statusLast = VALVE_RUNNING;
                     syspara.protectTimeOut = 0;
 #ifdef DEBUG
-                    printd("\r\n %s initstep:%d (%d) ststus:%02x", 
-                        __FUNCTION__, Valve.initStep, syspara.protectTimeOut, Valve.status);
+                    printd("\r\n %s initstep:%d (%d) ststus:%02x",
+                            __FUNCTION__, Valve.initStep, syspara.protectTimeOut, Valve.status);
 #endif
                 }
                 else
@@ -260,7 +263,7 @@ void ProcessValve(void)
                     getPrePort();
                 }
         	}
-            else
+            else    // 初始化/运行中/报错
             {
                 if(Valve.statusLast==VALVE_RUNNING)
                 {
@@ -268,17 +271,17 @@ void ProcessValve(void)
                     {
                         Valve.bGetPort = 0;
                         Valve.portCur = Valve.portDes;
-                        printd("\r\n get port %d", Valve.portCur);
-                        printd("\r\n get port %d", Valve.portCur);
+                        printd("\r\n 获取位置 %d", Valve.portCur);
                         Valve.portDes = 0;
                         Valve.retryTms = 0;
                         Valve.statusLast = 0;
                         Valve.status = VALVE_RUN_END;
+                        syspara.bCountLastTime = false;
                         getPrePort();
                     }
                     else
                     {
-						if(Valve.status!=VALVE_ERR)
+                        if(Valve.status!=VALVE_ERR)
                         {
                             Valve.portDes = 0;
                             Valve.ErrBlinkTime = RETRY_TIME_OUT;
@@ -322,9 +325,6 @@ void ValveLimitDetect(void)
         ++Valve.OptGap;
         if(Valve.OptBlock)
         {// 此时处理挡片
-#ifdef PULSE_CNT_EN
-            
-#endif
             if(sig.bRdPulse==true)
             {
                 printd("\r\nB%d", Valve.OptBlock);
@@ -447,9 +447,6 @@ void ValveLimitDetect(void)
         ++Valve.OptBlock;
         if(Valve.OptGap)
         {// 此处处理缺口
-#ifdef PULSE_CNT_EN
-            
-#endif
             if(sig.bRdPulse==true)
             {
                 printd("\r\nG%d", Valve.OptGap);
@@ -484,23 +481,23 @@ void ValveLimitDetect(void)
                     srd[0].accel_count = -DEG_DECCEL*rdc.stepP01dgr;
                     position[0]= -DEG_DECCEL*rdc.stepP01dgr;
                     srd[0].run_state = DECEL;
-                    if(Valve.bHalfSeal)
+                    if (Valve.bHalfSeal)
                     {
-                        if(Valve.status&VALVE_INITING && Valve.bNewInit==0xff)
+                        if (Valve.status & VALVE_INITING && Valve.bNewInit == 0xff)
                         {
                             Valve.portCur = 0xff;
                         }
-                        else if(Valve.status&VALVE_INITING || Valve.portDes==valveFix.fix.portCnt)
+                        else if (Valve.status & VALVE_INITING || Valve.portDes == valveFix.fix.portCnt)
                         {
-                            Valve.status &= ~(VALVE_INITING|VALVE_RUNNING);
+                            Valve.status &= ~(VALVE_INITING | VALVE_RUNNING);
                             Valve.portCur = valveFix.fix.portCnt;
                         }
                     }
                     else
                     {
-                        if(Valve.status&VALVE_INITING && Valve.bNewInit==0xff)
+                        if (Valve.status & VALVE_INITING && Valve.bNewInit == 0xff)
                             Valve.bNewInit = 1;
-                        Valve.status &= ~(VALVE_INITING|VALVE_RUNNING);
+                        Valve.status &= ~(VALVE_INITING | VALVE_RUNNING);
                         Valve.portCur = valveFix.fix.portCnt;
                     }
                     Valve.portDes = 0;

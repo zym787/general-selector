@@ -339,14 +339,17 @@ void everySecDo(void)
 #ifndef END_HOLE
     if (!Valve.bHalfSeal)
     {
+        // 非半通道走位
         if (!(Valve.status & VALVE_INITING) && Valve.bNewInit == 1)
         {
             Valve.dir = CCW;
             Valve.portDes = 1; /* C 开机1号通 */
             Valve.bNewInit = 0;
+            printd("\r\n 到1号位");
         }
     }
 #endif
+
     // 每秒检测一次
     if (timerPara.sec > SEC)
     {

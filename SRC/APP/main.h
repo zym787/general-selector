@@ -9,8 +9,8 @@
 
 #define DESCRIPTION         "Selector Valve"
 #define CONTROL             "232/485 AGS"
-#define SOFTWARE_VERSION    "r20"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0020     /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r27"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0027     /* 软件修改版次 */
 #ifndef END_HOLE    /* v2.0.0C 开机1号通 */
 #define HOLE_INFO           ">First< Hole"
 #define SOFT_NAME           "v2.0.0C"
@@ -73,7 +73,8 @@
 //  v2.0.0CD-r17    2025.10.13  修复老化时无法切换方向问题,现为就近切换通道老化,通道先递增后递减周而复始
 //                              增加单次开机老化计数,断电不保存
 //  v2.0.0CD-r18    2025.10.13  支援出错重走
-//  v2.0.0CD-r20    2025.10.14  支援扫描时打印脉冲宽度
+//  v2.0.0CD-r19/20    2025.10.14  debug输出,支援扫描时打印脉冲宽度,脉冲容忍度改为20%
+//  v2.0.0CD-r27    2025.11.17  撤销支援错位后重走，支援切换时间记录
 
 //------------------------------------------------------------------------------------------------------------
 #define ADDR_BOARD_ID           0
@@ -147,6 +148,8 @@ typedef struct
     uint32_t protectTimeOut;
 //    uint32_t totalCnt;        /* 切换次数 */
     uint32_t burnCnt;       // 烧机次数
+    bool    bCountLastTime;
+    uint32_t lastTime;      // 切换时间
 }_SYS_T;
 PEXT _SYS_T syspara;
 
