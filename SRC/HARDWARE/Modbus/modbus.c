@@ -268,6 +268,15 @@ void MB_ReadHoldingRegisters(void)
 //            ModbusPara.tBuf[6] = ((uint8*)&syspara.totalCnt)[0];
 //            byteCount = 7;
 //        }
+        else if (0x0C == op_addr)   /* 读停留时间 */
+        {
+         I2CPageRead_Nbytes(ADDR_PAUSE_TIME, LEN_PAUSE_TIME, (uint8_t*)&syspara.pauseTime);
+         ModbusPara.tBuf[3] = ((uint8_t*)&syspara.pauseTime)[3];
+         ModbusPara.tBuf[4] = ((uint8_t*)&syspara.pauseTime)[2];
+         ModbusPara.tBuf[5] = ((uint8_t*)&syspara.pauseTime)[1];
+         ModbusPara.tBuf[6] = ((uint8_t*)&syspara.pauseTime)[0];
+         byteCount = 7;
+        }
         else if(0x63 == op_addr)        /* 读通道数 */
         {
             I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
@@ -374,6 +383,7 @@ void MB_PresetSingleHoldingRegister(void)
                 Valve.bNewInit = 0xff;
                 Valve.passByOne = 0;
                 Valve.bReInit = 1;
+                Valve.goFirstFlag = 0;
                 Valve.ErrBlinkTime = RETRY_TIME_OUT;
                 I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
                 (CHANNEL_MIN > valveFix.fix.portCnt ||
@@ -434,6 +444,22 @@ void MB_PresetSingleHoldingRegister(void)
             else
             { 
                 ModbusPara.sERR = ERR_MB_DATA;  /* 操作数据无效 */
+            }
+        }
+        else if (0x0C == op_addr)   /* 写停留时间 */
+        {
+            ((uint8_t *)&syspara.pauseTime)[0] = ModbusPara.rBuf[6];
+            ((uint8_t *)&syspara.pauseTime)[1] = ModbusPara.rBuf[5];
+            ((uint8_t *)&syspara.pauseTime)[2] = ModbusPara.rBuf[4];
+            ((uint8_t *)&syspara.pauseTime)[3] = ModbusPara.rBuf[3];
+            if (9 == ModbusPara.rCnt && syspara.pauseTime <= ADZ_PT_MAX)
+            {
+                I2CPageWrite_Nbytes(ADDR_PAUSE_TIME, LEN_PAUSE_TIME, (uint8_t*)&syspara.pauseTime);
+            }
+            else
+            {
+                syspara.pauseTime = 0;
+                ModbusPara.sERR = ERR_MB_DATA;  /*  */
             }
         }
 //        else if(0xFF == op_addr)

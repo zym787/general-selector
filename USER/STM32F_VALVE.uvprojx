@@ -335,7 +335,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_MD</Define>
               <Undefine></Undefine>
-              <IncludePath>..\SRC\APP;..\SRC\SYSTEM\timer;..\SRC\SYSTEM\delay;..\SRC\SYSTEM\sys;..\SRC\SYSTEM\usart;..\SRC\CoreSupport;..\SRC\HARDWARE\usinterface;..\SRC\HARDWARE\stmFlash;..\SRC\HARDWARE\motor;..\SRC\HARDWARE\valve;..\SRC\HARDWARE\EEPROM;..\SRC\HARDWARE\Modbus;..\SRC\HARDWARE\protExt;..\SRC\HARDWARE\signal</IncludePath>
+              <IncludePath>..\SRC\APP;..\SRC\SYSTEM\timer;..\SRC\SYSTEM\delay;..\SRC\SYSTEM\sys;..\SRC\SYSTEM\usart;..\SRC\CoreSupport;..\SRC\HARDWARE\usinterface;..\SRC\HARDWARE\stmFlash;..\SRC\HARDWARE\motor;..\SRC\HARDWARE\valve;..\SRC\HARDWARE\EEPROM;..\SRC\HARDWARE\Modbus;..\SRC\HARDWARE\protExt;..\SRC\HARDWARE\signal;..\SRC\HARDWARE\io</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -511,6 +511,11 @@
               <FileName>signal.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\SRC\HARDWARE\signal\signal.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_io.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SRC\HARDWARE\io\bsp_io.c</FilePath>
             </File>
           </Files>
         </Group>

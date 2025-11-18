@@ -8,7 +8,9 @@
 #endif
 
 
-#define SEC (1000)
+#define SEC     (1000)
+#define DCSEC   (100)
+
 typedef struct
 {
     uint16 timeDbg;
@@ -17,6 +19,7 @@ typedef struct
     uint32 timeWaitMill;
     uint16_t timeOut;   /* 错误指示灯 */
     uint16_t sec;
+    uint32_t timePause; /* 停留时间计时器 */
 }_TIMER_T;
 
 PEXT _TIMER_T timerPara;

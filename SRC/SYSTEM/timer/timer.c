@@ -28,11 +28,18 @@ void TIM2_IRQHandler(void)
         ++timerPara.timeWaitMill;
         ++timerPara.timeOut;
         ++timerPara.sec;
+        ++timerPara.timeMilli;
         if(VALVE_INITING == Valve.status || VALVE_RUNNING == Valve.status)
             ++syspara.protectTimeOut;
+        ///切换时间计数器
         if (true == syspara.bCountLastTime)
         {
-            syspara.lastTime++;
+            ++syspara.lastTime;
+        }
+        ///停留时间计数器
+        if (true == syspara.ctrlPause)
+        {
+            ++timerPara.timePause;
         }
         if(protext.stepCnt)
         {

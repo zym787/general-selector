@@ -695,11 +695,12 @@ void TermReset(char rw)
         Valve.bNewInit = 0xff;
         Valve.passByOne = 0;
         Valve.bReInit = 1;
+        Valve.goFirstFlag = 0;
         I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
         (valveFix.fix.portCnt&&valveFix.fix.portCnt>32)?(valveFix.fix.portCnt=10):(valveFix.fix.portCnt);
         I2CPageRead_Nbytes(ADDR_VALVE_FIX, LEN_VALVE_FIX, &Valve.fixOrg);
         I2CPageRead_Nbytes(ADDR_DIR_FIX, LEN_DIR_FIX, &valveFix.fix.dirGap);
-        printd("\r\n 复位");
+        printd("\r\n 复位... 请10秒后操作设备");
     }
 }
 
@@ -809,6 +810,52 @@ void TermHalf(char rw)
 }
 
 /*
+ * 停留时间
+ */
+void TermPauseTime(char rw)
+{
+    int getInt = 0;
+    if (rw == READ_ACT)
+    {
+        I2CPageRead_Nbytes(ADDR_PAUSE_TIME, LEN_PAUSE_TIME, (uint8_t*)&syspara.pauseTime);
+        printd("\r\n 停留时间 %d毫秒", syspara.pauseTime);
+    }
+    else
+    {
+        unsigned char ret = FetchInt(6, 0, str.rcvStr, &getInt);
+        if (ret)
+        {
+            printd("\r Err code %d", ret);
+            return;
+        }
+        if (0 <= getInt && ADZ_PT_MAX >= getInt)
+        {
+            syspara.pauseTime = getInt;
+            printd("\r\n 写入停留时间 %d毫秒", syspara.pauseTime);
+        }
+        else
+        {
+            syspara.pauseTime = 0;
+            printd("\r\n %d 停留时间超限 写入默认值0 %d (0-%d)", getInt, syspara.pauseTime, ADZ_PT_MAX);
+        }
+        I2CPageWrite_Nbytes(ADDR_PAUSE_TIME, LEN_PAUSE_TIME, (uint8_t*)&syspara.pauseTime);
+    }
+}
+
+/*
+ * IO 
+ */
+void TermIO(char rw)
+{
+    if (rw == READ_ACT)
+    {
+        syspara.ioCtrl = !syspara.ioCtrl;
+        I2CPageWrite_Nbytes(ADDR_IO_CTRL, LEN_IO_CTRL, &syspara.ioCtrl);
+        printd("\r IO控制:%d %s", syspara.ioCtrl, (0 == syspara.ioCtrl ? "关闭" : "开启"));
+    }
+}
+
+/*
  * 点检模式：打印出所有关键参数
  */
 void TermInspection(char rw)
@@ -862,6 +909,8 @@ _TAB_T TermTab[]=
     {22,    (*TermRDCR)},
     {23,    (*TermHalf)},
     {24,    (*TermInspection)},
+    {25,    (*TermPauseTime)},
+    {26,    (*TermIO)},
 };
 
 /*
@@ -987,6 +1036,16 @@ void ChRUN(char *cmdName)
     {
         (!strcasecmp(cmdName, "INSP"))?(bRw = READ_ACT):(bRw = WRITE_ACT);
         FuncIndex = 24;
+    }
+    else if(!strcasecmp(cmdName, "PAUSET") || !strncasecmp(cmdName, "PAUSET", 5))
+    {
+        (!strcasecmp(cmdName, "PAUSET"))?(bRw = READ_ACT):(bRw = WRITE_ACT);
+        FuncIndex = 25;
+    }
+    else if(!strcasecmp(cmdName, "IOE") || !strncasecmp(cmdName, "IOE", 3))
+    {
+        (!strcasecmp(cmdName, "IOE"))?(bRw = READ_ACT):(bRw = WRITE_ACT);
+        FuncIndex = 26;
     }
     else
     {

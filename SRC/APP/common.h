@@ -15,25 +15,88 @@ typedef enum
     true
 }bool;
 
-/* 是否开机末端孔 默认不开启 ! */
-//#define END_HOLE    /* 开机末端孔 */
+//#define FIRST_HOLE_C        /* 开机1号孔 C版本 */
+//#define END_HOLE_D          /* 开机末端孔 D版本 */
+#define FIRST_HOLE_IO_E     /* 开机1号孔带IO控制 E版本 */
+//#define FIRST_HOLE_MUT_IO_F /* 开机1号孔多IO控制 F版本 */
 
-/* 是否限制临时速度 默认不开启 仅r5特殊定制使用! */
+/* 是否开机末端孔 默认不开启 ! */
+//#define END_HOLE    /* 开机末端孔 D版本 */
+
+/* 是否限制临时速度 默认不开启 现已成为事实标准 */
 #define LIMIT_TEMP_SPD
 
+///C版本 开机1号孔
+#ifdef FIRST_HOLE_C
+#define FIRST_HOLE  /* 开机1号孔 */
+#undef END_HOLE
+#undef IOCTRL       /* 禁用IO控制 */
+#undef MUT_IOCTRL   /* 禁用多IO控制 */
+#undef END_HOLE_D
+#undef FIRST_HOLE_IO_E
+#undef FIRST_HOLE_MUT_IO_F
+#define HOLE_INFO ">First< Hole"
+#define SOFT_NAME "v2.0.0C"
+#define SOFT_VER_NUM (uint32_t)0x200C0000
+#endif
+
+///D版本 开机末端孔
+#ifdef END_HOLE_D
+#define END_HOLE  /* 开机末端孔 */
+#undef FIRST_HOLE
+#undef IOCTRL     /* 禁用IO控制 */
+#undef MUT_IOCTRL /* 禁用多IO控制 */
+#undef FIRST_HOLE_C
+#undef FIRST_HOLE_IO_E
+#undef FIRST_HOLE_MUT_IO_F
+#define HOLE_INFO ">End< Hole"
+#define SOFT_NAME "v2.0.0D"
+#define SOFT_VER_NUM (uint32_t)0x200D0000
+#endif
+
+///E版本 开机1号孔带IO控制
+#ifdef FIRST_HOLE_IO_E
+#define FIRST_HOLE  /* 开机1号孔 */
+#define IOCTRL      /* 启用IO控制 */
+#undef END_HOLE
+#undef MUT_IOCTRL   /* 禁用多IO控制 */
+#undef FIRST_HOLE_C
+#undef END_HOLE_D
+#undef FIRST_HOLE_MUT_IO_F
+#define HOLE_INFO ">First< Hole with IO"
+#define SOFT_NAME "v2.0.0E"
+#define SOFT_VER_NUM (uint32_t)0x200E0000
+#endif
+
+///F版本 开机1号孔带多IO控制
+#ifdef FIRST_HOLE_MUT_IO_F
+#define FIRST_HOLE  /* 开机1号孔 */
+#define MUT_IOCTRL  /* 启用多IO控制 */
+#undef END_HOLE
+#undef IOCTRL       /* 禁用IO控制 */
+#undef FIRST_HOLE_C
+#undef END_HOLE_D
+#undef FIRST_HOLE_IO_E
+#define HOLE_INFO ">First< Hole with Mut IO"
+#define SOFT_NAME "v2.0.0F"
+#define SOFT_VER_NUM (uint32_t)0x200F0000
+#endif
+
 /* 发行模式 屏蔽调试输出 */
-#define RELEASE
+//#define RELEASE
 
 #ifdef RELEASE
 #undef DEBUG
 #undef DEBUG_MODBUS
+#undef PULSE_CNT_EN     /*  */
 #else
 #define DEBUG           /* 调试输出 */
 #define DEBUG_MODBUS    /* AGS调试输出 */
+#define PULSE_CNT_EN
 #endif
 
-// PCB定义
-// #define A12_906    /* 不用 */
+///PCB定义
+//#define A12_906    /* 不用 */
 #define A12_909  /* 901-C1套用 */
 
 #ifdef A12_906
@@ -71,6 +134,7 @@ typedef enum
 #include "main.h"
 #include "signal.h"
 #include "valve.h"
+#include "bsp_io.h"
 
 //正常的开关定义
 #define ON      1
@@ -78,6 +142,13 @@ typedef enum
 //反相的开关定义
 #define ON_OP   0
 #define OFF_OP  1
+
+///调试printd  屏蔽DEBUG时无效
+#ifdef DEBUG
+#define dbg_printf(fmt, ...) printf(fmt, ##__VA_ARGS__)
+#else
+#define dbg_printf(...)
+#endif
 
 
 //-------------------------rcc----------------------------------

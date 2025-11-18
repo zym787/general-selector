@@ -159,6 +159,7 @@ typedef struct
     unsigned char SnCode[LEN_SN];   // 序列码
     unsigned char serialNum;        // 连续目标孔位，不知道哪个傻逼想的，确定一个孔位要连续分多次走位
     unsigned char serialPort[PREPORTCNT];    // 连续目标孔位，不知道哪个傻逼想的，确定一个孔位要连续分多次走位
+    uint8_t goFirstFlag;    /* 执行开机1号孔步骤 */
 }_VALVE_T;
 PEXT _VALVE_T Valve;
 

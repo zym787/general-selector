@@ -205,6 +205,7 @@ void ProcessValve(void)
                         // 清空计数，避免数据暂留
 //                        Valve.OptBlock = 0;
 //                        Valve.OptGap = 0;
+                        VALVE_ENA = ENABLE;
                         AxisMoveRel(AXSV, (int)tpFloat, accel[AXSV] * 2, decel[AXSV] * 2, speed[AXSV]);
                         Valve.dirLast = Valve.direct;
                     }
@@ -249,6 +250,7 @@ void ProcessValve(void)
                     // 清空计数，避免数据暂留
 //                        Valve.OptBlock = 0;
 //                        Valve.OptGap = 0;
+                    VALVE_ENA = ENABLE;
                     AxisMoveRel(AXSV, (int)tpFloat, accel[AXSV]*2, decel[AXSV]*2, speed[AXSV]);
                     Valve.dirLast = Valve.direct;
                 }
@@ -256,10 +258,8 @@ void ProcessValve(void)
                 Valve.status |= VALVE_RUNNING;      /* 置位运行标志 */
                 Valve.statusLast = VALVE_RUNNING;
                 syspara.protectTimeOut = 0;
-#ifdef DEBUG
-                printd("\r\n %s initstep:%d (%d) ststus:%02x",
-                        __FUNCTION__, Valve.initStep, syspara.protectTimeOut, Valve.status);
-#endif
+                dbg_printf("\r\n %s initstep:%d (%d) ststus:%02x",
+                           __FUNCTION__, Valve.initStep, syspara.protectTimeOut, Valve.status);
 
                 }
                 else
@@ -281,8 +281,19 @@ void ProcessValve(void)
                         Valve.status = VALVE_RUN_END;
                         syspara.bCountLastTime = false;
                         getPrePort();
-                        // VALVE_ENA = DISABLE;
-                        printd("\r\n 获取位置: %d   切换时间: %dms", Valve.portCur, syspara.lastTime);
+                        VALVE_ENA = DISABLE;
+                        ///置位到1号位标志
+                        if (1 == Valve.goFirstFlag)
+                        {
+                            Valve.goFirstFlag = 2;
+                        }
+                        if (syspara.recordTimeRamp)
+                        {
+                            syspara.timeRamp[syspara.recordTimeRamp - 1] = syspara.lastTime;
+                        }
+                        printd("\r\n 获取位置: %d   切换时间: %dms %s", 
+                            Valve.portCur, syspara.lastTime, (syspara.recordTimeRamp) == 0 ? "" : "(记录)");
+                        syspara.recordTimeRamp = OFF;
                     }
                     else
                     {
@@ -309,6 +320,7 @@ void ProcessValve(void)
             tpFloat /= 2;
             if(!MotionStatus[AXSV])
             {
+                VALVE_ENA = ENABLE;
                 AxisMoveRel(AXSV, -(int)tpFloat, accel[AXSV], decel[AXSV], speed[AXSV]);
                 Valve.status &= ~(VALVE_INITING|VALVE_RUNNING);
                 Valve.bNewInit = 1;
@@ -332,8 +344,8 @@ void ValveLimitDetect(void)
         {// 此时处理挡片
             if(sig.bRdPulse==true)
             {
-#ifdef DEBUG
-                printd("\r\nB%d", Valve.OptBlock);
+#ifdef PULSE_CNT_EN
+                printd("\r\n B%d", Valve.OptBlock);
 #endif
                 sig.pulseBlock[sig.num] = Valve.OptBlock;
             }
@@ -456,8 +468,8 @@ void ValveLimitDetect(void)
         {// 此处处理缺口
             if(sig.bRdPulse==true)
             {
-#ifdef DEBUG
-                printd("\r\nG%d", Valve.OptGap);
+#ifdef PULSE_CNT_EN
+                printd("\r\n G%d", Valve.OptGap);
 #endif
                 sig.pulseGap[sig.num++] = Valve.OptGap;
             }
@@ -516,7 +528,7 @@ void ValveLimitDetect(void)
                     Valve.status &= ~VALVE_RUNNING;
                     Valve.status |= VALVE_RUN_END;
                     // 清时间，保证不会连续复位转动
-                    timerPara.timeMilli = 0;
+                    //timerPara.timeMilli = 0;
                     getPrePort();
                     speed[AXSV] = 100;
                     accel[AXSV] = 100;
@@ -527,11 +539,8 @@ void ValveLimitDetect(void)
                     accel[AXSV] *= (rdc.rate);
                     decel[AXSV] *= (Valve.spd);
                     decel[AXSV] *= (rdc.rate);
-#ifdef DEBUG
-                    printd("\r\n Restore motion speed  (%d) spd%d acc%d dec%d", 
-                        Valve.spd, speed[AXSV], accel[AXSV], decel[AXSV]);
-#endif
-//                    printd("\r\n inited");
+                    dbg_printf("\r\n Restore motion speed  (%d) spd%d acc%d dec%d",
+                               Valve.spd, speed[AXSV], accel[AXSV], decel[AXSV]);
                 }
             }
         }

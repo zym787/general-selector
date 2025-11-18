@@ -9,17 +9,8 @@
 
 #define DESCRIPTION         "Selector Valve"
 #define CONTROL             "232/485 AGS"
-#define SOFTWARE_VERSION    "r28"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0028     /* 软件修改版次 */
-#ifndef END_HOLE    /* v2.0.0C 开机1号通 */
-#define HOLE_INFO           ">First< Hole"
-#define SOFT_NAME           "v2.0.0C"
-#define SOFT_VER_NUM        (uint32_t)0x200C0000    /* C 开机1号通 */
-#else               /* v2.0.0D 开机末位通 */
-#define HOLE_INFO           ">Last< Hole"
-#define SOFT_NAME           "v2.0.0D"
-#define SOFT_VER_NUM        (uint32_t)0x200D0000    /* D 开机末位通 */
-#endif
+#define SOFTWARE_VERSION    "r29"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0029     /* 软件修改版次 */
 
 #define BOARD_0     0x88
 #define BOARD_1     0x66
@@ -34,17 +25,17 @@
 //  v2.0.0r3        2024.10.12  限制繁忙时命令响应 (TZY)
 //  v2.0.0r4        2025.01.23  修复最短路径切换指令返回值异常
 //  v2.0.0-r5       2025.07.23  修复部分默认参数写入乱码
-//                              分离软件版本号中的修改版次和版本名称，修改版本号，支持03读版本
+//                              分离软件版本号中的修改版次和版本名称,修改版本号,支持03读版本
 //                              初始化降速增扭
-//                              增加超时保护，LED报错快闪
+//                              增加超时保护,LED报错快闪
 //                              10写临时速度超过30部分会降低一半
 //                              默认速度强制设置为20
-//                              修复10写临时速度会篡改系统速度，方向仍会被篡改
-//  v2.0.0-r6       2025.07.24  恢复10写临时速度，速度不做限制
+//                              修复10写临时速度会篡改系统速度,方向仍会被篡改
+//  v2.0.0-r6       2025.07.24  恢复10写临时速度,速度不做限制
 //                              添加LIMIT_TEMP_SPD宏开关限制临时速度
-//  v2.0.0-r7       2025.07.25  查版本可以只管看到版本号，不需要进行进制转换 20 00 00 07
-//                              添加09读速度，添加半通道默认关闭、波特率默认9600、CW/CCW默认0
-//                              优化modbus协议栈，规范术语，新增0E操作地址错误
+//  v2.0.0-r7       2025.07.25  查版本可以只管看到版本号,不需要进行进制转换 20 00 00 07
+//                              添加09读速度,添加半通道默认关闭、波特率默认9600、CW/CCW默认0
+//                              优化modbus协议栈,规范术语,新增0E操作地址错误
 //                              添加07读写波特率
 //  v2.0.0-r8       2025.08.18  波特率支持38400
 //                  2025.08.19  AGS添加99读通道数,修复10写临时速度无法使用方向
@@ -77,11 +68,17 @@
 //  v2.0.0CD-r21    2025.10.14  修复支援错位后重走
 //  v2.0.0CD-r22    2025.10.17  脉冲容忍度改为15%
 //  v2.0.0CD-r23    2025.10.17  脉冲容忍度改为10%
-//  v2.0.0CD-r24    2025.11.11  修复速度范围，正常速度限制在15-70（减速比10）,其余减速比的速度成倍数关系
-//                              新增切换时间输出，在每次走位完成会输出当前位置和切换时间
-//  v2.0.0CD-r25    2025.11.14  修复阀错位问题，为无法使用eide编译导致
-//  v2.0.0CD-r27    2025.11.17  撤销支援错位后重走，支援切换时间记录
-//  v2.0.0CD-r28    2025.11.17  合并r22-r25
+//  v2.0.0CD-r24    2025.11.11  修复速度范围,正常速度限制在15-70（减速比10）,其余减速比的速度成倍数关系
+//                              新增切换时间输出,在每次走位完成会输出当前位置和切换时间
+//  v2.0.0CD-r25    2025.11.14  修复阀错位问题,为无法使用eide编译导致
+//  v2.0.0CD-r26    2025.11.14  支持IO,支持中间状态停留一定时间,下载口和AGS可设停留时间
+//  v2.0.0CD-r27    2025.11.17  撤销支援错位后重走,支援切换时间记录
+//  v2.0.0CD-r28    2025.11.17  合并r22-r26
+//  v2.0.0CD-r29    2025.11.18  分裂C D E F四个版本,C开机1号孔,D开机末端孔,E开机1号孔带IO控制,F开机1号孔多IO控制
+//                              汉化部分语句,使用dbg_printf替换调试输出,降低待机电流
+//                              支援IO,明确IO使用AGS1.3.1B标准,BI悬空/1 AI悬空/0 BO输出0,下载口IOE使能IO
+//                              支援中间状态停留一定时间,下载口和AGS可设停留时间
+//                              修复复位标志位,脉冲容忍度还原为10%
 
 
 //----EEPROM存储地址分配---//
@@ -133,6 +130,13 @@
 
 #define ADDR_HALF_SEAL			(ADDR_RDC_RATE+LEN_RDC_RATE)
 #define LEN_HALF_SEAL			1
+
+#define ADDR_IO_CTRL            (ADDR_HALF_SEAL+LEN_HALF_SEAL)
+#define LEN_IO_CTRL             1
+
+#define ADDR_PAUSE_TIME         (ADDR_IO_CTRL+LEN_IO_CTRL)
+#define LEN_PAUSE_TIME          4
+
 //------------------------------------------------------------------------------------------------------------
 
 #define NORMAL_BLINK            1500       //正常运行的闪烁间隔
@@ -158,7 +162,12 @@ typedef struct
 //    uint32_t totalCnt;        /* 切换次数 */
     uint32_t burnCnt;       // 烧机次数
     bool    bCountLastTime;
-    uint32_t lastTime;      // 切换时间
+    uint32_t lastTime;      /* 切换时间 */
+    uint32_t timeRamp[3];   /* 切换时间序列 */
+    uint8_t recordTimeRamp; /* 记录切换时间 */
+    bool ioCtrl;            /* IO控制位 */
+    uint32_t pauseTime;     /* 停留时间 */
+    bool ctrlPause;         /* 停留时间控制 */
 }_SYS_T;
 PEXT _SYS_T syspara;
 
