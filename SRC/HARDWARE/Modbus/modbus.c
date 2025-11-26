@@ -449,7 +449,7 @@ void MB_PresetSingleHoldingRegister(void)
             }
             else if(0 == ModbusPara.rBuf[3])
             {
-                Valve.spd = tBoundary.spd_min;
+                Valve.spd = tBoundary.spd_init;
                 I2CPageWrite_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
             }
             else

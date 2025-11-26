@@ -9,8 +9,8 @@
 
 #define DESCRIPTION         "Selector Valve"
 #define CONTROL             "232/485 AGS"
-#define SOFTWARE_VERSION    "r30"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0030     /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r31"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0031     /* 软件修改版次 */
 
 #define BOARD_0     0x88
 #define BOARD_1     0x66
@@ -82,6 +82,8 @@
 //  v2.0.0CD-r30    2025.11.26  CW/CCW补偿值默认调整为20,汉化部分指令,点检模式支持中文,支持中文显示所有指令,优化中文显示
 //                              速度范围改为1和4减速比1-255，10减速比1-100，16 20减速比1-70
 //                              删除读取脉冲标志
+//  v2.0.0CD-r31    2025.11.26  修复AGS速度写0时异常，为15RPM
+
 
 //----EEPROM存储地址分配---//
 //------------------------------------------------------------------------------------------------------------
