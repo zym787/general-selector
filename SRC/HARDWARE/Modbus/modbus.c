@@ -277,6 +277,17 @@ void MB_ReadHoldingRegisters(void)
          ModbusPara.tBuf[6] = ((uint8_t*)&syspara.pauseTime)[0];
          byteCount = 7;
         }
+        #if 0
+        else if (0x0D == op_addr) /* 读切换时间 */
+        {
+            I2CPageRead_Nbytes(ADDR_PAUSE_TIME, LEN_PAUSE_TIME, (uint8_t *)&syspara.pauseTime);
+            ModbusPara.tBuf[3] = ((uint8_t *)&syspara.pauseTime)[3];
+            ModbusPara.tBuf[4] = ((uint8_t *)&syspara.pauseTime)[2];
+            ModbusPara.tBuf[5] = ((uint8_t *)&syspara.pauseTime)[1];
+            ModbusPara.tBuf[6] = ((uint8_t *)&syspara.pauseTime)[0];
+            byteCount = 7;
+        }
+        #endif
         else if(0x63 == op_addr)        /* 读通道数 */
         {
             I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);

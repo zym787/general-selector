@@ -110,7 +110,7 @@ void InitValve(void)
         {
             if(RETRY_TIMES > Valve.retryTms)
             {
-                printd("\r\n start round");
+                printd("\r\n 开始转动");
                 VALVE_ENA = ENABLE;
                 // ++Valve.retryTms;
                 position[AXSV] = HomePos[AXSV];     // 清除当前的计步
@@ -539,7 +539,7 @@ void ValveLimitDetect(void)
                     accel[AXSV] *= (rdc.rate);
                     decel[AXSV] *= (Valve.spd);
                     decel[AXSV] *= (rdc.rate);
-                    dbg_printf("\r\n Restore motion speed  (%d) spd%d acc%d dec%d",
+                    dbg_printf("\r\n 恢复设定速度  (%dRPM) spd%d acc%d dec%d",
                                Valve.spd, speed[AXSV], accel[AXSV], decel[AXSV]);
                 }
             }

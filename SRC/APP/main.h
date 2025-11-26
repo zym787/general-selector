@@ -9,8 +9,8 @@
 
 #define DESCRIPTION         "Selector Valve"
 #define CONTROL             "232/485 AGS"
-#define SOFTWARE_VERSION    "r29"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0029     /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r30"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0030     /* 软件修改版次 */
 
 #define BOARD_0     0x88
 #define BOARD_1     0x66
@@ -79,7 +79,9 @@
 //                              支援IO,明确IO使用AGS1.3.1B标准,BI悬空/1 AI悬空/0 BO输出0,下载口IOE使能IO
 //                              支援中间状态停留一定时间,下载口和AGS可设停留时间
 //                              修复复位标志位,脉冲容忍度还原为10%
-
+//  v2.0.0CD-r30    2025.11.26  CW/CCW补偿值默认调整为20,汉化部分指令,点检模式支持中文,支持中文显示所有指令,优化中文显示
+//                              速度范围改为1和4减速比1-255，10减速比1-100，16 20减速比1-70
+//                              删除读取脉冲标志
 
 //----EEPROM存储地址分配---//
 //------------------------------------------------------------------------------------------------------------
@@ -156,7 +158,7 @@ typedef struct
 {
     uint8   typeProtocal;
     uint8   bdrate;
-    bool    bRdPulse;
+    bool    bRdPulse;       /* ?读取脉冲标志 */
     uint32  OptBlockLast;
     uint32_t protectTimeOut;
 //    uint32_t totalCnt;        /* 切换次数 */

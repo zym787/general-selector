@@ -31,13 +31,28 @@
 #endif
 
 #define S_LIST_M    "\r ---------------------Command Line----------------------\
-                     \r|-/?        Display menu.                               |\
-                     \r|-VR        Display software version.                   |\
-                     \r|-MAP       Eg. MAP=Addr,Val.                           |\
-                     \r|-IIC       Eg. IIC=Val.                                |\
-                     \r|-TS        Test.                                       |\
-                     \r -------------------------------------------------------\
-                  "
+                    \r|-/?        显示所有命令                                |\
+                    \r|-VR        显示软件版本                                |\
+                    \r|-IIC       擦除EEPROM                                  |\
+                    \r|-POS       移动到指定位置                              |\
+                    \r|-ADDR      设置/地址                                   |\
+                    \r|-INT       设置/显示间隔                               |\
+                    \r|-SPD       设置/显示速度                               |\
+                    \r|-SN        设置/显示序列号                             |\
+                    \r|-PRTCL     设置/显示协议                               |\
+                    \r|-BDR       设置/显示波特率                             |\
+                    \r|-SCAN      设置/显示间隔                               |\
+                    \r|-DIRCW     设置/显示顺时针补偿                         |\
+                    \r|-DIRCCW    设置/显示逆时针补偿                         |\
+                    \r|-RESET     复位                                        |\
+                    \r|-CNT       设置/显示通道数                             |\
+                    \r|-RDCR      设置/显示减速比                             |\
+                    \r|-HALF      设置/显示半通道                             |\
+                    \r|-INSP      点检模式                                    |\
+                    \r|-PAUSET    设置/显示停留时间                           |\
+                    \r|-IOE       IO输出引脚翻转                              |\
+                    \r -------------------------------------------------------\
+                    "
 
 #define S_LIST_SH   "\r --------------------Sub command Line-------------------"
 #define S_LIST_SBD  "\r --------------------Sub command Body-------------------"

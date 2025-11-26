@@ -128,7 +128,7 @@ void SignalScan(void)
                 AxisMoveRel(AXSV, -(int)rdc.stepRound*13/12, accel[AXSV]/2, decel[AXSV]/2, speed[AXSV]/2);
                 memset(sig.pulseGap, 0, SIGNAL_CNT*2);
                 memset(sig.pulseBlock, 0, SIGNAL_CNT*2);
-                printd("\r\n 信号总数:%d", SIGNAL_CNT);
+                printd("\r\n 可扫描信号总数: %d", SIGNAL_CNT);
                 printd("\r\n 重置扫描寄存器");
                 sig.stpScan = 102;
             }
@@ -148,7 +148,7 @@ void SignalScan(void)
                     if(!*(sig.pulseGap+i))
                         break;
                 }
-                printd("\r\n Gap num=%d", i);
+                printd("\r\n Gap不为零个数: %d", i);
                 rwBuff[4] = sig.pulseGap[i - 1] >> 8;
                 rwBuff[5] = sig.pulseGap[i - 1];
                 // Block 挡块
@@ -159,7 +159,7 @@ void SignalScan(void)
                     if(!*(sig.pulseBlock+i))
                         break;
                 }
-                printd("\r\n Block num=%d", i);
+                printd("\r\n Block不为零个数: %d", i);
 
                 // Block 取均值
                 sig.pulseBlock[i-3] = AverageN(sig.pulseBlock, i-2);
@@ -213,9 +213,12 @@ void SignalScan(void)
                 // normal Gap 20 percent
                 temp = sig.pulseGap[0]*PERCENT_TOLL;
                 sig.pulseGap[1] = temp/PERCENT;
-                printd("\r\n B:%d, %d, %d", sig.pulseBlock[0], sig.pulseBlock[1], sig.pulseBlock[2]);
-                printd(", Err:%d, %d, %d", sig.pulseBlock[3], sig.pulseBlock[4], sig.pulseBlock[5]);
-                printd("\r\n G:%d, Err:%d", sig.pulseGap[0], sig.pulseGap[1]);
+
+                printd("\r\n B(Err):  %d(%d) %d(%d) %d(%d)",
+                       sig.pulseBlock[0], sig.pulseBlock[3],
+                       sig.pulseBlock[1], sig.pulseBlock[4],
+                       sig.pulseBlock[2], sig.pulseBlock[5]);
+                printd("\r\n G(Err):  %d(%d)", sig.pulseGap[0], sig.pulseGap[1]);
             }
             VALVE_ENA = ENABLE;
             Valve.status = VALVE_INITING;
@@ -256,7 +259,6 @@ void SignalScan(void)
             {
 //                sig.arrCount[pos-1] = sig.scanCount;
 //                sig.pulse[pos-1] = sig.basicPulse;
-                printd("\r\n pos%d", pos);
                 printd("\r\n pos%d sig %d", pos, sig.arrCount[pos - 1]);
                 sig.scanCount = 0;
                 sig.stpScan = 2;

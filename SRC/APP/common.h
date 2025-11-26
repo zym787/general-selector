@@ -15,16 +15,20 @@ typedef enum
     true
 }bool;
 
-//#define FIRST_HOLE_C        /* 开机1号孔 C版本 */
+#define FIRST_HOLE_C        /* 开机1号孔 C版本 */
 //#define END_HOLE_D          /* 开机末端孔 D版本 */
-#define FIRST_HOLE_IO_E     /* 开机1号孔带IO控制 E版本 */
+//#define FIRST_HOLE_IO_E     /* 开机1号孔带IO控制 E版本 */
 //#define FIRST_HOLE_MUT_IO_F /* 开机1号孔多IO控制 F版本 */
 
-/* 是否开机末端孔 默认不开启 ! */
-//#define END_HOLE    /* 开机末端孔 D版本 */
+/* 发行模式 屏蔽调试输出 */
+#define RELEASE
 
 /* 是否限制临时速度 默认不开启 现已成为事实标准 */
 #define LIMIT_TEMP_SPD
+
+/// PCB定义
+// #define A12_906    /* 不用 */
+#define A12_909 /* 901-C1套用 */
 
 ///C版本 开机1号孔
 #ifdef FIRST_HOLE_C
@@ -82,9 +86,7 @@ typedef enum
 #define SOFT_VER_NUM (uint32_t)0x200F0000
 #endif
 
-/* 发行模式 屏蔽调试输出 */
-//#define RELEASE
-
+///调试模式定义
 #ifdef RELEASE
 #undef DEBUG
 #undef DEBUG_MODBUS
@@ -95,10 +97,7 @@ typedef enum
 #define PULSE_CNT_EN
 #endif
 
-///PCB定义
-//#define A12_906    /* 不用 */
-#define A12_909  /* 901-C1套用 */
-
+///PCB版本定义
 #ifdef A12_906
     #define PCB_VR                  "A12-906"
     #define HARDWARE_DESCRIPTION    "Horizontal Version (2.5A Max)"
