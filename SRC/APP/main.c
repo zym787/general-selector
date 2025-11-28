@@ -40,9 +40,9 @@ void ParameterInit(void)
         I2CPageRead_Nbytes(ADDR_VALVE_FIX, LEN_VALVE_FIX, &Valve.fixOrg);
         printd("\r 原点补偿: %d (1度)", Valve.fixOrg);
 
-        // 方向补偿
+        // 方向补偿 无用
         I2CPageRead_Nbytes(ADDR_DIR_FIX, LEN_DIR_FIX, &valveFix.fix.dirGap);
-        printd("\r 方向补偿: %d (0.1度)", valveFix.fix.dirGap);
+        // printd("\r 方向补偿: %d (0.1度)", valveFix.fix.dirGap);
 
         I2CPageRead_Nbytes(ADDR_DIR_SD, LEN_DIR_SD, ReadBuf);
         Valve.fDirCw = ReadBuf[0];

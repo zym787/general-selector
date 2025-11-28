@@ -54,7 +54,10 @@ void bsp_IODetect(void)
         {
             if (VALVE_RUN_END == Valve.status)
             {
-                ///3״̬C -> 2״̬B -> 1״̬A
+                
+#if FIRST_HOLE_IO_E_DIR == 1
+                /// E1
+                /// 3״̬C -> 2״̬B -> 1״̬A
                 if (0x03 == Valve.portCur)
                 {
                     InPosition = 0;
@@ -93,6 +96,48 @@ void bsp_IODetect(void)
                 {
                     Valve.portDes = 0x00;
                 }
+#elif FIRST_HOLE_IO_E_DIR == 2
+                // E2
+                /// 5״̬C -> 6״̬B -> 1״̬A
+                if (0x05 == Valve.portCur)
+                {
+                    InPosition = 0;
+                    Valve.portDes = 0x06;
+                    Valve.dir = 0xff;
+                    dbg_printf("\r\n >1  %d->%d Dir:%d", Valve.portCur, Valve.portDes, Valve.dir);
+                }
+                else if (0x06 == Valve.portCur)
+                {
+                    syspara.ctrlPause = true;
+                    dbg_printf("\r\n >2  Waiting %dms < %d", timerPara.timePause, syspara.pauseTime);
+                    if (syspara.pauseTime <= timerPara.timePause)
+                    {
+                        timerPara.timePause = 0;
+                        syspara.ctrlPause = false;
+                        Valve.portDes = 0x01;
+                        Valve.dir = 0xff;
+                        dbg_printf("\r\n >3  %d->%d Dir:%d", Valve.portCur, Valve.portDes, Valve.dir);
+                    }
+#ifdef DEBUG
+                    else if (1 == timerPara.timePause % 300)
+                    {
+                        dbg_printf("\r\n timer pauseTime: %d", timerPara.timePause);
+                    }
+#endif // DEBUG
+                }
+                else if (0x01 == Valve.portCur && !InPosition)
+                {
+                    uint32_t timeCost = syspara.timeRamp[0] + syspara.timeRamp[1] + syspara.pauseTime;
+                    InPosition = 1;
+                    dbg_printf("\r\n >4 In Position %d", Valve.portCur);
+                    printd("\r\n ��ʱ %dms", timeCost);
+                    IO_OUT = ON;
+                }
+                else
+                {
+                    Valve.portDes = 0x00;
+                }
+#endif
             }
         }
         /// BI��0V      ��� 1  ״̬C
@@ -101,6 +146,7 @@ void bsp_IODetect(void)
         {
             if (VALVE_RUN_END == Valve.status)
             {
+#if FIRST_HOLE_IO_E_DIR == 1
                 ///1״̬A -> 2״̬B -> 3״̬C
                 if (0x01 == Valve.portCur)
                 {
@@ -145,6 +191,52 @@ void bsp_IODetect(void)
                 {
                     Valve.portDes = 0x00;
                 }
+#elif FIRST_HOLE_IO_E_DIR == 2
+                /// 1״̬A -> 6״̬B -> 5״̬C
+                if (0x01 == Valve.portCur)
+                {
+                    InPosition = 0;
+                    Valve.portDes = 0x06;
+                    Valve.dir = 0xff;
+                    syspara.recordTimeRamp = 1;
+                    dbg_printf("\r\n >1  %d->%d Dir:%d", Valve.portCur, Valve.portDes, Valve.dir);
+                }
+                else if (0x06 == Valve.portCur)
+                {
+                    syspara.ctrlPause = true;
+                    dbg_printf("\r\n >2  Waiting %dms", syspara.pauseTime);
+                    if (syspara.pauseTime <= timerPara.timePause)
+                    {
+                        timerPara.timePause = 0;
+                        syspara.ctrlPause = false;
+                        Valve.portDes = 0x05;
+                        Valve.dir = 0xff;
+                        syspara.recordTimeRamp = 2;
+                        dbg_printf("\r\n >3  %d->%d Dir:%d", Valve.portCur, Valve.portDes, Valve.dir);
+                    }
+#ifdef DEBUG
+                    else
+                    {
+                        if (1 == timerPara.timePause % 300)
+                        {
+                            dbg_printf("\r\n pauseTime: %d", timerPara.timePause);
+                        }
+                    }
+#endif // DEBUG
+                }
+                else if (0x05 == Valve.portCur && !InPosition)
+                {
+                    uint32_t timeCost = syspara.timeRamp[0] + syspara.timeRamp[1] + syspara.pauseTime;
+                    InPosition = 1;
+                    dbg_printf("\r\n >4 In Position %d", Valve.portCur);
+                    printd("\r\n ��ʱ %dms", timeCost);
+                    IO_OUT = OFF;
+                }
+                else
+                {
+                    Valve.portDes = 0x00;
+                }
+#endif
             }
         }
 #endif

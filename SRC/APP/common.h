@@ -30,6 +30,11 @@ typedef enum
 // #define A12_906    /* 不用 */
 #define A12_909 /* 901-C1套用 */
 
+///E版本有两种方向: 
+/// FIRST_HOLE_IO_E_DIR  1   E1: 1->2->3
+/// FIRST_HOLE_IO_E_DIR  2   E2: 1->6->5
+#define FIRST_HOLE_IO_E_DIR 2
+
 ///C版本 开机1号孔
 #ifdef FIRST_HOLE_C
 #define FIRST_HOLE  /* 开机1号孔 */
@@ -42,6 +47,7 @@ typedef enum
 #define HOLE_INFO ">First< Hole"
 #define SOFT_NAME "v2.0.0C"
 #define SOFT_VER_NUM (uint32_t)0x200C0000
+#define CONTROL             "232/485 AGS"
 #endif
 
 ///D版本 开机末端孔
@@ -56,6 +62,7 @@ typedef enum
 #define HOLE_INFO ">End< Hole"
 #define SOFT_NAME "v2.0.0D"
 #define SOFT_VER_NUM (uint32_t)0x200D0000
+#define CONTROL             "232/485 AGS"
 #endif
 
 ///E版本 开机1号孔带IO控制
@@ -70,6 +77,7 @@ typedef enum
 #define HOLE_INFO ">First< Hole with IO"
 #define SOFT_NAME "v2.0.0E"
 #define SOFT_VER_NUM (uint32_t)0x200E0000
+#define CONTROL             "IO + 232/485 AGS"
 #endif
 
 ///F版本 开机1号孔带多IO控制
@@ -84,6 +92,7 @@ typedef enum
 #define HOLE_INFO ">First< Hole with Mut IO"
 #define SOFT_NAME "v2.0.0F"
 #define SOFT_VER_NUM (uint32_t)0x200F0000
+#define CONTROL             "232/485 AGS"
 #endif
 
 ///调试模式定义
