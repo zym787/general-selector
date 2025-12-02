@@ -193,12 +193,12 @@ void ProcessValve(void)
                                 Valve.initStep = 0;
                                 Valve.bReInit = 1;
                             }
-                            printd("\r\n 就近逆时针 =>%d", Valve.portDes);
+                            printd("\r\n 阀头就近顺时针 =>%d", Valve.portDes);
                         }
                         else if (Positive >= Negative)
                         {
                             Valve.dir = CW;
-                            printd("\r\n 就近顺时针 =>%d", Valve.portDes);
+                            printd("\r\n 阀头就近逆时针 =>%d", Valve.portDes);
                         }
                         tpFloat = rdc.stepRound;
                         (Valve.dir == CCW) ? (tpFloat *= -1) : (tpFloat);
@@ -293,7 +293,7 @@ void ProcessValve(void)
                         }
                         printd("\r\n 获取位置: %d   切换时间: %dms %s", 
                             Valve.portCur, syspara.lastTime, (syspara.recordTimeRamp) == 0 ? "" : "(记录)");
-                        syspara.recordTimeRamp = OFF;
+                        syspara.recordTimeRamp = 0;
                     }
                     else
                     {

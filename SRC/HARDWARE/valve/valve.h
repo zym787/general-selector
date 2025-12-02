@@ -154,8 +154,8 @@ typedef struct
     unsigned int stpCnt;            //初始化后开始补偿的步数
 
     unsigned int BaudRate;          //运行的波特率值
-    unsigned char fDirCw;              // 寻位减速值
-    unsigned char fDirCCw;              // 寻位减速值
+    unsigned char fDirCw;              // 寻位减速值 电机顺时针，阀头逆时针
+    unsigned char fDirCCw;             // 寻位减速值 电机逆时针，阀头顺时针
     unsigned char SnCode[LEN_SN];   // 序列码
     unsigned char serialNum;        // 连续目标孔位，不知道哪个傻逼想的，确定一个孔位要连续分多次走位
     unsigned char serialPort[PREPORTCNT];    // 连续目标孔位，不知道哪个傻逼想的，确定一个孔位要连续分多次走位

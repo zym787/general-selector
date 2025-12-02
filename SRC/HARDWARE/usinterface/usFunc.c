@@ -626,7 +626,8 @@ void TermScan(char rw)
 
 
 /*
-
+ * 电机顺时针减速值
+ * 阀头逆时针
 */
 void TermDirCw(char rw)
 {
@@ -634,7 +635,7 @@ void TermDirCw(char rw)
     if(rw == READ_ACT)
     {
         I2CPageRead_Nbytes(ADDR_DIR_SD, LEN_DIR_SD-1, (uint8 *)&getInt);
-        printd("\r\n 顺时针减速值:%d", getInt);
+        printd("\r\n 逆时针减速值:%d", getInt);
     }
     else
     {
@@ -648,21 +649,22 @@ void TermDirCw(char rw)
         {
             I2CPageWrite_Nbytes(ADDR_DIR_SD, LEN_DIR_SD-1, (uint8 *)&getInt);
             Valve.fDirCw = getInt;
-            printd("\r\n 设置顺时针减速值:%d", getInt);
+            printd("\r\n 设置逆时针减速值:%d", getInt);
         }
     }
 }
 
 /*
-
-*/
+ * 电机逆时针减速值
+ * 阀头顺时针
+ */
 void TermDirCCw(char rw)
 {
     int getInt = 0;
     if(rw == READ_ACT)
     {
         I2CPageRead_Nbytes(ADDR_DIR_SD+1, LEN_DIR_SD-1, (uint8 *)&getInt);
-        printd("\r\n 逆时针减速值:%d", getInt);
+        printd("\r\n 顺时针减速值:%d", getInt);
     }
     else
     {
@@ -676,7 +678,7 @@ void TermDirCCw(char rw)
         {
             I2CPageWrite_Nbytes(ADDR_DIR_SD+1, LEN_DIR_SD-1, (uint8 *)&getInt);
             Valve.fDirCCw = getInt;
-            printd("\r\n 设置逆时针减速值:%d", getInt);
+            printd("\r\n 设置顺时针减速值:%d", getInt);
         }
     }
 }
@@ -869,8 +871,8 @@ void TermInspection(char rw)
     printd("\r\n 速度       (SPD)  : %d", Valve.spd);                /* 速度 */
     printd("\r\n 减速比     (RDCR) : %d", rdc.rate);                 /* 减速比 */
     printd("\r\n 半通道     (HALF) : %d", Valve.bHalfSeal);          /* 半通道 */
-    printd("\r\n 顺时针补偿 (CW)   : %d", Valve.fDirCw);             /* 顺时针补偿 */
-    printd("\r\n 逆时针补偿 (CCW)  : %d", Valve.fDirCCw);            /* 逆时针补偿 */
+    printd("\r\n 逆时针补偿 (CW)   : %d", Valve.fDirCw);             /* 顺时针补偿 */
+    printd("\r\n 顺时针补偿 (CCW)  : %d", Valve.fDirCCw);            /* 逆时针补偿 */
     printd("\r\n 原点补偿   (FIXO) : %d", Valve.fixOrg);             /* 原点补偿 */
     printd("\r\n 方向补偿   (FIXG) : %d", valveFix.fix.dirGap);      /* 方向补偿 */
 #ifdef FIRST_HOLE_IO_E

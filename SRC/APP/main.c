@@ -50,8 +50,8 @@ void ParameterInit(void)
         (!Valve.fDirCw || Valve.fDirCw > 100) ? (Valve.fDirCw = 1) : (Valve.fDirCw);
         (!Valve.fDirCCw || Valve.fDirCCw > 100) ? (Valve.fDirCCw = 1) : (Valve.fDirCCw);
         printd("\r\n 定位减速补偿: \
-                \r\n 顺时针补偿CW:  %d (0.1度)\
-                \r\n 逆时针补偿CCW: %d (0.1度)",
+                \r\n 逆时针补偿CW:  %d (0.1度)\
+                \r\n 顺时针补偿CCW: %d (0.1度)",
                Valve.fDirCw, Valve.fDirCCw);
 
         // 烧机间隔
