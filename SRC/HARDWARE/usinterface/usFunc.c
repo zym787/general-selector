@@ -885,6 +885,37 @@ void TermInspection(char rw)
     printd("\r\n ***************< 点检模式 >***************\r\n");
 }
 
+/*
+ * 老化次数
+ */
+void TermTestCnt(char rw)
+{
+    int getInt = 0;
+    uint32_t saveCnt = 0;
+    if (rw == READ_ACT)
+    {
+        I2CPageRead_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&saveCnt);
+        if(saveCnt <= syspara.burnCnt)
+        {
+            I2CPageWrite_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
+            dbg_printf("Saved");
+        }
+        printd("\r\n 老化次数 %d", syspara.burnCnt);
+    }
+    else
+    {
+        unsigned char ret = FetchInt(5, 0, str.rcvStr, &getInt);
+        if (ret)
+        {
+            printd("\r Err code %d", ret);
+            return;
+        }
+        printd("\r\n 设置老化次数 %d", getInt);
+        syspara.burnCnt = getInt;
+        I2CPageWrite_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
+    }
+}
+
 //-------------------------界面相关定制函数-------------------------//
 _TAB_T TermTab[]=
 {
@@ -915,6 +946,7 @@ _TAB_T TermTab[]=
     {24,    (*TermInspection)},
     {25,    (*TermPauseTime)},
     {26,    (*TermIO)},
+    {27,    (*TermTestCnt)},
 };
 
 /*
@@ -1050,6 +1082,11 @@ void ChRUN(char *cmdName)
     {
         (!strcasecmp(cmdName, "IOE"))?(bRw = READ_ACT):(bRw = WRITE_ACT);
         FuncIndex = 26;
+    }
+    else if (!strcasecmp(cmdName, "TESTC") || !strncasecmp(cmdName, "TESTC", 5))
+    {
+        (!strcasecmp(cmdName, "TESTC")) ? (bRw = READ_ACT) : (bRw = WRITE_ACT);
+        FuncIndex = 27;
     }
     else
     {

@@ -586,7 +586,8 @@ void TestBurn(void)
                 printd("\r\n %d->%d 方向:%d",Valve.portCur, Valve.portDes, Valve.dir);
                 if (0 == syspara.burnCnt % 10)
                 {
-                    printd("  此次开机老化次数:%d(断电不保存)", syspara.burnCnt);
+                    printd("  老化次数:%d(断电保存)", syspara.burnCnt);
+                    I2CPageWrite_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
                 }
             }
         }

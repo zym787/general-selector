@@ -159,6 +159,8 @@ void ParameterInit(void)
         ///停留时间
         I2CPageRead_Nbytes(ADDR_PAUSE_TIME, LEN_PAUSE_TIME, (uint8_t*)&syspara.pauseTime);
         printd("\r\n 中间状态停留时间: %d 毫秒", syspara.pauseTime);
+        I2CPageRead_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
+        printd("\r\n 老化次数 %d", syspara.burnCnt);
     }
     else
     {
@@ -215,6 +217,9 @@ void ParameterInit(void)
         ///IO控制
         syspara.ioCtrl = true;
         I2CPageWrite_Nbytes(ADDR_IO_CTRL, LEN_IO_CTRL, &syspara.ioCtrl);
+        ///老化次数
+        syspara.burnCnt = 0;
+        I2CPageWrite_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
 
         // 写入参数后 锁定驱动
         VALVE_ENA = DISABLE;

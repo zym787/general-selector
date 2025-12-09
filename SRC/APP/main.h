@@ -8,8 +8,8 @@
 #endif
 
 #define DESCRIPTION         "Selector Valve"
-#define SOFTWARE_VERSION    "r33"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0033     /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r34"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0034     /* 软件修改版次 */
 
 #define BOARD_0     0x88
 #define BOARD_1     0x66
@@ -84,7 +84,7 @@
 //  v2.0.0CD-r31    2025.11.26  修复AGS速度写0时异常，为15RPM
 //  v2.0.0CD-r32    2025.11.28  修复E版本方向错误,切换反向从1到6到5,删除未使用的方向补偿
 //  v2.0.0CD-r33    2025.12.02  修复顺逆时针补偿下载口显示，代码内CW/CCW为电机方向，实际使用为阀头方向，两者相反
-
+//  v2.0.0CD-r34    2025.12.09  老化次数支持断电保存,下载口TESTC读写老化次数
 
 //----EEPROM存储地址分配---//
 //------------------------------------------------------------------------------------------------------------
@@ -141,6 +141,10 @@
 
 #define ADDR_PAUSE_TIME         (ADDR_IO_CTRL+LEN_IO_CTRL)
 #define LEN_PAUSE_TIME          4
+
+#define ADDR_BURN_CNT			(ADDR_PAUSE_TIME+LEN_PAUSE_TIME)
+#define LEN_BURN_CNT			 2
+
 
 //------------------------------------------------------------------------------------------------------------
 
