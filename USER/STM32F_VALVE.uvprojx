@@ -10,7 +10,8 @@
       <TargetName>VALVE</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060422::V5.06 update 4 (build 422)::ARMCC</pCCUsed>
+      <pCCUsed>5060960::V5.06 update 7 (build 960)::ARMCC</pCCUsed>
+      <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>STM32F103C8</Device>
@@ -132,7 +133,7 @@
             <UseExternalTool>0</UseExternalTool>
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
-            <Capability>0</Capability>
+            <Capability>1</Capability>
             <DriverSelection>-1</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
@@ -183,6 +184,8 @@
             <hadXRAM>0</hadXRAM>
             <uocXRam>0</uocXRam>
             <RvdsVP>0</RvdsVP>
+            <RvdsMve>0</RvdsMve>
+            <RvdsCdeCp>0</RvdsCdeCp>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
@@ -323,6 +326,7 @@
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
             <uC99>1</uC99>
+            <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>1</v6Lang>
             <v6LangP>1</v6LangP>
@@ -333,9 +337,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>STM32F10X_MD</Define>
+              <Define>STM32F10X_MD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\SRC\APP;..\SRC\SYSTEM\timer;..\SRC\SYSTEM\delay;..\SRC\SYSTEM\sys;..\SRC\SYSTEM\usart;..\SRC\CoreSupport;..\SRC\HARDWARE\usinterface;..\SRC\HARDWARE\stmFlash;..\SRC\HARDWARE\motor;..\SRC\HARDWARE\valve;..\SRC\HARDWARE\EEPROM;..\SRC\HARDWARE\Modbus;..\SRC\HARDWARE\protExt;..\SRC\HARDWARE\signal;..\SRC\HARDWARE\io</IncludePath>
+              <IncludePath>..\SRC\APP;..\SRC\SYSTEM\timer;..\SRC\SYSTEM\delay;..\SRC\SYSTEM\sys;..\SRC\SYSTEM\usart;..\SRC\CoreSupport;..\SRC\HARDWARE\usinterface;..\SRC\HARDWARE\stmFlash;..\SRC\HARDWARE\motor;..\SRC\HARDWARE\valve;..\SRC\HARDWARE\EEPROM;..\SRC\HARDWARE\Modbus;..\SRC\HARDWARE\protExt;..\SRC\HARDWARE\signal;..\SRC\HARDWARE\io;..\SRC\SYSTEM\adc;..\SRC\CoreSupport\STM32F10x_StdPeriph_Driver\inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -348,7 +352,7 @@
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
             <useXO>0</useXO>
-            <uClangAs>0</uClangAs>
+            <ClangAsOpt>4</ClangAsOpt>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -421,6 +425,7 @@
                 <uThumb>2</uThumb>
                 <uSurpInc>2</uSurpInc>
                 <uC99>2</uC99>
+                <uGnu>2</uGnu>
                 <useXO>2</useXO>
                 <v6Lang>0</v6Lang>
                 <v6LangP>0</v6LangP>
@@ -446,7 +451,7 @@
                 <NoWarn>2</NoWarn>
                 <uSurpInc>2</uSurpInc>
                 <useXO>2</useXO>
-                <uClangAs>2</uClangAs>
+                <ClangAsOpt>0</ClangAsOpt>
                 <VariousControls>
                   <MiscControls></MiscControls>
                   <Define></Define>
@@ -554,6 +559,7 @@
                 <uThumb>2</uThumb>
                 <uSurpInc>2</uSurpInc>
                 <uC99>2</uC99>
+                <uGnu>2</uGnu>
                 <useXO>2</useXO>
                 <v6Lang>0</v6Lang>
                 <v6LangP>0</v6LangP>
@@ -579,7 +585,7 @@
                 <NoWarn>2</NoWarn>
                 <uSurpInc>2</uSurpInc>
                 <useXO>2</useXO>
-                <uClangAs>2</uClangAs>
+                <ClangAsOpt>0</ClangAsOpt>
                 <VariousControls>
                   <MiscControls></MiscControls>
                   <Define></Define>
@@ -610,6 +616,36 @@
               <FileType>1</FileType>
               <FilePath>..\SRC\SYSTEM\timer\timer.c</FilePath>
             </File>
+            <File>
+              <FileName>adc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SRC\SYSTEM\adc\adc.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>StdPeriph_Driver</GroupName>
+          <Files>
+            <File>
+              <FileName>stm32f10x_adc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SRC\CoreSupport\STM32F10x_StdPeriph_Driver\src\stm32f10x_adc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_gpio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SRC\CoreSupport\STM32F10x_StdPeriph_Driver\src\stm32f10x_gpio.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_rcc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SRC\CoreSupport\STM32F10x_StdPeriph_Driver\src\stm32f10x_rcc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_conf.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\SRC\CoreSupport\stm32f10x_conf.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -631,5 +667,14 @@
     <components/>
     <files/>
   </RTE>
+
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>STM32F_VALVE</LayName>
+        <LayPrjMark>1</LayPrjMark>
+      </Layer>
+    </Layers>
+  </LayerInfo>
 
 </Project>

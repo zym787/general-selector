@@ -15,10 +15,10 @@ typedef enum
     true
 }bool;
 
-#define FIRST_HOLE_C        /* 开机1号孔 C版本 */
+// #define FIRST_HOLE_C        /* 开机1号孔 C版本 */
 //#define END_HOLE_D          /* 开机末端孔 D版本 */
 //#define FIRST_HOLE_IO_E     /* 开机1号孔带IO控制 E版本 */
-//#define FIRST_HOLE_MUT_IO_F /* 开机1号孔多IO控制 F版本 */
+#define FIRST_HOLE_MUT_IO_F /* 开机1号孔多IO控制 F版本 */
 
 /* 发行模式 屏蔽调试输出 */
 #define RELEASE
@@ -143,6 +143,7 @@ typedef enum
 #include "signal.h"
 #include "valve.h"
 #include "bsp_io.h"
+#include "adc.h"
 
 //正常的开关定义
 #define ON      1

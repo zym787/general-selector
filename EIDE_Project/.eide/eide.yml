@@ -27,6 +27,7 @@ virtualFolder:
         - path: ../SRC/HARDWARE/motor/Smotor.lib
         - path: ../SRC/HARDWARE/protExt/protExt.c
         - path: ../SRC/HARDWARE/signal/signal.c
+        - path: ../SRC/HARDWARE/io/bsp_io.c
       folders: []
     - name: SYSTEM
       files:
@@ -34,10 +35,17 @@ virtualFolder:
         - path: ../SRC/SYSTEM/sys/sys.c
         - path: ../SRC/SYSTEM/usart/usart.c
         - path: ../SRC/SYSTEM/timer/timer.c
+        - path: ../SRC/SYSTEM/adc/adc.c
       folders: []
     - name: Doc
       files:
         - path: ../Doc/Valve_v2.0.0修改说明.md
+      folders: []
+    - name: StdPeriph_Driver
+      files:
+        - path: ../SRC/CoreSupport/STM32F10x_StdPeriph_Driver/src/stm32f10x_adc.c
+        - path: ../SRC/CoreSupport/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c
+        - path: ../SRC/CoreSupport/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c
       folders: []
 dependenceList: []
 outDir: build
@@ -48,6 +56,7 @@ targets:
     cppPreprocessAttrs:
       defineList:
         - STM32F10X_MD
+        - USE_STDPERIPH_DRIVER
       incList:
         - ../SRC/APP
         - ../SRC/SYSTEM/timer
@@ -65,6 +74,9 @@ targets:
         - ../SRC/HARDWARE/signal
         - .cmsis/include
         - ../USER/RTE/_VALVE
+        - ../SRC/SYSTEM/adc
+        - ../SRC/HARDWARE/io
+        - ../SRC/CoreSupport/STM32F10x_StdPeriph_Driver/inc
       libList: []
     excludeList: []
     toolchain: AC5
