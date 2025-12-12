@@ -18,6 +18,7 @@ void bsp_IOInit(void)
     RCC->APB2ENR |= RCC_APB2Periph_AFIO;
     RCC->APB2ENR |= (RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB);
 
+///E版本
 #ifdef A12_909
     // FB OUT
     GPIOB->CRH &= (GPIO_Crh_P13);
@@ -37,17 +38,39 @@ void bsp_IOInit(void)
     GPIOB->CRH &= (GPIO_Crh_P14);
     GPIOB->CRH |= (GPIO_Mode_IN_PU_PD_P14);
 #endif
+
+///F版本
+#ifdef A12_926
+    // OUT1(PB13) OUT2(PA8) FBOUT(PA11) ERROUT(PA12)
+    GPIOB->CRH &= (GPIO_Crh_P13);
+    GPIOB->CRH |= (GPIO_Mode_Out_PP_50MHz_P13);
+    GPIOB->ODR |= (GPIO_Pin_13);
+    GPIOA->CRH &= (GPIO_Crh_P8 | GPIO_Crh_P11 | GPIO_Crh_P12);
+    GPIOA->CRH |= (GPIO_Mode_Out_PP_50MHz_P8 | GPIO_Mode_Out_PP_50MHz_P11 | GPIO_Mode_Out_PP_50MHz_P12);
+    GPIOA->ODR |= (GPIO_Pin_8 | GPIO_Pin_11 | GPIO_Pin_12);
+    // IO_OUT1 = 0;
+    // IO_OUT2 = 0;
+    // IO_FBOUT = 0;
+    // IO_ERROUT = 0;
+
+    // IN1(PB3) IN2(PB4)
+    GPIOB->CRL &= (GPIO_Crl_P3 | GPIO_Crl_P4);
+    GPIOB->CRL |= (GPIO_Mode_IN_PU_PD_P3 | GPIO_Mode_IN_PU_PD_P4);
+#endif
 }
 
 /// A12-909  BI悬空/5.0V 输出0  AI悬空/0V 输出0  状态A
 ///          BI0V        输出1  AI3.3-12V 输出1  状态B
 /// A12-906  BI 悬空/5.0V  输出0
+/// A12-926  IN1    IN2    OUT1    OUT2    FBOUT    ERROUT
+///          0       0       0       0       0       0
+///          1       0       1       0       0       0
 void bsp_IODetect(void)
 {
-    static uint8_t InPosition = 0;  /* 单程执行完成标志 */
     if (true  == syspara.ioCtrl)
     {
 #ifdef A12_909
+        static uint8_t InPosition = 0; /* 单程执行完成标志 */
         /// BI悬空/接5V 输出0 状态A
         /// AI悬空/接0V 输出0 状态A
         if (1 == IO_IN)
@@ -238,6 +261,51 @@ void bsp_IODetect(void)
                 }
 #endif
             }
+        }
+#endif
+#ifdef MUT_IOCTRL
+        /// ININ    3 2 1 0
+        /// 通道    1 2 3 4
+        /// IOOUT   3 2 1 0
+        uint8_t IoInStatus = 0x03 & (~(IO_IN1 << 0 | IO_IN2 << 1));
+        uint8_t IoOutStatus = 0;
+        if (VALVE_RUN_END == Valve.status)
+        {
+            ///到位
+            if ((IoInStatus + 1) == Valve.portCur)
+            {
+                IO_FBOUT = OFF;  ///移动完成
+                /// IO状态输出
+                IoOutStatus = Valve.portCur - 1;
+                IO_OUT1 = (~IoInStatus & 0x01) ? ON : OFF;
+                IO_OUT2 = (~IoInStatus & 0x02) ? ON : OFF;
+                dbg_printf("\r\n > In Position %d=%d    IO  IN:%d %d  OUT:%d %d (C%d E%d)",
+                           Valve.portCur, IoInStatus, IO_IN1, IO_IN2, IO_OUT1, IO_OUT2, IO_FBOUT, IO_ERROUT);
+            }
+            ///新状态输入
+            else
+            {
+                IO_FBOUT = ON; /// 移动未完成
+                /// IO输入检测
+                Valve.portDes = IoInStatus + 1;
+                Valve.dir = 0xFF;
+                dbg_printf("\r\n > Update Position %d!=%d    IO  IN:%d %d  OUT:%d %d (C%d E%d)",
+                           Valve.portCur, IoInStatus, IO_IN1, IO_IN2, IO_OUT1, IO_OUT2, IO_FBOUT, IO_ERROUT);
+            }
+        }
+        ///报错
+        else if (VALVE_ERR == Valve.status)
+        {
+            IO_ERROUT = OFF;
+            IO_FBOUT = ON;
+            IO_OUT1 = ON;
+            IO_OUT2 = ON;
+        }
+        ///运行&初始化
+        else
+        {
+            IO_ERROUT = ON;
+            IO_FBOUT = ON;
         }
 #endif
     }

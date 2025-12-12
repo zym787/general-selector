@@ -18,7 +18,7 @@
 #define I_16A               0x03
 #define I_05A               0x04
 
-#ifdef A12_909
+#if ((defined A12_909) || (defined A12_926))
 #define LED_WORK            PCout(15)
 #define VALVE_OPT           PAin(15)
 #define VALVE_ENA		    PAout(4)
@@ -47,7 +47,7 @@
     M_ISET_2=(val>>1&0x01);\
     M_ISET_3=(val>>2&0x01);
 
-#ifdef A12_909
+#if ((defined A12_909) || (defined A12_926))
 #define SCALE               64                      //当前细分数为64
 #endif
 #ifdef A12_906
@@ -55,7 +55,7 @@
 #endif
 #define P_ROUND                 200                     //每圈大步数为200
 
-#ifdef A12_909  /* A12_909 64细分 64*200=12800 */
+#if ((defined A12_909) || (defined A12_926))           /* A12_909 64细分 64*200=12800 */
 #define STEPS_1_DEGREE_RD01      (35.6)                 //每度需走的步数为12800/360=35.555~
 #define STEPS_01_DEGREE_RD01     (3.6)                  //每0.1度需走的步数为12800/3600=3.555~
 #define STEPS_1_DEGREE_RD04      (142.2)                 //每度需走的步数为12800/360=35.555~

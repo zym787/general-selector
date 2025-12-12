@@ -87,6 +87,9 @@ typedef enum
 #ifdef FIRST_HOLE_MUT_IO_F
 #define FIRST_HOLE  /* 开机1号孔 */
 #define MUT_IOCTRL  /* 启用多IO控制 */
+#define A12_926     /* 926-B2套用909 */
+#undef A12_906
+#undef A12_909
 #undef END_HOLE
 #undef IOCTRL       /* 禁用IO控制 */
 #undef FIRST_HOLE_C
@@ -118,15 +121,14 @@ typedef enum
     #define PCB_VR                  "A12-909"
     #define HARDWARE_DESCRIPTION     "Vertical Version (2.2A Max)"
 #endif
+#ifdef A12_926
+    #define PCB_VR                  "A12-926"
+    #define HARDWARE_DESCRIPTION    "Vertical Version (2.2A Max) with Multiple IO"
+#endif
 
 #ifdef LIMIT_TEMP_SPD
     #define LTS                     "LTS"
 #endif
-
-//#define RED4
-//#define RED5
-//#define RED10
-//#define RED16
 
 //#define HALF_CHN
 //#define NEW_SCALE

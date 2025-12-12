@@ -5,7 +5,7 @@ void ConfigValve(void)
 {
     RCC->APB2ENR |= (RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC);
 
-#ifdef A12_909
+#if ((defined A12_909) || (defined A12_926))
     //LED
     GPIOC->CRH &= (GPIO_Crh_P15);
     GPIOC->CRH |= (GPIO_Mode_Out_PP_50MHz_P15);

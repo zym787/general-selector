@@ -151,7 +151,7 @@ void ParameterInit(void)
         I2CPageRead_Nbytes(ADDR_HALF_SEAL, LEN_HALF_SEAL, &Valve.bHalfSeal);
         printd("\r 半通道: %d %s", Valve.bHalfSeal,
             (Valve.bHalfSeal) == 0 ? "关闭" : "开启");
-#ifdef IOCTRL
+#if ((defined IOCTRL) || (defined MUT_IOCTRL))
         I2CPageRead_Nbytes(ADDR_IO_CTRL, LEN_IO_CTRL, &syspara.ioCtrl);
         printd("\r\n IO控制: %d %s", syspara.ioCtrl,
             (syspara.ioCtrl) == false ? "关闭" : "开启");
@@ -274,7 +274,7 @@ void GPIOInit(void)
     ADC_Configuration();
 #endif
 #endif
-
+    
     RCC->APB2ENR |= (RCC_APB2Periph_GPIOB);
     GPIOB->CRL &= (GPIO_Crl_P1);
     GPIOB->CRL |= (GPIO_Mode_Out_PP_50MHz_P1);
@@ -350,7 +350,6 @@ void errProcRun(void)
 #define SINGLE_INITING_TIMOUT 14 // 转一圈差不多3秒，复位单次是两圈
 void everySecDo(void)
 {
-    ///开机1号孔
 #ifdef FIRST_HOLE
     /// 开机1号孔
     if (!Valve.bHalfSeal)
@@ -379,17 +378,23 @@ void everySecDo(void)
             timerPara.timeMilli = 0;
             bsp_IODetect();
         }
-    }
+   }
 #endif  // IOCTRL
 
     ///F版本 多IO
 #ifdef MUT_IOCTRL
     /// 多IO检测
+    static uint8_t times = 0;
     if (mSEC < timerPara.timeMilli)
     {
         timerPara.timeMilli = 0;
         ++times;
         AdcPro();
+        if (0 == times % 100)
+        {
+            times = 0;
+            bsp_IODetect();
+        }
     }
 #endif
 
@@ -483,7 +488,6 @@ int main(void)
 
 void DebugOut(void)
 {
-
     if (Valve.bPassPort)
     {
         Valve.bPassPort = 0;
@@ -508,6 +512,8 @@ void DebugOut(void)
                    IO_IN, IO_OUT, syspara.pauseTime, syspara.ctrlPause);
 #endif
 #ifdef MUT_IOCTRL
+        dbg_printf("\r\n   IN1:%d IN2:%d  OUT1:%d OUT2:%d  FBOUT:%d ERROUT:%d",
+                   IO_IN1, IO_IN2, IO_OUT1, IO_OUT2, IO_FBOUT, IO_ERROUT);
         /* 注意： 末尾只有 \r回车, 没有\n换行，可以使PC超级终端界面稳定在1行显示 */
         {
             ///Get ADC

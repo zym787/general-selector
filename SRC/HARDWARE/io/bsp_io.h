@@ -16,7 +16,7 @@
 
 #define ADZ_PT_MAX  0x05265C00  /* 最大停留时间 */
 
-/// IO????
+/// IO引脚定义
 #ifdef A12_909
 #define IO_OUT PBout(13)
 #define IO_IN PBin(5)
@@ -24,6 +24,14 @@
 #ifdef A12_906
 #define IO_OUT PBout(13)
 #define IO_IN PBin(14)
+#endif
+#ifdef A12_926
+#define IO_IN1 PBin(3)
+#define IO_IN2 PBin(4)
+#define IO_OUT1 PBout(13)
+#define IO_OUT2 PAout(8)
+#define IO_FBOUT PAout(11)
+#define IO_ERROUT PAout(12)
 #endif
 
 extern void bsp_IOInit(void);
