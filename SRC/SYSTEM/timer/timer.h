@@ -10,6 +10,7 @@
 
 #define SEC     (1000)
 #define DCSEC   (100)
+#define mSEC    (10)
 
 typedef struct
 {

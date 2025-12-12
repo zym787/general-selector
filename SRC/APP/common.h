@@ -37,6 +37,7 @@ typedef enum
 
 ///C版本 开机1号孔
 #ifdef FIRST_HOLE_C
+#undef USE_STDPERIPH_DRIVER
 #define FIRST_HOLE  /* 开机1号孔 */
 #undef END_HOLE
 #undef IOCTRL       /* 禁用IO控制 */
@@ -52,6 +53,7 @@ typedef enum
 
 ///D版本 开机末端孔
 #ifdef END_HOLE_D
+#undef USE_STDPERIPH_DRIVER
 #define END_HOLE  /* 开机末端孔 */
 #undef FIRST_HOLE
 #undef IOCTRL     /* 禁用IO控制 */
@@ -67,6 +69,7 @@ typedef enum
 
 ///E版本 开机1号孔带IO控制
 #ifdef FIRST_HOLE_IO_E
+#undef USE_STDPERIPH_DRIVER
 #define FIRST_HOLE  /* 开机1号孔 */
 #define IOCTRL      /* 启用IO控制 */
 #undef END_HOLE
@@ -143,8 +146,9 @@ typedef enum
 #include "signal.h"
 #include "valve.h"
 #include "bsp_io.h"
+#ifdef MUT_IOCTRL
 #include "adc.h"
-
+#endif
 //正常的开关定义
 #define ON      1
 #define OFF     0
@@ -159,7 +163,7 @@ typedef enum
 #define dbg_printf(...)
 #endif
 
-
+#ifndef MUT_IOCTRL
 //-------------------------rcc----------------------------------
 #define RCC_APB1Periph_TIM2              ((vu32)0x00000001)
 #define RCC_APB1Periph_TIM3              ((vu32)0x00000002)
@@ -227,6 +231,7 @@ typedef enum
 #define GPIO_Pin_14                     ((vu16)0x4000)
 #define GPIO_Pin_15                     ((vu16)0x8000)
 #define GPIO_Pin_All                    ((vu16)0xFFFF)
+#endif
 
 #define GPIO_Crl_P0                     ((vu32)0XFFFFFFF0)
 #define GPIO_Crl_P1                     ((vu32)0XFFFFFF0f)

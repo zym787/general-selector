@@ -269,6 +269,10 @@ void GPIOInit(void)
     ///IO初始化
 #ifdef IOCTRL
     bsp_IOInit();
+    /// ADC初始化
+#ifdef MUT_IOCTRL
+    ADC_Configuration();
+#endif
 #endif
 
     RCC->APB2ENR |= (RCC_APB2Periph_GPIOB);
@@ -348,6 +352,7 @@ void everySecDo(void)
 {
     ///开机1号孔
 #ifdef FIRST_HOLE
+    /// 开机1号孔
     if (!Valve.bHalfSeal)
     {
         // 非半通道走位
@@ -362,8 +367,11 @@ void everySecDo(void)
             printd("\r\n 到1号位  当前位置:%d", Valve.portCur);
         }
     }
-    ///IO检测
+#endif  // FIRST_HOLE
+
+    ///E版本 带IO
 #ifdef IOCTRL
+    /// IO检测
     if (2 == Valve.goFirstFlag)
     {
         if (DCSEC < timerPara.timeMilli)
@@ -373,6 +381,16 @@ void everySecDo(void)
         }
     }
 #endif  // IOCTRL
+
+    ///F版本 多IO
+#ifdef MUT_IOCTRL
+    /// 多IO检测
+    if (mSEC < timerPara.timeMilli)
+    {
+        timerPara.timeMilli = 0;
+        ++times;
+        AdcPro();
+    }
 #endif
 
     // 每秒检测一次
@@ -485,7 +503,37 @@ void DebugOut(void)
             dbg_printf("  AGS");
         else
             dbg_printf("  EXTCOM %d %d", protext.stepCnt, protext.time);
+#ifdef IOCTRL
         dbg_printf("\r\n   IO_IN:%d IO_OUT:%d  停留时间:%d  Ctrl:%d",
                    IO_IN, IO_OUT, syspara.pauseTime, syspara.ctrlPause);
+#endif
+#ifdef MUT_IOCTRL
+        /* 注意： 末尾只有 \r回车, 没有\n换行，可以使PC超级终端界面稳定在1行显示 */
+        {
+            ///Get ADC
+            uint16_t adc = GetADC();
+            /* 超级终端界面上会显示一个不断旋转的字符
+            增加这个功能，是为了避免程序死机的假象，因为ADC采样值很稳定
+            */
+            static uint8_t pos = 0;
+
+            if (pos == 0)
+                dbg_printf("\r\n   |");
+            else if (pos == 1)
+                dbg_printf("\r\n   /");
+            else if (pos == 2)
+                dbg_printf("\r\n   -");
+            else if (pos == 3)
+                dbg_printf("\r\n   \\");		/* 注意：这个特殊字符需要转义 */
+
+            if (++pos >= 4)
+            {
+                pos = 0;
+            }
+
+            dbg_printf("PA0口线ADC1_CH0采样值=%5d  电压=%4dmV\r",
+                adc, ((uint32_t)adc * 3300) / 4095);
+        }
+#endif
     }
 }

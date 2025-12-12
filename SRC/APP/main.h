@@ -8,8 +8,8 @@
 #endif
 
 #define DESCRIPTION         "Selector Valve"
-#define SOFTWARE_VERSION    "r34"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0034     /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r35"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0035     /* 软件修改版次 */
 
 #define BOARD_0     0x88
 #define BOARD_1     0x66
@@ -86,7 +86,7 @@
 //  v2.0.0CDE-r33   2025.12.02  修复顺逆时针补偿下载口显示，代码内CW/CCW为电机方向，实际使用为阀头方向，两者相反
 //  v2.0.0CDE-r34   2025.12.09  老化次数支持断电保存,下载口TESTC读写老化次数
 //  v2.0.0CDEF-r35  2025.12.11  添加标准库ADC,GPIO,RCC支援
-
+//                  2025.12.12  F版本, 开机1号孔多IO控制,完成ADC移植
 
 //----EEPROM存储地址分配---//
 //------------------------------------------------------------------------------------------------------------
