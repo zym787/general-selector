@@ -15,10 +15,10 @@ typedef enum
     true
 }bool;
 
-// #define FIRST_HOLE_C        /* 开机1号孔 C版本 */
+#define FIRST_HOLE_C        /* 开机1号孔 C版本 */
 //#define END_HOLE_D          /* 开机末端孔 D版本 */
 //#define FIRST_HOLE_IO_E     /* 开机1号孔带IO控制 E版本 */
-#define FIRST_HOLE_MUT_IO_F /* 开机1号孔多IO控制 F版本 */
+// #define FIRST_HOLE_MUT_IO_F /* 开机1号孔多IO控制 F版本 */
 
 /* 发行模式 屏蔽调试输出 */
 #define RELEASE
@@ -80,7 +80,7 @@ typedef enum
 #define HOLE_INFO ">First< Hole with IO"
 #define SOFT_NAME "v2.0.0E"
 #define SOFT_VER_NUM (uint32_t)0x200E0000
-#define CONTROL             "IO + 232/485 AGS"
+#define CONTROL             "IO (Active High) + 232/485 AGS"
 #endif
 
 ///F版本 开机1号孔带多IO控制
@@ -98,7 +98,7 @@ typedef enum
 #define HOLE_INFO ">First< Hole with Mut IO"
 #define SOFT_NAME "v2.0.0F"
 #define SOFT_VER_NUM (uint32_t)0x200F0000
-#define CONTROL             "232/485 AGS"
+#define CONTROL             "IO (Active Low)"
 #endif
 
 ///调试模式定义
@@ -128,6 +128,8 @@ typedef enum
 
 #ifdef LIMIT_TEMP_SPD
     #define LTS                     "LTS"
+#else
+    #define LTS                     ""
 #endif
 
 //#define HALF_CHN

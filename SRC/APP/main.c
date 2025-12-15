@@ -21,6 +21,8 @@ void ParameterInit(void)
     {
         printd("\r 读取系统参数");
 
+        printd("\r\n 基本参数");
+
         // 地址 0~63
         I2CPageRead_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara.mAddrs);
         printd("\r 地址: %d", ModbusPara.mAddrs);
@@ -181,6 +183,10 @@ void ParameterInit(void)
         I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
         /* 通道数 10 */
         valveFix.fix.portCnt = valvePortCnt;
+#ifdef MUT_IOCTRL
+    /// 多IO检测 12通定制
+        valveFix.fix.portCnt = 12;
+#endif
         I2CPageWrite_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
         /* 原点补偿 0 */
         Valve.fixOrg = valveFixDflt;
@@ -389,8 +395,8 @@ void everySecDo(void)
     {
         timerPara.timeMilli = 0;
         ++times;
-        AdcPro();
-        if (0 == times % 100)
+        // AdcPro();
+        if (0 == times % 21)
         {
             times = 0;
             bsp_IODetect();
@@ -450,20 +456,22 @@ int main(void)
     GPIOInit();
     delay_ms(100);
     BootInterface();
-#ifndef LIMIT_TEMP_SPD /* 不开启临时速度限制 */
-    printd("\r\n Version:%s(%08X)  Time: %s %s \
-            \r\n Description:%s  %s  (%s)\
-            \r\n PCB:%s  %s \r\n",
-           SOFT_VER_C, SOFT_VER, __DATE__, __TIME__,
-           DESCRIPTION, HOLE_INFO, CONTROL,
-           PCB_VR, HARDWARE_DESCRIPTION);
-#else /* 开启临时速度限制 */
     printd("\r\n Version:%s(%08X)  Time: %s %s \
             \r\n Description:%s  %s  (%s) %s\
             \r\n PCB:%s  %s \r\n",
            SOFT_VER_C, SOFT_VER, __DATE__, __TIME__,
            DESCRIPTION, HOLE_INFO, CONTROL, LTS,
            PCB_VR, HARDWARE_DESCRIPTION);
+#ifdef FIRST_HOLE_MUT_IO_F
+    printd("\r\n-------------------多IO控制说明 (低电平有效)-------------------");
+    printd("\r\n 输入:    IN1     IN2   | OUT1   OUT2   通道 (状态)");
+    printd("\r\n         1/悬空  1/悬空 |  1      1      1   (1)");
+    printd("\r\n           0     1/悬空 |  0      1     12   (2)");
+    printd("\r\n         1/悬空    0    |  1      0     11   (3)");
+    printd("\r\n           0       0    |  0      0     10   (4)");
+    printd("\r\n 运行中: FBOUT输出1,OUT1/OUT2保持先前状态,到位后FBOUT输出0");
+    printd("\r\n 报错时: 无论IN1/IN2输入何值,ERROUT输出0,FBOUT/OUT1/OUT2输出1");
+    printd("\r\n-------------------------------------------------------------\r\n");
 #endif
     if (syspara.typeProtocal == MY_MODBUS)
         ModbusInit(); // AGS协议
