@@ -8,8 +8,8 @@
 #endif
 
 #define DESCRIPTION         "Selector Valve"
-#define SOFTWARE_VERSION    "r38"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0038     /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r39"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0039     /* 软件修改版次 */
 
 #define BOARD_0     0x88
 #define BOARD_1     0x66
@@ -96,6 +96,7 @@
 //                              0       0       4       0       0       报错时,其他引脚全高
 //  v2.0.0CDEF-r37  2025.12.15  F版本默认12通,指定顺序切换1-12-11-10
 //  v2.0.0CDEF-r38  2025.12.16  F版本默认12通,指定顺序切换1-2-3-4
+//  v2.0.0CDEF-r39  2025.12.16  F版本下载口STATC写入切换顺序,默认12通切换顺序1-2-3-4,修复打印切换顺序错误
 
 //----EEPROM存储地址分配---//
 //------------------------------------------------------------------------------------------------------------
@@ -156,6 +157,8 @@
 #define ADDR_BURN_CNT			(ADDR_PAUSE_TIME+LEN_PAUSE_TIME)
 #define LEN_BURN_CNT			 2
 
+#define ADDR_STATE_CHANNEL		(ADDR_BURN_CNT+LEN_BURN_CNT)
+#define LEN_STATE_CHANNEL		4
 
 //------------------------------------------------------------------------------------------------------------
 

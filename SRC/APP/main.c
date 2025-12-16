@@ -163,6 +163,13 @@ void ParameterInit(void)
         printd("\r\n 中间状态停留时间: %d 毫秒", syspara.pauseTime);
         I2CPageRead_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
         printd("\r\n 老化次数 %d", syspara.burnCnt);
+        I2CPageRead_Nbytes(ADDR_STATE_CHANNEL, LEN_STATE_CHANNEL, Valve.StatusChannel);
+#ifdef MUT_IOCTRL
+        printd("\r\n           1  2  3  4");
+        printd("\r\n 通道状态:");
+        for (uint8_t i = 0; i < 4; ++i)
+            printd(" %d", *(Valve.StatusChannel + i));
+#endif
     }
     else
     {
@@ -226,6 +233,12 @@ void ParameterInit(void)
         ///老化次数
         syspara.burnCnt = 0;
         I2CPageWrite_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
+        ///通道状态
+#ifdef MUT_IOCTRL
+        uint8_t temp[4] = {1, 2, 3, 4};
+        memcpy(Valve.StatusChannel, temp, 4);
+        I2CPageWrite_Nbytes(ADDR_STATE_CHANNEL, LEN_STATE_CHANNEL, Valve.StatusChannel);
+#endif
 
         // 写入参数后 锁定驱动
         VALVE_ENA = DISABLE;
@@ -465,10 +478,10 @@ int main(void)
 #ifdef FIRST_HOLE_MUT_IO_F
     printd("\r\n-------------------多IO控制说明 (低电平有效)-------------------");
     printd("\r\n 输入:    IN1     IN2   | OUT1   OUT2   通道 (状态)");
-    printd("\r\n         1/悬空  1/悬空 |  1      1      1   (1)");
-    printd("\r\n           0     1/悬空 |  0      1     12   (2)");
-    printd("\r\n         1/悬空    0    |  1      0     11   (3)");
-    printd("\r\n           0       0    |  0      0     10   (4)");
+    printd("\r\n         1/悬空  1/悬空 |  1      1      %d   (1)", Valve.StatusChannel[0]);
+    printd("\r\n           0     1/悬空 |  0      1      %d   (2)", Valve.StatusChannel[1]);
+    printd("\r\n         1/悬空    0    |  1      0      %d   (3)", Valve.StatusChannel[2]);
+    printd("\r\n           0       0    |  0      0      %d   (4)", Valve.StatusChannel[3]);
     printd("\r\n 运行中: FBOUT输出1,OUT1/OUT2保持先前状态,到位后FBOUT输出0");
     printd("\r\n 报错时: 无论IN1/IN2输入何值,ERROUT输出0,FBOUT/OUT1/OUT2输出1");
     printd("\r\n-------------------------------------------------------------\r\n");

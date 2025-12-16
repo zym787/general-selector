@@ -269,14 +269,13 @@ void bsp_IODetect(void)
         /// IOOUT   3 2 1 0
         uint8_t IoInStatus = 0x03 & (~(IO_IN1 << 0 | IO_IN2 << 1));
         uint8_t IoOutStatus = 0;
-        uint8_t StatusChannel[4] = {1, 2, 3, 4};
         if (VALVE_RUN_END == Valve.status)
         {
             dbg_printf("\r\n > Status    1  2  3  4");
             dbg_printf("\r\n > Position  %d  %d  %d  %d  (Complete%d Error%d)",
-                       StatusChannel[0], StatusChannel[1], StatusChannel[2], StatusChannel[3], IO_FBOUT, IO_ERROUT);
+                       Valve.StatusChannel[0], Valve.StatusChannel[1], Valve.StatusChannel[2], Valve.StatusChannel[3], IO_FBOUT, IO_ERROUT);
             ///到位
-            if (StatusChannel[IoInStatus] == Valve.portCur)
+            if (Valve.StatusChannel[IoInStatus] == Valve.portCur)
             {
                 /// IO状态输出
                 IoOutStatus = Valve.portCur - 1;
@@ -285,7 +284,7 @@ void bsp_IODetect(void)
                 IO_ERROUT = ON;
                 IO_FBOUT = OFF; /// 移动完成
                 dbg_printf("\r\n > In Position %d=>>%d(%d)    IO  IN1/2:%d %d  OUT1/2:%d %d  (Complete%d Error%d)",
-                           Valve.portCur, StatusChannel[IoInStatus], IoInStatus, IO_IN1, IO_IN2, IO_OUT1, IO_OUT2, IO_FBOUT, IO_ERROUT);
+                           Valve.portCur, Valve.StatusChannel[IoInStatus], IoInStatus, IO_IN1, IO_IN2, IO_OUT1, IO_OUT2, IO_FBOUT, IO_ERROUT);
             }
             ///新状态输入
             else
@@ -293,10 +292,10 @@ void bsp_IODetect(void)
                 IO_FBOUT = ON; /// 移动未完成
                 IO_ERROUT = ON;
                 /// IO输入检测
-                Valve.portDes = StatusChannel[IoInStatus];
+                Valve.portDes = Valve.StatusChannel[IoInStatus];
                 Valve.dir = 0xFF;
                 printd("\r\n > Update Position %d!=>>%d(%d)    IO  IN1/2:%d %d  OUT1/2:%d %d  (Complete%d Error%d)",
-                           Valve.portCur, StatusChannel[IoInStatus], IoInStatus, IO_IN1, IO_IN2, IO_OUT1, IO_OUT2, IO_FBOUT, IO_ERROUT);
+                       Valve.portCur, Valve.StatusChannel[IoInStatus], IoInStatus, IO_IN1, IO_IN2, IO_OUT1, IO_OUT2, IO_FBOUT, IO_ERROUT);
             }
         }
         ///报错

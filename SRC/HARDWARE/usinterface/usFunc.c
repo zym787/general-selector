@@ -916,6 +916,53 @@ void TermTestCnt(char rw)
     }
 }
 
+/*
+ * 通道状态
+ */
+void TermStateChannel(char rw)
+{
+#ifdef MUT_IOCTRL
+    int getInt[4] = {1, 1, 1, 1};
+    if (rw == READ_ACT)
+    {
+        I2CPageRead_Nbytes(ADDR_STATE_CHANNEL, LEN_STATE_CHANNEL, Valve.StatusChannel);
+        printd("\r\n                1  2  3  4");
+        printd("\r\n 读取通道状态:");
+        for (uint8_t i = 0; i < 4; ++i)
+            printd(" %d", *(Valve.StatusChannel + i));
+        printd("\r\n");
+    }
+    else
+    {
+        unsigned char ret = FetchInt(5, 0, str.rcvStr, getInt);
+        if (ret)
+        {
+            printd("\r\n Err code %d", ret);
+            return;
+        }
+        printd("\r\n                1  2  3  4");
+        printd("\r\n 设置通道状态: ");
+        ///范围检查
+        for (uint8 i = 0; i < 4; i++)
+        {
+            if (1 <= getInt[i] && getInt[i] <= valveFix.fix.portCnt)
+            {
+                Valve.StatusChannel[i] = getInt[i];
+                printd(" %d", Valve.StatusChannel[i]);
+            }
+            else
+            {
+                printd("\r\n 错误! 第%d个通道值%d超限 请重新检查", i + 1, Valve.StatusChannel[i]);
+                return;
+            }
+        }
+        I2CPageWrite_Nbytes(ADDR_STATE_CHANNEL, LEN_STATE_CHANNEL, Valve.StatusChannel);
+    }
+#else
+        printd("\r\n 该版本不支持通道状态功能");
+#endif
+}
+
 //-------------------------界面相关定制函数-------------------------//
 _TAB_T TermTab[]=
 {
@@ -947,6 +994,7 @@ _TAB_T TermTab[]=
     {25,    (*TermPauseTime)},
     {26,    (*TermIO)},
     {27,    (*TermTestCnt)},
+    {28,    (*TermStateChannel)},
 };
 
 /*
@@ -1087,6 +1135,11 @@ void ChRUN(char *cmdName)
     {
         (!strcasecmp(cmdName, "TESTC")) ? (bRw = READ_ACT) : (bRw = WRITE_ACT);
         FuncIndex = 27;
+    }
+    else if (!strcasecmp(cmdName, "STATC") || !strncasecmp(cmdName, "STATC", 5))
+    {
+        (!strcasecmp(cmdName, "STATC")) ? (bRw = READ_ACT) : (bRw = WRITE_ACT);
+        FuncIndex = 28;
     }
     else
     {
