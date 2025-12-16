@@ -163,8 +163,9 @@ void ParameterInit(void)
         printd("\r\n 中间状态停留时间: %d 毫秒", syspara.pauseTime);
         I2CPageRead_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
         printd("\r\n 老化次数 %d", syspara.burnCnt);
-        I2CPageRead_Nbytes(ADDR_STATE_CHANNEL, LEN_STATE_CHANNEL, Valve.StatusChannel);
+        /// 通道状态
 #ifdef MUT_IOCTRL
+        I2CPageRead_Nbytes(ADDR_STATE_CHANNEL, LEN_STATE_CHANNEL, Valve.StatusChannel);
         printd("\r\n           1  2  3  4");
         printd("\r\n 通道状态:");
         for (uint8_t i = 0; i < 4; ++i)
@@ -245,6 +246,20 @@ void ParameterInit(void)
         printd("\r 写入成功,请复位!!!");
         
     }
+#ifdef MUT_IOCTRL
+    ///范围检查
+    for (uint8_t i = 0; i < 4; i++)
+    {
+        if (1 > Valve.StatusChannel[i] || Valve.StatusChannel[i] > valveFix.fix.portCnt)
+        {
+            printd("\r\n 错误! 第%d个通道值%d超限 写入默认值 1 2 3 4", i + 1, Valve.StatusChannel[i]);
+            uint8_t temp[4] = {1, 2, 3, 4};
+            memcpy(Valve.StatusChannel, temp, 4);
+            I2CPageWrite_Nbytes(ADDR_STATE_CHANNEL, LEN_STATE_CHANNEL, Valve.StatusChannel);
+            break;
+        }
+    }
+#endif
     getOptStartStatus();
     /* 设置速度范围 */
     tBoundary.spd_min = SPD_MIN;
@@ -286,14 +301,14 @@ void ParameterInit(void)
 void GPIOInit(void)
 {
     ///IO初始化
-#ifdef IOCTRL
+#if ((defined IOCTRL) || (defined MUT_IOCTRL))
     bsp_IOInit();
     /// ADC初始化
 #ifdef MUT_IOCTRL
     ADC_Configuration();
 #endif
 #endif
-    
+
     RCC->APB2ENR |= (RCC_APB2Periph_GPIOB);
     GPIOB->CRL &= (GPIO_Crl_P1);
     GPIOB->CRL |= (GPIO_Mode_Out_PP_50MHz_P1);
@@ -476,6 +491,8 @@ int main(void)
            DESCRIPTION, HOLE_INFO, CONTROL, LTS,
            PCB_VR, HARDWARE_DESCRIPTION);
 #ifdef FIRST_HOLE_MUT_IO_F
+    I2CPageRead_Nbytes(ADDR_STATE_CHANNEL, LEN_STATE_CHANNEL, Valve.StatusChannel);
+    delay_ms(100);
     printd("\r\n-------------------多IO控制说明 (低电平有效)-------------------");
     printd("\r\n 输入:    IN1     IN2   | OUT1   OUT2   通道 (状态)");
     printd("\r\n         1/悬空  1/悬空 |  1      1      %d   (1)", Valve.StatusChannel[0]);
@@ -535,6 +552,7 @@ void DebugOut(void)
 #ifdef MUT_IOCTRL
         dbg_printf("\r\n   IN1:%d IN2:%d  OUT1:%d OUT2:%d  FBOUT:%d ERROUT:%d",
                    IO_IN1, IO_IN2, IO_OUT1, IO_OUT2, IO_FBOUT, IO_ERROUT);
+        #if 0
         /* 注意： 末尾只有 \r回车, 没有\n换行，可以使PC超级终端界面稳定在1行显示 */
         {
             ///Get ADC
@@ -561,6 +579,7 @@ void DebugOut(void)
             dbg_printf("PA0口线ADC1_CH0采样值=%5d  电压=%4dmV\r",
                 adc, ((uint32_t)adc * 3300) / 4095);
         }
+        #endif
 #endif
     }
 }

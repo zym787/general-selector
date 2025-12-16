@@ -943,7 +943,7 @@ void TermStateChannel(char rw)
         printd("\r\n                1  2  3  4");
         printd("\r\n 设置通道状态: ");
         ///范围检查
-        for (uint8 i = 0; i < 4; i++)
+        for (uint8_t i = 0; i < 4; i++)
         {
             if (1 <= getInt[i] && getInt[i] <= valveFix.fix.portCnt)
             {

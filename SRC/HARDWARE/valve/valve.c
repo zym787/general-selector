@@ -5,7 +5,7 @@ void ConfigValve(void)
 {
     RCC->APB2ENR |= (RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC);
 
-#if ((defined A12_909) || (defined A12_926))
+#ifdef A12_909
     //LED
     GPIOC->CRH &= (GPIO_Crh_P15);
     GPIOC->CRH |= (GPIO_Mode_Out_PP_50MHz_P15);
@@ -25,6 +25,25 @@ void ConfigValve(void)
     GPIOA->CRH &= (GPIO_Crh_P11);
     GPIOA->CRH |= (GPIO_Mode_IN_PU_PD_P11);
     GPIOA->ODR |= (GPIO_Pin_11);
+#endif
+
+#ifdef A12_926
+    // LED
+    GPIOC->CRH &= (GPIO_Crh_P15);
+    GPIOC->CRH |= (GPIO_Mode_Out_PP_50MHz_P15);
+    // VALVE OPTO
+    GPIOA->CRH &= (GPIO_Crh_P15);
+    GPIOA->CRH |= (GPIO_Mode_IN_PU_PD_P15);
+    GPIOA->ODR |= (GPIO_Pin_15);
+    GPIOA->CRL &= (GPIO_Crl_P4 & GPIO_Crl_P5 & GPIO_Crl_P6 & GPIO_Crl_P7);
+    GPIOA->CRL |= (GPIO_Mode_Out_PP_50MHz_P4 | GPIO_Mode_Out_PP_50MHz_P5 | GPIO_Mode_Out_PP_50MHz_P6 | GPIO_Mode_Out_PP_50MHz_P7);
+    // ISET1/2  PB0/PB12
+    GPIOB->CRL &= (GPIO_Crl_P0);
+    GPIOB->CRL |= (GPIO_Mode_IN_PU_PD_P0);
+    GPIOB->ODR |= (GPIO_Pin_0);
+    GPIOB->CRH &= (GPIO_Crh_P12);
+    GPIOB->CRH |= (GPIO_Mode_IN_PU_PD_P12);
+    GPIOB->ODR |= (GPIO_Pin_12);
 #endif
 
 #ifdef A12_906

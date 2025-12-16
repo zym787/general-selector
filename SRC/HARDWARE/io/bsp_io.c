@@ -16,10 +16,10 @@
 void bsp_IOInit(void)
 {
     RCC->APB2ENR |= RCC_APB2Periph_AFIO;
-    RCC->APB2ENR |= (RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB);
 
 ///E版本
 #ifdef A12_909
+    RCC->APB2ENR |= (RCC_APB2Periph_GPIOB);
     // FB OUT
     GPIOB->CRH &= (GPIO_Crh_P13);
     GPIOB->CRH |= (GPIO_Mode_Out_PP_50MHz_P13);
@@ -30,6 +30,7 @@ void bsp_IOInit(void)
 #endif
 
 #ifdef A12_906
+    RCC->APB2ENR |= (RCC_APB2Periph_GPIOB);
     // FB OUT
     GPIOB->CRH &= (GPIO_Crh_P13);
     GPIOB->CRH |= (GPIO_Mode_Out_PP_50MHz_P13);
@@ -41,6 +42,7 @@ void bsp_IOInit(void)
 
 ///F版本
 #ifdef A12_926
+    RCC->APB2ENR |= (RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB);
     // OUT1(PB13) OUT2(PA8) FBOUT(PA11) ERROUT(PA12)
     GPIOB->CRH &= (GPIO_Crh_P13);
     GPIOB->CRH |= (GPIO_Mode_Out_PP_50MHz_P13);
@@ -48,14 +50,16 @@ void bsp_IOInit(void)
     GPIOA->CRH &= (GPIO_Crh_P8 | GPIO_Crh_P11 | GPIO_Crh_P12);
     GPIOA->CRH |= (GPIO_Mode_Out_PP_50MHz_P8 | GPIO_Mode_Out_PP_50MHz_P11 | GPIO_Mode_Out_PP_50MHz_P12);
     GPIOA->ODR |= (GPIO_Pin_8 | GPIO_Pin_11 | GPIO_Pin_12);
-    // IO_OUT1 = 0;
-    // IO_OUT2 = 0;
-    // IO_FBOUT = 0;
-    // IO_ERROUT = 0;
+    // IO_OUT1 = 1;
+    // IO_OUT2 = 1;
+    // IO_FBOUT = 1;
+    // IO_ERROUT = 1;
 
     // IN1(PB3) IN2(PB4)
-    GPIOB->CRL &= (GPIO_Crl_P3 | GPIO_Crl_P4);
-    GPIOB->CRL |= (GPIO_Mode_IN_PU_PD_P3 | GPIO_Mode_IN_PU_PD_P4);
+    GPIOB->CRL &= (GPIO_Crl_P3);
+    GPIOB->CRL |= (GPIO_Mode_IN_PU_PD_P3);
+    GPIOB->CRL &= (GPIO_Crl_P4);
+    GPIOB->CRL |= (GPIO_Mode_IN_PU_PD_P4);
 #endif
 }
 
@@ -69,7 +73,7 @@ void bsp_IODetect(void)
 {
     if (true  == syspara.ioCtrl)
     {
-#ifdef A12_909
+#ifdef IOCTRL
         static uint8_t InPosition = 0; /* 单程执行完成标志 */
         /// BI悬空/接5V 输出0 状态A
         /// AI悬空/接0V 输出0 状态A
@@ -302,8 +306,6 @@ void bsp_IODetect(void)
         else if (VALVE_ERR == Valve.status)
         {
             IO_FBOUT = ON;
-            IO_OUT1 = ON;
-            IO_OUT2 = ON;
             IO_ERROUT = OFF;
         }
         ///运行&初始化
