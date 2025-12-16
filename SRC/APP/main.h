@@ -8,8 +8,8 @@
 #endif
 
 #define DESCRIPTION         "Selector Valve"
-#define SOFTWARE_VERSION    "r37"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0037     /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r38"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0038     /* 软件修改版次 */
 
 #define BOARD_0     0x88
 #define BOARD_1     0x66
@@ -95,6 +95,7 @@
 //                              1/悬空  0       3       1       0       保持时为0,否则1
 //                              0       0       4       0       0       报错时,其他引脚全高
 //  v2.0.0CDEF-r37  2025.12.15  F版本默认12通,指定顺序切换1-12-11-10
+//  v2.0.0CDEF-r38  2025.12.16  F版本默认12通,指定顺序切换1-2-3-4
 
 //----EEPROM存储地址分配---//
 //------------------------------------------------------------------------------------------------------------

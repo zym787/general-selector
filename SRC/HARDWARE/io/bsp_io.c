@@ -269,7 +269,7 @@ void bsp_IODetect(void)
         /// IOOUT   3 2 1 0
         uint8_t IoInStatus = 0x03 & (~(IO_IN1 << 0 | IO_IN2 << 1));
         uint8_t IoOutStatus = 0;
-        uint8_t StatusChannel[4] = {1, 12, 11, 10};
+        uint8_t StatusChannel[4] = {1, 2, 3, 4};
         if (VALVE_RUN_END == Valve.status)
         {
             dbg_printf("\r\n > Status    1  2  3  4");
