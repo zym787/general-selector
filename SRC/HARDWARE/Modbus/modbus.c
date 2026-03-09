@@ -260,14 +260,19 @@ void MB_ReadHoldingRegisters(void)
             ModbusPara.tBuf[3] = Valve.spd; /* 速度 */
             byteCount = 4;
         }
-//        else if(0x0A == op_addr)           /* 读切换次数 */
-//        {
-//            ModbusPara.tBuf[3] = ((uint8*)&syspara.totalCnt)[3];
-//            ModbusPara.tBuf[4] = ((uint8*)&syspara.totalCnt)[2];
-//            ModbusPara.tBuf[5] = ((uint8*)&syspara.totalCnt)[1];
-//            ModbusPara.tBuf[6] = ((uint8*)&syspara.totalCnt)[0];
-//            byteCount = 7;
-//        }
+       else if(0x0A == op_addr)           /* 读切换次数 */
+       {
+           ModbusPara.tBuf[3] = ((uint8*)&syspara.totalCnt)[3];
+           ModbusPara.tBuf[4] = ((uint8*)&syspara.totalCnt)[2];
+           ModbusPara.tBuf[5] = ((uint8*)&syspara.totalCnt)[1];
+           ModbusPara.tBuf[6] = ((uint8*)&syspara.totalCnt)[0];
+           if(syspara.totalCnt != syspara.totalCntLst)
+           {
+               I2CPageWrite_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, ((uint8*)&syspara.totalCnt));
+               syspara.totalCntLst = syspara.totalCnt;
+           }
+           byteCount = 7;
+       }
         else if (0x0C == op_addr)   /* 读停留时间 */
         {
          I2CPageRead_Nbytes(ADDR_PAUSE_TIME, LEN_PAUSE_TIME, (uint8_t*)&syspara.pauseTime);
@@ -461,6 +466,21 @@ void MB_PresetSingleHoldingRegister(void)
             else
             { 
                 ModbusPara.sERR = ERR_MB_DATA;  /* 操作数据无效 */
+            }
+        }
+        else if(0x0A == op_addr)        /* 写切换次数 */
+        {
+            if (9 == ModbusPara.rCnt)
+            {
+                ((uint8*)&syspara.totalCnt)[0] = ModbusPara.rBuf[6];
+                ((uint8*)&syspara.totalCnt)[1] = ModbusPara.rBuf[5];
+                ((uint8*)&syspara.totalCnt)[2] = ModbusPara.rBuf[4];
+                ((uint8*)&syspara.totalCnt)[3] = ModbusPara.rBuf[3];
+                I2CPageWrite_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, (uint8*)&syspara.totalCnt);
+            }
+            else
+            {
+                ModbusPara.sERR = ERR_MB_DATA;   /* 操作数据无效 */
             }
         }
         else if (0x0C == op_addr)   /* 写停留时间 */

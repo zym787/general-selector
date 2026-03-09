@@ -176,6 +176,9 @@ void ParameterInit(void)
         for (uint8_t i = 0; i < 4; ++i)
             printd(" %d", *(Valve.StatusChannel + i));
 #endif
+        /* 切换次数 */
+        I2CPageRead_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, ((uint8*)&syspara.totalCnt));
+        printd("\r\n 切换次数:%d", syspara.totalCnt);
     }
     else
     {
@@ -441,6 +444,14 @@ void everySecDo(void)
     if (timerPara.sec > SEC)
     {
         timerPara.sec = 0;
+        if(VALVE_RUN_END == Valve.status)
+        {
+            if(syspara.totalCnt != syspara.totalCntLst) /* 保存切换次数 */
+            {
+                syspara.totalCntLst = syspara.totalCnt;
+                I2CPageWrite_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, (uint8*)&syspara.totalCnt);
+            }
+        }
         // 超时报错
         // 单通道间做5秒的超时处理，避免长时间堵转烧坏电路
         if ((Valve.status == VALVE_RUNNING && syspara.protectTimeOut > SINGLE_RUN_TIMEOUT * SEC) ||

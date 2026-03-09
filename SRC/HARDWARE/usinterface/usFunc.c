@@ -879,7 +879,7 @@ void TermIO(char rw)
  */
 void TermInspection(char rw)
 {
-    printd("\r\n ***************< 点检模式 >***************\r\n");
+    printd("\r\n ***************< 点检模式 >***************");
     /* 点检参数 */
     printd("\r\n 版本       (VR)   : %s", SOFT_VER_C);               /* 版本号 */
     printd("\r\n 电路板     (PCB)  : %s", PCB_VR);                   /* PCB版本号 */
@@ -894,10 +894,16 @@ void TermInspection(char rw)
     printd("\r\n 顺时针补偿 (CCW)  : %d", Valve.fDirCCw);            /* 逆时针补偿 */
     printd("\r\n 原点补偿   (FIXO) : %d", Valve.fixOrg);             /* 原点补偿 */
     printd("\r\n 方向补偿   (FIXG) : %d", valveFix.fix.dirGap);      /* 方向补偿 */
+    printd("\r\n 老化次数  (TESTC) : %d", syspara.burnCnt);          /* 老化次数 */
+    printd("\r\n 切换次数  (MOVES) : %d", syspara.totalCnt);      /* 切换次数 */
 #ifdef FIRST_HOLE_IO_E
     printd("\r\n IO控制     (IOE)  : 1");                            /* IO */
     printd("\r\n 停留时间   (REPLY): %d", syspara.pauseTime);        /* 停留时间 */
 #endif // FIRST_HOLE_IO_E
+#ifdef FIRST_HOLE_MUT_IO_F
+    printd("\r\n                         1  2  3  4");
+    printd("\r\n 切换顺序     (STATC)  : %d %d %d %d", Valve.StatusChannel[0], Valve.StatusChannel[1], Valve.StatusChannel[2], Valve.StatusChannel[3]);                            /* IO */
+#endif // FIRST_HOLE_MUT_IO_F
     /* 序列号 */
     printd("\r\n 序列号     (SN)   : %02X %02X %02X %02X %02X", 
         Valve.SnCode[0], Valve.SnCode[1], Valve.SnCode[2], Valve.SnCode[3], Valve.SnCode[4]);
@@ -982,6 +988,33 @@ void TermStateChannel(char rw)
 #endif
 }
 
+/*
+ * 切换次数
+ */
+void TermMovesCnt(char rw)
+{
+    int getInt = 0;
+    printd("\r\n func %s", __func__);
+    if(rw == READ_ACT)
+    {
+        I2CPageRead_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, ((uint8*)&syspara.totalCnt));
+        printd("\r 切换次数:%d", syspara.totalCnt);
+    }
+    else
+    {
+        unsigned char ret = FetchInt(5, 0, str.rcvStr, &getInt);
+        if(ret)
+        {
+            printd("\r Err code %d", ret);
+            return;
+        }
+        syspara.totalCnt = getInt;
+        printd("\r 写入切换次数:%d", syspara.totalCnt);
+        I2CPageWrite_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, (uint8*)&syspara.totalCnt);
+    }
+}
+
+
 //-------------------------界面相关定制函数-------------------------//
 _TAB_T TermTab[]=
 {
@@ -1014,6 +1047,7 @@ _TAB_T TermTab[]=
     {26,    (*TermIO)},
     {27,    (*TermTestCnt)},
     {28,    (*TermStateChannel)},
+    {29,    (*TermMovesCnt)},
 };
 
 /*
@@ -1159,6 +1193,11 @@ void ChRUN(char *cmdName)
     {
         (!strcasecmp(cmdName, "STATC")) ? (bRw = READ_ACT) : (bRw = WRITE_ACT);
         FuncIndex = 28;
+    }
+    else if (!strcasecmp(cmdName, "MOVES") || !strncasecmp(cmdName, "MOVES", 5))
+    {
+        (!strcasecmp(cmdName, "MOVES")) ? (bRw = READ_ACT) : (bRw = WRITE_ACT);
+        FuncIndex = 29;
     }
     else
     {

@@ -8,8 +8,8 @@
 #endif
 
 #define DESCRIPTION         "Selector Valve"
-#define SOFTWARE_VERSION    "r43"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0043     /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r44"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0044     /* 软件修改版次 */
 
 #define BOARD_0     0x88
 #define BOARD_1     0x66
@@ -101,6 +101,7 @@
 //  v2.0.0CDEF-r41  2025.12.16  F修复引脚初始化
 //  v2.0.0CDEF-r42  2025.12.16  F修复输入引脚持续为高问题
 //  v2.0.0CDEF-r43  2026.03.09  串口新增0D功能码读写半通道功能,点检模式支援波特率值显示
+//  v2.0.0CDEF-r44  2026.03.09  新增切换次数记录,下载口MOVES/串口0A功能码读写切换次数
 
 
 //----EEPROM存储地址分配---//
@@ -165,6 +166,9 @@
 #define ADDR_STATE_CHANNEL		(ADDR_BURN_CNT+LEN_BURN_CNT)
 #define LEN_STATE_CHANNEL		4
 
+#define ADDR_TOTAL_CNT          (ADDR_STATE_CHANNEL+LEN_STATE_CHANNEL)
+#define LEN_TOTAL_CNT           4
+
 //------------------------------------------------------------------------------------------------------------
 
 #define NORMAL_BLINK            1500       //正常运行的闪烁间隔
@@ -195,6 +199,8 @@ typedef struct
     bool ioCtrl;            /* IO控制位 */
     uint32_t pauseTime;     /* 停留时间 */
     bool ctrlPause;         /* 停留时间控制 */
+    uint32_t    totalCnt;           /* 切换次数 */
+    uint32_t    totalCntLst;
 }_SYS_T;
 PEXT _SYS_T syspara;
 

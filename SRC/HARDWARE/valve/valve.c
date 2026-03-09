@@ -298,6 +298,7 @@ void ProcessValve(void)
                         Valve.retryTms = 0;
                         Valve.statusLast = 0;
                         Valve.status = VALVE_RUN_END;
+                        ++syspara.totalCnt;     /* ÇÐ»»´ÎÊý+1 */
                         syspara.bCountLastTime = false;
                         getPrePort();
                         VALVE_ENA = DISABLE;
