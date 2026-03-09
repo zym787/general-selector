@@ -8,6 +8,25 @@ void (*FuncPtr)(char rw);          //函数功能指针
 _TAB_T TermTab[];
 
 
+/**
+ * @brief 获取UART波特率字符串描述
+ * @param bdrate 波特率枚举值
+ * @return 对应波特率的字符串，无效值返回"Error"
+ */
+const char* getBaudRateString(int bdrate) {
+  // 检查波特率值并返回对应字符串
+  if (bdrate == UART_BAUD_9600) {
+    return "9600";
+  } else if (bdrate == UART_BAUD_19200) {
+    return "19200";
+  } else if (bdrate == UART_BAUD_38400) {
+    return "38400";
+  } else {
+    return "Error";
+  }
+}
+
+
 /*
 
 */
@@ -561,7 +580,7 @@ void TermBaud(char rw)
     if(rw == READ_ACT)
     {
         I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
-        printd("\r\n 读取波特率:%d", syspara.bdrate);
+        printd("\r 波特率:%d %sbps", syspara.bdrate, getBaudRateString(syspara.bdrate));
     }
     else
     {
@@ -867,7 +886,7 @@ void TermInspection(char rw)
     printd("\r\n 编译时间   (TIME) : %s %s", __DATE__, __TIME__);    /* 时间 */
     printd("\r\n 地址       (ADDR) : %d", ModbusPara.mAddrs);        /* 地址 */
     printd("\r\n 通道数     (CNT)  : %d", valveFix.fix.portCnt);     /* 通道数 */
-    printd("\r\n 波特率     (BAUD) : %d", syspara.bdrate);           /* 波特率 */
+    printd("\r\n 波特率     (BAUD) : %d %sbps", syspara.bdrate, getBaudRateString(syspara.bdrate));           /* 波特率 */
     printd("\r\n 速度       (SPD)  : %d", Valve.spd);                /* 速度 */
     printd("\r\n 减速比     (RDCR) : %d", rdc.rate);                 /* 减速比 */
     printd("\r\n 半通道     (HALF) : %d", Valve.bHalfSeal);          /* 半通道 */

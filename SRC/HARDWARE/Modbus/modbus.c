@@ -39,7 +39,7 @@ void ModbusInit(void)
         TIM3_Init(MODBUS_TIME_9600, 71);   // 45us--0.45ms
     }
     delay_ms(100);
-    printd("\r Init AGS UART2/3 Baud:%d", syspara.bdrate);
+    //printd("\r Init AGS UART2/3 Baud:%d", syspara.bdrate);
 
     // 参数配置
     ModbusPara.sRUN =  MB_IDEL;
@@ -288,6 +288,12 @@ void MB_ReadHoldingRegisters(void)
             byteCount = 7;
         }
         #endif
+        else if (0x0D == op_addr)        /* 读半通道 */
+        {
+                I2CPageRead_Nbytes(ADDR_HALF_SEAL, LEN_HALF_SEAL, &Valve.bHalfSeal);
+                ModbusPara.tBuf[3] = Valve.bHalfSeal;
+                byteCount = 4;
+        }
         else if(0x63 == op_addr)        /* 读通道数 */
         {
             I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
@@ -472,6 +478,19 @@ void MB_PresetSingleHoldingRegister(void)
                 syspara.pauseTime = 0;
                 ModbusPara.sERR = ERR_MB_DATA;  /*  */
             }
+        }
+        else if (0x0D == op_addr)        /* 写半通道 */
+        {
+                if ((OFF == ModbusPara.rBuf[3] || ON == ModbusPara.rBuf[3]) &&
+                    6 == ModbusPara.rCnt)
+                {
+                    Valve.bHalfSeal = ModbusPara.rBuf[3];
+                    I2CPageWrite_Nbytes(ADDR_HALF_SEAL, LEN_HALF_SEAL, &Valve.bHalfSeal);
+                }
+                else
+                {
+                    ModbusPara.sERR = ERR_MB_DATA;  /* 操作数据无效 */
+                }
         }
 //        else if(0xFF == op_addr)
 //        {

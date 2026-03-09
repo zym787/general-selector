@@ -29,9 +29,14 @@ void ParameterInit(void)
 
         /* 波特率 */
         I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
-        printd("\r 波特率: %d  %s bps", syspara.bdrate, 
-            (syspara.bdrate) == UART_BAUD_9600 ? "9600" : (syspara.bdrate) == UART_BAUD_19200 ? "19200" : 
-            (syspara.bdrate) == UART_BAUD_38400 ? "38400" : "Error");
+        if (BAUD_MIN <= syspara.bdrate && BAUD_MAX >= syspara.bdrate) {
+            printd("\r 波特率: %d  %sbps", syspara.bdrate, getBaudRateString(syspara.bdrate));
+        }
+        else {
+            syspara.bdrate = BAUD_DEF;
+            printd("\r 波特率超限,默认写入%d 9600bps 请重新设置!", syspara.bdrate);
+            I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
+        }
 
         // 通道数
         I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
@@ -500,7 +505,7 @@ int main(void)
     printd("\r\n         1/悬空    0    |  1      0      %d   (3)", Valve.StatusChannel[2]);
     printd("\r\n           0       0    |  0      0      %d   (4)", Valve.StatusChannel[3]);
     printd("\r\n 运行中: FBOUT输出1,OUT1/OUT2保持先前状态,到位后FBOUT输出0");
-    printd("\r\n 报错时: 无论IN1/IN2输入何值,ERROUT输出0,FBOUT/OUT1/OUT2输出1");
+    printd("\r\n 报错时: 无论IN1/IN2输入何值,ERROUT输出0,FBOUT输出1,OUT1/OUT2保持先前状态");
     printd("\r\n-------------------------------------------------------------\r\n");
 #endif
     if (syspara.typeProtocal == MY_MODBUS)
