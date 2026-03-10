@@ -44,6 +44,6 @@ CompileFlags:
     - -D"__SOFTFP__=1"
     - -D"__ARMCC_VERSION=5060960"
   Remove: []
-  CompilationDatabase: ./build/VALVE
+  CompilationDatabase: ./build/XZF_VALVE
 Diagnostics:
   Suppress: "*"

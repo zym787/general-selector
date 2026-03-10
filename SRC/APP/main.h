@@ -178,10 +178,10 @@
 #define	RX_EN()		(PBout(1)=0)
 #define	TX_EN()		(PBout(1)=1)
 
-    enum PROTOCAL {
-        MY_MODBUS,
-        EXT_COMM
-    };
+enum PROTOCAL {
+    MY_MODBUS,
+    EXT_COMM
+};
 
 typedef struct
 {

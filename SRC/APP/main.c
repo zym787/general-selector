@@ -392,8 +392,8 @@ void errProcRun(void)
 #define SINGLE_INITING_TIMOUT 14 // 转一圈差不多3秒，复位单次是两圈
 void everySecDo(void)
 {
+    /* 开机1号孔 */
 #ifdef FIRST_HOLE
-    /// 开机1号孔
     if (!Valve.bHalfSeal)
     {
         // 非半通道走位
@@ -444,15 +444,18 @@ void everySecDo(void)
     if (timerPara.sec > SEC)
     {
         timerPara.sec = 0;
+        
+        /* 切换次数发生变化时写入 */
         if(VALVE_RUN_END == Valve.status)
         {
-            if(syspara.totalCnt != syspara.totalCntLst) /* 保存切换次数 */
+            if(syspara.totalCnt != syspara.totalCntLst)
             {
                 syspara.totalCntLst = syspara.totalCnt;
                 I2CPageWrite_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, (uint8*)&syspara.totalCnt);
             }
         }
-        // 超时报错
+        
+        /* 超时报错 */
         // 单通道间做5秒的超时处理，避免长时间堵转烧坏电路
         if ((Valve.status == VALVE_RUNNING && syspara.protectTimeOut > SINGLE_RUN_TIMEOUT * SEC) ||
             (Valve.status & VALVE_INITING && syspara.protectTimeOut > SINGLE_INITING_TIMOUT * SEC))

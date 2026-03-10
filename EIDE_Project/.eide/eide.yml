@@ -1,5 +1,5 @@
 version: "4.1"
-name: STM32F_VALVE
+name: XZF
 type: ARM
 deviceName: null
 packDir: null
@@ -37,15 +37,16 @@ virtualFolder:
         - path: ../SRC/SYSTEM/timer/timer.c
         - path: ../SRC/SYSTEM/adc/adc.c
       folders: []
-    - name: Doc
-      files:
-        - path: ../Doc/Valve_v2.0.0修改说明.md
-      folders: []
     - name: StdPeriph_Driver
       files:
         - path: ../SRC/CoreSupport/STM32F10x_StdPeriph_Driver/src/stm32f10x_adc.c
         - path: ../SRC/CoreSupport/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c
         - path: ../SRC/CoreSupport/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c
+        - path: ../SRC/CoreSupport/stm32f10x_conf.h
+      folders: []
+    - name: Doc
+      files:
+        - path: ../Doc/Valve_v2.0.0修改说明.md
       folders: []
 dependenceList: []
 outDir: build
@@ -89,6 +90,148 @@ targets:
           version: 4
           afterBuildTasks: []
           asm-compiler: {}
+          beforeBuildTasks: []
+          c/cpp-compiler:
+            CXX_FLAGS: --diag_suppress=1 --diag_suppress=1295
+            C_FLAGS: --diag_suppress=1 --diag_suppress=1295
+            c99-mode: true
+            one-elf-section-per-function: true
+            optimization: level-0
+            warnings: all-warnings
+          global:
+            output-debug-info: enable
+            use-microLIB: false
+          linker:
+            $outputTaskExcludes:
+              - .bin
+            output-format: elf
+            ro-base: "0x08000000"
+            rw-base: "0x20000000"
+            xo-base: ""
+        scatterFilePath: ../OBJ/STM32F103H.sct
+        storageLayout:
+          RAM:
+            - id: 1
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 2
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 3
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 1
+              isChecked: true
+              mem:
+                size: "0x5000"
+                startAddr: "0x20000000"
+              noInit: false
+              tag: IRAM
+            - id: 2
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: IRAM
+          ROM:
+            - id: 1
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 2
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 3
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 1
+              isChecked: true
+              isStartup: true
+              mem:
+                size: "0x10000"
+                startAddr: "0x8000000"
+              tag: IROM
+            - id: 2
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: IROM
+        useCustomScatterFile: false
+    uploadConfigMap:
+      JLink:
+        baseAddr: ""
+        bin: ""
+        cpuInfo:
+          cpuName: "null"
+          vendor: "null"
+        otherCmds: ""
+        proType: 1
+        speed: 8000
+    uploader: JLink
+  XZF_VALVE:
+    cppPreprocessAttrs:
+      defineList:
+        - STM32F10X_MD
+        - USE_STDPERIPH_DRIVER
+      incList:
+        - ../SRC/APP
+        - ../SRC/SYSTEM/timer
+        - ../SRC/SYSTEM/delay
+        - ../SRC/SYSTEM/sys
+        - ../SRC/SYSTEM/usart
+        - ../SRC/CoreSupport
+        - ../SRC/HARDWARE/usinterface
+        - ../SRC/HARDWARE/stmFlash
+        - ../SRC/HARDWARE/motor
+        - ../SRC/HARDWARE/valve
+        - ../SRC/HARDWARE/EEPROM
+        - ../SRC/HARDWARE/Modbus
+        - ../SRC/HARDWARE/protExt
+        - ../SRC/HARDWARE/signal
+        - ../SRC/HARDWARE/io
+        - ../SRC/SYSTEM/adc
+        - ../SRC/CoreSupport/STM32F10x_StdPeriph_Driver/inc
+        - .cmsis/include
+        - ../USER/RTE/_XZF_VALVE
+      libList: []
+    excludeList: []
+    toolchain: AC5
+    toolchainConfigMap:
+      AC5:
+        archExtensions: ""
+        cpuType: Cortex-M3
+        floatingPointHardware: none
+        options:
+          version: 4
+          afterBuildTasks: []
+          asm-compiler:
+            defines: []
           beforeBuildTasks: []
           c/cpp-compiler:
             CXX_FLAGS: --diag_suppress=1 --diag_suppress=1295

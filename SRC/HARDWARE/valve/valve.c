@@ -522,6 +522,8 @@ void ValveLimitDetect(void)
                     srd[0].accel_count = -DEG_DECCEL*rdc.stepP01dgr;
                     position[0]= -DEG_DECCEL*rdc.stepP01dgr;
                     srd[0].run_state = DECEL;
+                    
+                    /* °ëÍ¨µÀ */
                     if (Valve.bHalfSeal)
                     {
                         if (Valve.status & VALVE_INITING && Valve.bNewInit == 0xff)
