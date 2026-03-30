@@ -140,7 +140,7 @@
 #include "smotor.h"
 #include "EEP24serial.h"
 #include "protext.h"
-#include "modbus.h"
+#include "ags_mb.h"
 #include "main.h"
 #include "signal.h"
 #include "valve.h"

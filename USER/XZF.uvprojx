@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_MD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\SRC\APP;..\SRC\SYSTEM\timer;..\SRC\SYSTEM\delay;..\SRC\SYSTEM\sys;..\SRC\SYSTEM\usart;..\SRC\CoreSupport;..\SRC\HARDWARE\usinterface;..\SRC\HARDWARE\stmFlash;..\SRC\HARDWARE\motor;..\SRC\HARDWARE\valve;..\SRC\HARDWARE\EEPROM;..\SRC\HARDWARE\Modbus;..\SRC\HARDWARE\protExt;..\SRC\HARDWARE\signal;..\SRC\HARDWARE\io;..\SRC\SYSTEM\adc;..\SRC\CoreSupport\STM32F10x_StdPeriph_Driver\inc</IncludePath>
+              <IncludePath>..\SRC\APP;..\SRC\SYSTEM\timer;..\SRC\SYSTEM\delay;..\SRC\SYSTEM\sys;..\SRC\SYSTEM\usart;..\SRC\CoreSupport;..\SRC\HARDWARE\usinterface;..\SRC\HARDWARE\stmFlash;..\SRC\HARDWARE\motor;..\SRC\HARDWARE\valve;..\SRC\HARDWARE\EEPROM;..\SRC\HARDWARE\ags_mb;..\SRC\HARDWARE\protExt;..\SRC\HARDWARE\signal;..\SRC\HARDWARE\io;..\SRC\SYSTEM\adc;..\SRC\CoreSupport\STM32F10x_StdPeriph_Driver\inc;..\SRC\3rd\common;..\SRC\3rd\xfusion\xf_common;..\SRC\3rd\xfusion\xf_utils_log;..\SRC\3rd\xfusion</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -483,19 +483,9 @@
               <FilePath>..\SRC\HARDWARE\EEPROM\EEP24Serial.c</FilePath>
             </File>
             <File>
-              <FileName>modbus.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\SRC\HARDWARE\Modbus\modbus.c</FilePath>
-            </File>
-            <File>
               <FileName>usFunc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\SRC\HARDWARE\usinterface\usFunc.c</FilePath>
-            </File>
-            <File>
-              <FileName>ModBusCrc16.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\SRC\HARDWARE\Modbus\ModBusCrc16.c</FilePath>
             </File>
             <File>
               <FileName>USINTF_CR-0.lib</FileName>
@@ -506,6 +496,16 @@
               <FileName>Smotor.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\SRC\HARDWARE\motor\Smotor.lib</FilePath>
+            </File>
+            <File>
+              <FileName>ags_mb.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SRC\HARDWARE\ags_mb\ags_mb.c</FilePath>
+            </File>
+            <File>
+              <FileName>ModBusCrc16.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SRC\HARDWARE\ags_mb\ModBusCrc16.c</FilePath>
             </File>
             <File>
               <FileName>protExt.c</FileName>
@@ -655,6 +655,31 @@
               <FileName>XZF_v2.0.0修改说明.md</FileName>
               <FileType>5</FileType>
               <FilePath>..\Doc\XZF_v2.0.0修改说明.md</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>3rd/xfusion</GroupName>
+          <Files>
+            <File>
+              <FileName>xf_utils_log_dump.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SRC\3rd\xfusion\xf_utils_log\xf_utils_log_dump.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>elab/common</GroupName>
+          <Files>
+            <File>
+              <FileName>elab_log.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SRC\3rd\common\elab_log.c</FilePath>
+            </File>
+            <File>
+              <FileName>elab_common.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SRC\3rd\common\elab_common.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -83,7 +83,7 @@ void RxUsart(uint8_t res)
 			}
 			break;
 		case PROTOCOL_ADDR:
-			if(res == ModbusPara.mAddrs)
+			if(res == ags_mbParam.mAddrs)
 			{
 				RCV_Buf(res);
 				protext.stepCnt = PROTOCOL_COMMAND;
@@ -132,7 +132,7 @@ void RxUsart(uint8_t res)
 //	}
 //	else if(protext.stepCnt==PROTOCOL_ADDR)
 //	{
-//        if(ModbusPara.mAddrs==res)
+//        if(ags_mbParam.mAddrs==res)
 //    	{// 开始接收数据
 //    	    protext.stepCnt = PROTOCOL_COMMAND;
 //    		protext.rxCount = 2;
@@ -146,7 +146,7 @@ void RxUsart(uint8_t res)
 //	else if(protext.stepCnt>PROTOCOL_COMMAND)
 //	{
 //		// 如果溢出或者传输过程出现时间间隔超过T1.5，都不在接收
-//		if(ModbusPara.times<FRAME_ERR_TIME)
+//		if(ags_mbParam.times<FRAME_ERR_TIME)
 //			protext.usartBuf[protext.rxCount] = res;
 //		else
 //		    ERR_Reset();
@@ -436,8 +436,8 @@ void ProtocalSet(void)
 {
     if(protext.usartBuf[6]==AGS_MODBUS || protext.usartBuf[6]==EXT_COMM)
     {
-//        syspara.protocol_type = ModbusPara.rBuf[3];
-        I2CPageWrite_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &ModbusPara.rBuf[3]);
+//        syspara.protocol_type = ags_mbParam.rBuf[3];
+        I2CPageWrite_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &ags_mbParam.rBuf[3]);
     }
 }
 

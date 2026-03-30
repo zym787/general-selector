@@ -576,7 +576,7 @@ void ValveLimitDetect(void)
 void TestBurn(void)
 {
     static uint32_t bDir = 0;
-    if(BURN_ADDR == ModbusPara.mAddrs)
+    if(BURN_ADDR == ags_mbParam.mAddrs)
     {
         if(timerPara.timeWaitMill > intCtrl*SEC)
         {// 30秒间隔，启动模块运转到下一个通道

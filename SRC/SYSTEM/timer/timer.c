@@ -80,7 +80,7 @@ void TIM3_IRQHandler(void)
 	if(TIM3->SR&0X0001)//溢出中断
 	{
         TIM3->SR &= ~0x0001 ;//清除中断标志位
-        ModbusTimesProcess();
+        ags_mbTimesProcess();
 	}
 }
 

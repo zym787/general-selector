@@ -272,7 +272,7 @@ void TermTs(char rw)
             case 2:
                 if(getInt[1]<=64)
                 {
-                    ModbusPara.mAddrs = getInt[1];
+                    ags_mbParam.mAddrs = getInt[1];
                     printd("\r\n Set addrs %d", getInt[1]);
                     I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, (uint8_t *)&getInt[1]);
                 }
@@ -382,8 +382,8 @@ void TermAddr(char rw)
     int getInt=0;
     if(rw == READ_ACT)
     {
-        I2CPageRead_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara.mAddrs);
-        printd("\r\n 读取地址 %d", ModbusPara.mAddrs);
+        I2CPageRead_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ags_mbParam.mAddrs);
+        printd("\r\n 读取地址 %d", ags_mbParam.mAddrs);
     }
     else
     {
@@ -395,16 +395,16 @@ void TermAddr(char rw)
         }
         if(AGS_ADDR_MIN <= getInt && BURN_ADDR >= getInt)
         {
-            ModbusPara.mAddrs = getInt;
-            printd("\r\n 设置地址 %d", ModbusPara.mAddrs);
+            ags_mbParam.mAddrs = getInt;
+            printd("\r\n 设置地址 %d", ags_mbParam.mAddrs);
         }
         else
         {
             printd("\r\n %d 地址超出范围 (合法地址:%d-%d)", getInt, AGS_ADDR_MIN, BURN_ADDR);
-            ModbusPara.mAddrs = AGS_ADDR_DEF;
-            printd("\r\n 使用默认地址 %d", ModbusPara.mAddrs);
+            ags_mbParam.mAddrs = AGS_ADDR_DEF;
+            printd("\r\n 使用默认地址 %d", ags_mbParam.mAddrs);
         }
-        I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara.mAddrs);
+        I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ags_mbParam.mAddrs);
     }
 }
 
@@ -861,7 +861,7 @@ void TermInspection(char rw)
     printd("\r\n 版本       (VR)   : %s", SOFT_VER_C);               /* 版本号 */
     printd("\r\n 电路板     (PCB)  : %s", PCB_VR);                   /* PCB版本号 */
     printd("\r\n 编译时间   (TIME) : %s %s", __DATE__, __TIME__);    /* 时间 */
-    printd("\r\n 地址       (ADDR) : %d", ModbusPara.mAddrs);        /* 地址 */
+    printd("\r\n 地址       (ADDR) : %d", ags_mbParam.mAddrs);        /* 地址 */
     printd("\r\n 通道数     (CNT)  : %d", valveFix.fix.portCnt);     /* 通道数 */
     printd("\r\n 波特率     (BAUD) : %d %dbps", syspara.baudrate, BaudRate_V[syspara.baudrate]); /* 波特率 */
     printd("\r\n 速度       (SPD)  : %d", Valve.spd);                /* 速度 */

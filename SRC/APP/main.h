@@ -214,7 +214,6 @@ typedef struct {
         bool bRdPulse; /* ?读取脉冲标志 */
         uint32_t OptBlockLast;
         uint32_t protectTimeOut;
-        //    uint32_t totalCnt;        /* 切换次数 */
         uint32_t burnCnt;  // 烧机次数
         bool bCountLastTime;
         uint32_t lastTime;      /* 切换时间 */
