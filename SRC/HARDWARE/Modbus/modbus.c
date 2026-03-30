@@ -1,19 +1,20 @@
 #define _MODBUS_GLOBALS_
 #include "common.h"
 
+uint16_t BaudRate_V[BAUD_NUM] = {0, 9600, 19200, 38400};
 
 void ModbusInit(void)
 {
     unsigned char cnt;
     RX_EN();        /* 开机为接收模式 */
 
-    I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
-    if(UART_BAUD_38400 < syspara.bdrate)
+    I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.baudrate);
+    if(BAUD_38400 < syspara.baudrate)
     {
-        syspara.bdrate = UART_BAUD_9600;    /* 9600 */
+        syspara.baudrate = BAUD_9600;    /* 9600 */
     }
 
-    if(UART_BAUD_19200 == syspara.bdrate)       /* 19200 */
+    if(BAUD_19200 == syspara.baudrate)       /* 19200 */
     {
         Usart2_Init(36, BAUD_RATE_19200);   /* UART2 19200bps */
         delay_ms(100);
@@ -21,7 +22,7 @@ void ModbusInit(void)
         delay_ms(100);
         TIM3_Init(MODBUS_TIME_19200, 71);   // 45us--0.45ms
     }
-    else if(UART_BAUD_38400 == syspara.bdrate)  /* 38400 */
+    else if(BAUD_38400 == syspara.baudrate)  /* 38400 */
     {
         Usart2_Init(36, BAUD_RATE_38400);   /* UART2 38400bps */
         delay_ms(100);
@@ -31,7 +32,7 @@ void ModbusInit(void)
     }
     else                                        /* Default 9600 */
     {
-        syspara.bdrate = UART_BAUD_9600;
+        syspara.baudrate = BAUD_9600;
         Usart2_Init(36, BAUD_RATE_9600);   /* UART2 9600bps */
         delay_ms(100);
         Usart3_Init(36, BAUD_RATE_9600);   /* UART3 9600bps */
@@ -39,7 +40,7 @@ void ModbusInit(void)
         TIM3_Init(MODBUS_TIME_9600, 71);   // 45us--0.45ms
     }
     delay_ms(100);
-    //printd("\r Init AGS UART2/3 Baud:%d", syspara.bdrate);
+    //printd("\r Init AGS UART2/3 Baud:%d", syspara.baudrate);
 
     // 参数配置
     ModbusPara.sRUN =  MB_IDEL;
@@ -241,8 +242,8 @@ void MB_ReadHoldingRegisters(void)
         }
         else if(0x07 == op_addr)            /* 读波特率 */
         {
-            I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
-            ModbusPara.tBuf[3] = syspara.bdrate;     /* 波特率 */
+            I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.baudrate);
+            ModbusPara.tBuf[3] = syspara.baudrate;     /* 波特率 */
             byteCount = 4;
         }
         else if(0x08 == op_addr)           /* 读序列号 */
@@ -262,13 +263,13 @@ void MB_ReadHoldingRegisters(void)
         }
        else if(0x0A == op_addr)           /* 读切换次数 */
        {
-           ModbusPara.tBuf[3] = ((uint8*)&syspara.totalCnt)[3];
-           ModbusPara.tBuf[4] = ((uint8*)&syspara.totalCnt)[2];
-           ModbusPara.tBuf[5] = ((uint8*)&syspara.totalCnt)[1];
-           ModbusPara.tBuf[6] = ((uint8*)&syspara.totalCnt)[0];
+           ModbusPara.tBuf[3] = ((uint8_t*)&syspara.totalCnt)[3];
+           ModbusPara.tBuf[4] = ((uint8_t*)&syspara.totalCnt)[2];
+           ModbusPara.tBuf[5] = ((uint8_t*)&syspara.totalCnt)[1];
+           ModbusPara.tBuf[6] = ((uint8_t*)&syspara.totalCnt)[0];
            if(syspara.totalCnt != syspara.totalCntLst)
            {
-               I2CPageWrite_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, ((uint8*)&syspara.totalCnt));
+               I2CPageWrite_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, ((uint8_t*)&syspara.totalCnt));
                syspara.totalCntLst = syspara.totalCnt;
            }
            byteCount = 7;
@@ -324,7 +325,7 @@ void MB_ReadHoldingRegisters(void)
         }
 #ifdef DEBUG_MODBUS
         printd("\r s:");
-        for(uint8 i = 0; i < byteCount; i++)
+        for(uint8_t i = 0; i < byteCount; i++)
             printd(" %02x", ModbusPara.tBuf[i]);
 #endif
     }
@@ -384,8 +385,8 @@ void MB_PresetSingleHoldingRegister(void)
         }
         else if(0x01 == op_addr)        /* 写地址 */
         {
-            if((AGS_ADDR_MIN <= ModbusPara.rBuf[3] && AGS_ADDR_MAX >= ModbusPara.rBuf[3]) && 
-                (6 == ModbusPara.rCnt))
+        //     if((AGS_ADDR_MIN <= ModbusPara.rBuf[3] && AGS_ADDR_MAX >= ModbusPara.rBuf[3]) && 
+        if((AGS_ADDR_MAX >= ModbusPara.rBuf[3]) && (6 == ModbusPara.rCnt))
             {
                 ModbusPara.mAddrs = ModbusPara.rBuf[3];
                 I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara.mAddrs);
@@ -422,12 +423,24 @@ void MB_PresetSingleHoldingRegister(void)
         }
         else if(0x07 == op_addr)        /* 写波特率 */
         {
-            if((UART_BAUD_9600 <= ModbusPara.rBuf[3] &&
-                    UART_BAUD_38400 >= ModbusPara.rBuf[3]) &&
+            if((BAUD_9600 <= ModbusPara.rBuf[3] &&
+                    BAUD_38400 >= ModbusPara.rBuf[3]) &&
                     6 == ModbusPara.rCnt)
             {
-                syspara.bdrate = ModbusPara.rBuf[3];
-                I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
+                    switch (ModbusPara.rBuf[3]) {
+                        case BAUD_9600:
+                            syspara.baudrate = BAUD_9600;
+                            break;
+                        case BAUD_19200:
+                                syspara.baudrate = BAUD_19200;
+                                break;
+                        case BAUD_38400:
+                                syspara.baudrate = BAUD_38400;
+                                break;
+                        default:
+                            break;
+                    }
+                    I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.baudrate);
             }
             else
             {
@@ -472,11 +485,11 @@ void MB_PresetSingleHoldingRegister(void)
         {
             if (9 == ModbusPara.rCnt)
             {
-                ((uint8*)&syspara.totalCnt)[0] = ModbusPara.rBuf[6];
-                ((uint8*)&syspara.totalCnt)[1] = ModbusPara.rBuf[5];
-                ((uint8*)&syspara.totalCnt)[2] = ModbusPara.rBuf[4];
-                ((uint8*)&syspara.totalCnt)[3] = ModbusPara.rBuf[3];
-                I2CPageWrite_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, (uint8*)&syspara.totalCnt);
+                ((uint8_t*)&syspara.totalCnt)[0] = ModbusPara.rBuf[6];
+                ((uint8_t*)&syspara.totalCnt)[1] = ModbusPara.rBuf[5];
+                ((uint8_t*)&syspara.totalCnt)[2] = ModbusPara.rBuf[4];
+                ((uint8_t*)&syspara.totalCnt)[3] = ModbusPara.rBuf[3];
+                I2CPageWrite_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, (uint8_t*)&syspara.totalCnt);
             }
             else
             {
@@ -540,7 +553,7 @@ void MB_PresetSingleHoldingRegister(void)
         }
 #ifdef DEBUG_MODBUS
         printd("\r s:");
-        for(uint8 i=0; i<byteCount; i++)
+        for(uint8_t i=0; i<byteCount; i++)
             printd(" %02x", ModbusPara.tBuf[i]);
 #endif
     }

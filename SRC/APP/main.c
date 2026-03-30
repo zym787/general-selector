@@ -5,8 +5,7 @@ uint8_t valveFixDflt    = 0,
         valveFixDir     = 0,
         valvePortCnt    = 10, 
         IntDflt         = 5, 
-        SpdDflt         = INIT_SPD, 
-        protocalDflt    = MY_MODBUS, 
+        SpdDflt         = INIT_SPD,
         bRdpDflt        = 0;
 
 void ParameterInit(void)
@@ -28,14 +27,14 @@ void ParameterInit(void)
         printd("\r 地址: %d", ModbusPara.mAddrs);
 
         /* 波特率 */
-        I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
-        if (BAUD_MIN <= syspara.bdrate && BAUD_MAX >= syspara.bdrate) {
-            printd("\r 波特率: %d  %sbps", syspara.bdrate, getBaudRateString(syspara.bdrate));
+        I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.baudrate);
+        if (BAUD_MIN <= syspara.baudrate && BAUD_MAX >= syspara.baudrate) {
+                printd("\r 波特率: %d  %dbps", syspara.baudrate, BaudRate_V[syspara.baudrate]);
         }
         else {
-            syspara.bdrate = BAUD_DEF;
-            printd("\r 波特率超限,默认写入%d 9600bps 请重新设置!", syspara.bdrate);
-            I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
+            syspara.baudrate = BAUD_9600;
+            printd("\r 波特率超限,默认写入%d 9600bps 请重新设置!", syspara.baudrate);
+            I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.baudrate);
         }
 
         // 通道数
@@ -72,9 +71,9 @@ void ParameterInit(void)
             printd(" %02X", *(Valve.SnCode + i));
         
         // 控制协议
-        I2CPageRead_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.typeProtocal);
-        printd("\r\n 控制协议: %d %s", syspara.typeProtocal,
-            (syspara.typeProtocal) == MY_MODBUS ? "AGS" : "EXTCOM_HX");
+        I2CPageRead_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.protocol_type);
+        printd("\r\n 控制协议: %d %s", syspara.protocol_type,
+            (syspara.protocol_type) == AGS_MODBUS ? "AGS" : "EXTCOM_HX");
 
         // 扫描标志
         I2CPageRead_Nbytes(ADDR_SYMBOL, LEN_SYMBOL, ReadBuf);
@@ -82,7 +81,7 @@ void ParameterInit(void)
         sig.pulseBlock[0] <<= 8;
         sig.pulseBlock[0] |= ReadBuf[1];
         // lit blade 20 percent
-        uint32 temp=0;
+        uint32_t temp=0;
         temp = sig.pulseBlock[0] * PERCENT_TOLL;
         sig.pulseBlock[3] = temp / PERCENT;
 
@@ -177,7 +176,7 @@ void ParameterInit(void)
             printd(" %d", *(Valve.StatusChannel + i));
 #endif
         /* 切换次数 */
-        I2CPageRead_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, ((uint8*)&syspara.totalCnt));
+        I2CPageRead_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, ((uint8_t*)&syspara.totalCnt));
         printd("\r\n 切换次数:%d", syspara.totalCnt);
     }
     else
@@ -195,8 +194,8 @@ void ParameterInit(void)
         ModbusPara.mAddrs = AGS_ADDR_DEF;
         I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara.mAddrs);
         /* 波特率 1 9600bps */
-        syspara.bdrate = 1;
-        I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
+        syspara.baudrate = BAUD_9600;
+        I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.baudrate);
         /* 通道数 10 */
         valveFix.fix.portCnt = valvePortCnt;
 #ifdef MUT_IOCTRL
@@ -231,14 +230,14 @@ void ParameterInit(void)
         memset(Valve.SnCode, 0, sizeof(Valve.SnCode));
         I2CPageWrite_Nbytes(ADDR_SN, LEN_SN, Valve.SnCode);
         /* 协议 */
-        syspara.typeProtocal = protocalDflt;
-        I2CPageWrite_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.typeProtocal);
+        syspara.protocol_type = AGS_MODBUS;
+        I2CPageWrite_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.protocol_type);
         ///停留时间
         syspara.pauseTime = 0;
         I2CPageWrite_Nbytes(ADDR_PAUSE_TIME, LEN_PAUSE_TIME, (uint8_t*)&syspara.pauseTime);
         ///IO控制
         syspara.ioCtrl = true;
-        I2CPageWrite_Nbytes(ADDR_IO_CTRL, LEN_IO_CTRL, &syspara.ioCtrl);
+        I2CPageWrite_Nbytes(ADDR_IO_CTRL, LEN_IO_CTRL, (uint8_t *)&syspara.ioCtrl);
         ///老化次数
         syspara.burnCnt = 0;
         I2CPageWrite_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
@@ -299,7 +298,7 @@ void ParameterInit(void)
         Valve.bReInit = 1;
     }
     Valve.bNewInit = 0xff;
-    syspara.burnCnt = 0;    // 清空单次开机老化次数
+    //syspara.burnCnt = 0;    // 清空单次开机老化次数
     Valve.goFirstFlag = 0;
 }
 
@@ -451,7 +450,7 @@ void everySecDo(void)
             if(syspara.totalCnt != syspara.totalCntLst)
             {
                 syspara.totalCntLst = syspara.totalCnt;
-                I2CPageWrite_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, (uint8*)&syspara.totalCnt);
+                I2CPageWrite_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, (uint8_t*)&syspara.totalCnt);
             }
         }
         
@@ -493,7 +492,11 @@ int main(void)
 {
     Stm32_Clock_Init(9); /* 系统时钟设置 */
     delay_init(72);      /* 延时初始化 */
-    JTAG_Set(JTAG_SWD_DISABLE);
+#if 0
+        JTAG_Set(JTAG_SWD_DISABLE);
+#else
+    JTAG_Set(JTAG_SWD_ENABLE);
+#endif
     delay_ms(100);
     Usart1_Init(72, 115200); /* 串口初始化为115200 */
     iic_INIT();
@@ -522,14 +525,14 @@ int main(void)
     printd("\r\n 报错时: 无论IN1/IN2输入何值,ERROUT输出0,FBOUT输出1,OUT1/OUT2保持先前状态");
     printd("\r\n-------------------------------------------------------------\r\n");
 #endif
-    if (syspara.typeProtocal == MY_MODBUS)
+    if (syspara.protocol_type == AGS_MODBUS)
         ModbusInit(); // AGS协议
     else
         CommInit(); // HX协议
     ParameterInit();
     while (1)
     {
-        if (syspara.typeProtocal == MY_MODBUS)
+        if (syspara.protocol_type == AGS_MODBUS)
             ModbusProces();
         else
             UsartProcess();
@@ -560,7 +563,7 @@ void DebugOut(void)
                    Valve.OptBlock, VALVE_OPT, Valve.bNewInit);
         dbg_printf("\r\n   状态:0x%02x,当前位:%d,目标位:%d,方向:%d",
                    Valve.status, Valve.portCur, Valve.portDes, srd[0].dir);
-        if (syspara.typeProtocal == MY_MODBUS)
+        if (syspara.protocol_type == AGS_MODBUS)
             dbg_printf("  AGS");
         else
             dbg_printf("  EXTCOM %d %d", protext.stepCnt, protext.time);

@@ -8,7 +8,7 @@
 //arr：自动重装值。
 //psc：时钟预分频数
 //这里使用的是定时器3!
-void TIM2_Init(uint16 arr,uint16 psc)
+void TIM2_Init(uint16_t arr,uint16_t psc)
 {
 	RCC->APB1ENR|=1<<0;	//TIM2时钟使能
  	TIM2->ARR=arr;  	//设定计数器自动重装值//刚好1ms
@@ -64,7 +64,7 @@ void TIM2_IRQHandler(void)
 //arr：自动重装值。
 //psc：时钟预分频数
 //这里使用的是定时器3!
-void TIM3_Init(uint16 arr,uint16 psc)
+void TIM3_Init(uint16_t arr,uint16_t psc)
 {
 	RCC->APB1ENR|=1<<1;	//TIM3时钟使能
  	TIM3->ARR=arr;  	//设定计数器自动重装值//刚好1ms
@@ -90,7 +90,7 @@ void TIM3_IRQHandler(void)
 //arr：自动重装值。
 //psc：时钟预分频数
 //这里使用的是定时器4!
-void TIM4_Init(uint16 arr,uint16 psc)
+void TIM4_Init(uint16_t arr,uint16_t psc)
 {
 	RCC->APB1ENR|=1<<2;	//TIM4时钟使能
  	TIM4->ARR=arr;  	//设定计数器自动重装值//刚好1ms
@@ -133,7 +133,7 @@ void HardFault_Handler(void)
 //arr：自动重装值。
 //psc：时钟预分频数
 //这里使用的是定时器5!
-void TIM5_Init(uint16 arr,uint16 psc)
+void TIM5_Init(uint16_t arr,uint16_t psc)
 {
 	RCC->APB1ENR|=1<<3;	//TIM5时钟使能
  	TIM5->ARR=arr;  	//设定计数器自动重装值//刚好1ms
@@ -158,7 +158,7 @@ void TIM5_IRQHandler(void)
 //arr：自动重装值。
 //psc：时钟预分频数
 //这里使用的是定时器6!
-void TIM6_Init(uint16 arr,uint16 psc)
+void TIM6_Init(uint16_t arr,uint16_t psc)
 {
 	RCC->APB1ENR|=1<<4;	//TIM6时钟使能
  	TIM6->ARR=arr;  	//设定计数器自动重装值//刚好1ms
@@ -184,7 +184,7 @@ void TIM6_IRQHandler(void)
 //arr：自动重装值。
 //psc：时钟预分频数
 //这里使用的是定时器7!
-void TIM7_Init(uint16 arr,uint16 psc)
+void TIM7_Init(uint16_t arr,uint16_t psc)
 {
 	RCC->APB1ENR|=1<<5;	//TIM3时钟使能
  	TIM7->ARR=arr;  	//设定计数器自动重装值//刚好1ms

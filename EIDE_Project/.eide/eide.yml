@@ -80,6 +80,8 @@ targets:
         - ../SRC/CoreSupport/STM32F10x_StdPeriph_Driver/inc
       libList: []
     excludeList: []
+    settings:
+      debugger: cortex-debug
     toolchain: AC5
     toolchainConfigMap:
       AC5:
@@ -221,6 +223,8 @@ targets:
         - ../USER/RTE/_XZF_VALVE
       libList: []
     excludeList: []
+    settings:
+      debugger: cortex-debug
     toolchain: AC5
     toolchainConfigMap:
       AC5:

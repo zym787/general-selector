@@ -8,25 +8,6 @@ void (*FuncPtr)(char rw);          //函数功能指针
 _TAB_T TermTab[];
 
 
-/**
- * @brief 获取UART波特率字符串描述
- * @param bdrate 波特率枚举值
- * @return 对应波特率的字符串，无效值返回"Error"
- */
-const char* getBaudRateString(int bdrate) {
-  // 检查波特率值并返回对应字符串
-  if (bdrate == UART_BAUD_9600) {
-    return "9600";
-  } else if (bdrate == UART_BAUD_19200) {
-    return "19200";
-  } else if (bdrate == UART_BAUD_38400) {
-    return "38400";
-  } else {
-    return "Error";
-  }
-}
-
-
 /*
 
 */
@@ -263,7 +244,7 @@ void TermFetch(char rw)
 void TermTs(char rw)
 {
     int getInt[2]={0, 0};
-//    uint8 buffer[2]={0,0};
+//    uint8_t buffer[2]={0,0};
     if(rw == READ_ACT)
     {
         printd("%s", S_LIST_SH);
@@ -293,7 +274,7 @@ void TermTs(char rw)
                 {
                     ModbusPara.mAddrs = getInt[1];
                     printd("\r\n Set addrs %d", getInt[1]);
-                    I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, (uint8 *)&getInt[1]);
+                    I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, (uint8_t *)&getInt[1]);
                 }
                 break;
             case 59686681:
@@ -503,8 +484,8 @@ void TermSN(char rw)
     {
         I2CPageRead_Nbytes(ADDR_SN, LEN_SN, Valve.SnCode);
         printd("\r\n 读序列号:");
-        for(uint8 i=0; i<10; i++)
-            printd(" %02x", Valve.SnCode[i]);
+        for (uint8_t i = 0; i < LEN_SN; i++)
+          printd(" %02x", Valve.SnCode[i]);
     }
     else
     {
@@ -516,9 +497,9 @@ void TermSN(char rw)
         }
 
         printd("\r\n 设置序列号: ");
-        I2CPageWrite_Nbytes(ADDR_SN, LEN_SN, (uint8*)getInt);
-        for (uint8 i = 0; i < 10; i++)
-            printd(" %02x", Valve.SnCode[i]);
+        I2CPageWrite_Nbytes(ADDR_SN, LEN_SN, (uint8_t*)getInt);
+        for (uint8_t i = 0; i < LEN_SN; i++)
+          printd(" %02x", Valve.SnCode[i]);
     }
 }
 
@@ -530,42 +511,38 @@ void TermProtocal(char rw)
     int getInt=0;
     if(rw == READ_ACT)
     {
-        I2CPageRead_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.typeProtocal);
-        if(MY_MODBUS == syspara.typeProtocal)
+        I2CPageRead_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.protocol_type);
+        printd("\r\n now protocol is");
+        if(AGS_MODBUS == syspara.protocol_type)
         {
-            printd("\r\n AGS");
+            printd(" AGS");
         }
-        else if(EXT_COMM == syspara.typeProtocal)
+        else if(EXT_COMM == syspara.protocol_type)
         {
-            printd("\r\n EXTCOM");
-        }
-        else
-        {
-            printd("\r\n read wrong type");
-        }
-    }
-    else
-    {
-        unsigned char ret = FetchInt(5, 0, str.rcvStr, &getInt);
-        if(ret)
-        {
-            printd("\r\n Err code %d", ret);
-            return;
-        }
-        if(getInt==MY_MODBUS || getInt==EXT_COMM)
-        {
-            syspara.typeProtocal = getInt;
-            printd("\r\n set protocal to");
-            if(syspara.typeProtocal==MY_MODBUS)
-                printd("\r\n AGS");
-            else
-                printd("\r\n EXTCOM");
-            I2CPageWrite_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.typeProtocal);
+            printd(" HX");
         }
         else
         {
-            printd("\r\n wrong type  0:AGS  1:EXT");
+            printd(" wrong type");
         }
+    } else {
+            unsigned char ret = FetchInt(5, 0, str.rcvStr, &getInt);
+            if (ret) {
+                    printd("\r\n Err code %d", ret);
+                    return;
+            }
+
+            if (syspara.protocol_type == AGS_MODBUS) {
+                    syspara.protocol_type = AGS_MODBUS;
+                    printd("\r\n set protocal to AGS");
+            } else if (syspara.protocol_type == EXT_COMM) {
+                    syspara.protocol_type = EXT_COMM;
+                    printd("\r\n set protocal to HX");
+            } else {
+                    syspara.protocol_type = AGS_MODBUS;
+                    printd("\r\n wrong type set default AGS");
+            }
+            I2CPageWrite_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.protocol_type);
     }
 }
 
@@ -579,8 +556,8 @@ void TermBaud(char rw)
     int getInt = 0;
     if(rw == READ_ACT)
     {
-        I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
-        printd("\r 波特率:%d %sbps", syspara.bdrate, getBaudRateString(syspara.bdrate));
+        I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.baudrate);
+        printd("\r 波特率:%d %dbps", syspara.baudrate, BaudRate_V[syspara.baudrate]);
     }
     else
     {
@@ -592,23 +569,23 @@ void TermBaud(char rw)
         } 
         if(9600 == getInt)
         {
-            syspara.bdrate = 1;
+                syspara.baudrate = BAUD_9600;
         }
         else if(19200 == getInt)
         {
-            syspara.bdrate = 2;
+                syspara.baudrate = BAUD_19200;
         }
         else if(38400 == getInt)
         {
-            syspara.bdrate = 3;
+                syspara.baudrate = BAUD_38400;
         }
         else
         {
             printd("\r\n %d 波特率超出范围", getInt);
             return;
         }
-        printd("\r\n 设置波特率为 %d %dbps", syspara.bdrate, getInt);
-        I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
+        printd("\r\n 设置波特率为 %d %dbps", syspara.baudrate, getInt);
+        I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.baudrate);
     }
 }
 
@@ -653,7 +630,7 @@ void TermDirCw(char rw)
     int getInt = 0;
     if(rw == READ_ACT)
     {
-        I2CPageRead_Nbytes(ADDR_DIR_SD, LEN_DIR_SD-1, (uint8 *)&getInt);
+        I2CPageRead_Nbytes(ADDR_DIR_SD, LEN_DIR_SD-1, (uint8_t *)&getInt);
         printd("\r\n 逆时针减速值:%d", getInt);
     }
     else
@@ -666,7 +643,7 @@ void TermDirCw(char rw)
         }
         if(getInt<=255)
         {
-            I2CPageWrite_Nbytes(ADDR_DIR_SD, LEN_DIR_SD-1, (uint8 *)&getInt);
+            I2CPageWrite_Nbytes(ADDR_DIR_SD, LEN_DIR_SD-1, (uint8_t *)&getInt);
             Valve.fDirCw = getInt;
             printd("\r\n 设置逆时针减速值:%d", getInt);
         }
@@ -682,7 +659,7 @@ void TermDirCCw(char rw)
     int getInt = 0;
     if(rw == READ_ACT)
     {
-        I2CPageRead_Nbytes(ADDR_DIR_SD+1, LEN_DIR_SD-1, (uint8 *)&getInt);
+        I2CPageRead_Nbytes(ADDR_DIR_SD+1, LEN_DIR_SD-1, (uint8_t *)&getInt);
         printd("\r\n 顺时针减速值:%d", getInt);
     }
     else
@@ -695,7 +672,7 @@ void TermDirCCw(char rw)
         }
         if(getInt<=255)
         {
-            I2CPageWrite_Nbytes(ADDR_DIR_SD+1, LEN_DIR_SD-1, (uint8 *)&getInt);
+            I2CPageWrite_Nbytes(ADDR_DIR_SD+1, LEN_DIR_SD-1, (uint8_t *)&getInt);
             Valve.fDirCCw = getInt;
             printd("\r\n 设置顺时针减速值:%d", getInt);
         }
@@ -869,7 +846,7 @@ void TermIO(char rw)
     if (rw == READ_ACT)
     {
         syspara.ioCtrl = !syspara.ioCtrl;
-        I2CPageWrite_Nbytes(ADDR_IO_CTRL, LEN_IO_CTRL, &syspara.ioCtrl);
+        I2CPageWrite_Nbytes(ADDR_IO_CTRL, LEN_IO_CTRL, (uint8_t *)&syspara.ioCtrl);
         printd("\r IO控制:%d %s", syspara.ioCtrl, (0 == syspara.ioCtrl ? "关闭" : "开启"));
     }
 }
@@ -886,7 +863,7 @@ void TermInspection(char rw)
     printd("\r\n 编译时间   (TIME) : %s %s", __DATE__, __TIME__);    /* 时间 */
     printd("\r\n 地址       (ADDR) : %d", ModbusPara.mAddrs);        /* 地址 */
     printd("\r\n 通道数     (CNT)  : %d", valveFix.fix.portCnt);     /* 通道数 */
-    printd("\r\n 波特率     (BAUD) : %d %sbps", syspara.bdrate, getBaudRateString(syspara.bdrate));           /* 波特率 */
+    printd("\r\n 波特率     (BAUD) : %d %dbps", syspara.baudrate, BaudRate_V[syspara.baudrate]); /* 波特率 */
     printd("\r\n 速度       (SPD)  : %d", Valve.spd);                /* 速度 */
     printd("\r\n 减速比     (RDCR) : %d", rdc.rate);                 /* 减速比 */
     printd("\r\n 半通道     (HALF) : %d", Valve.bHalfSeal);          /* 半通道 */
@@ -897,10 +874,11 @@ void TermInspection(char rw)
     printd("\r\n 老化次数  (TESTC) : %d", syspara.burnCnt);          /* 老化次数 */
     printd("\r\n 切换次数  (MOVES) : %d", syspara.totalCnt);      /* 切换次数 */
 #ifdef FIRST_HOLE_IO_E
-    printd("\r\n IO控制     (IOE)  : 1");                            /* IO */
+    printd("\r\n IO控制     (IOE) : %d", syspara.ioCtrl);            /* IO */
     printd("\r\n 停留时间   (REPLY): %d", syspara.pauseTime);        /* 停留时间 */
 #endif // FIRST_HOLE_IO_E
 #ifdef FIRST_HOLE_MUT_IO_F
+    printd("\r\n IO控制     (IOE) : %d", syspara.ioCtrl);            /* IO */
     printd("\r\n                         1  2  3  4");
     printd("\r\n 切换顺序     (STATC)  : %d %d %d %d", Valve.StatusChannel[0], Valve.StatusChannel[1], Valve.StatusChannel[2], Valve.StatusChannel[3]);                            /* IO */
 #endif // FIRST_HOLE_MUT_IO_F
@@ -997,7 +975,7 @@ void TermMovesCnt(char rw)
     printd("\r\n func %s", __func__);
     if(rw == READ_ACT)
     {
-        I2CPageRead_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, ((uint8*)&syspara.totalCnt));
+        I2CPageRead_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, ((uint8_t*)&syspara.totalCnt));
         printd("\r 切换次数:%d", syspara.totalCnt);
     }
     else
@@ -1010,7 +988,7 @@ void TermMovesCnt(char rw)
         }
         syspara.totalCnt = getInt;
         printd("\r 写入切换次数:%d", syspara.totalCnt);
-        I2CPageWrite_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, (uint8*)&syspara.totalCnt);
+        I2CPageWrite_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, (uint8_t*)&syspara.totalCnt);
     }
 }
 

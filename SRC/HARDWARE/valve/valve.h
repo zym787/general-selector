@@ -111,9 +111,9 @@ enum
 #define CHANNEL_MIN         3       /* 最小通道数 */
 #define CHANNEL_MAX         32      /* 最大通道数 */
 #define CHANNEL_DEF         10      /* 默认通道数 */
-#define BAUD_MIN            1       /* 最小波特率 */
-#define BAUD_MAX            3       /* 最大波特率 */
-#define BAUD_DEF            1       /* 默认波特率 */
+#define BAUD_MIN            BAUD_9600 /* 最小波特率 */
+#define BAUD_MAX            BAUD_38400 /* 最大波特率 */
+#define BAUD_DEF            BAUD_9600 /* 默认波特率 */
 
 #define RDCR_1              1       /* 减速比 1 */
 #define RDCR_4              4       /* 减速比 4 */
@@ -167,8 +167,8 @@ PEXT _VALVE_T Valve;
 
 typedef struct
 {
-	uint8	rate;
-	uint32	stepRound;
+	uint8_t	rate;
+	uint32_t	stepRound;
 	float	stepP1dgr;
 	float	stepP01dgr;
 }RDC_T;
@@ -187,9 +187,9 @@ typedef struct
 {
     bool    bEnable;            // retry bit
     bool    typeCtrl;           // type of ctrl shortest coord or define direction
-    uint8   dir;                // retry direction
-    uint8   times;              // retry times
-    uint8   totalSignalCnt;     // total signal count
+    uint8_t   dir;                // retry direction
+    uint8_t   times;              // retry times
+    uint8_t   totalSignalCnt;     // total signal count
 }_RETRY_T;
 PEXT _RETRY_T try;
 

@@ -1,19 +1,12 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
-typedef unsigned char  uint8;                    /* Unsigned  8 bit quantity                           */
-typedef unsigned short uint16;                   /* Unsigned 16 bit quantity                           */
-typedef unsigned int   uint32;                   /* Unsigned 32 bit quantity                           */
 
 #define read            false
 #define write           true
 #define end             false
 #define start           true
-typedef enum
-{
-    false,
-    true
-}bool;
+
 
 #define FIRST_HOLE_C        /* 开机1号孔 C版本 */
 //#define END_HOLE_D          /* 开机末端孔 D版本 */
@@ -135,6 +128,8 @@ typedef enum
 //#define HALF_CHN
 //#define NEW_SCALE
 
+#include <stdbool.h>
+
 #include <stm32f10x.h>
 #include "sys.h"
 #include "usFunc.h"
@@ -153,6 +148,10 @@ typedef enum
 #ifdef MUT_IOCTRL
 #include "adc.h"
 #endif
+
+#include "../3rd/common/elab_log.h"
+#include "../3rd/xfusion/xf_utils.h"
+
 //正常的开关定义
 #define ON      1
 #define OFF     0

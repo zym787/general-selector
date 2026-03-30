@@ -7,6 +7,8 @@
 #define PEXT extern
 #endif
 
+// clang-format off
+
 #define DESCRIPTION         "Selector Valve"
 #define SOFTWARE_VERSION    "r44"                /* 软件修改版次 */
 #define SOFT_REVISION       (uint16_t)0x0044     /* 软件修改版次 */
@@ -148,11 +150,11 @@
 #define ADDR_DIR_SD             (ADDR_SYMBOL+LEN_SYMBOL)
 #define LEN_DIR_SD              2
 
-#define ADDR_RDC_RATE			(ADDR_DIR_SD+LEN_DIR_SD)
-#define LEN_RDC_RATE			1
+#define ADDR_RDC_RATE           (ADDR_DIR_SD+LEN_DIR_SD)
+#define LEN_RDC_RATE            1
 
-#define ADDR_HALF_SEAL			(ADDR_RDC_RATE+LEN_RDC_RATE)
-#define LEN_HALF_SEAL			1
+#define ADDR_HALF_SEAL          (ADDR_RDC_RATE+LEN_RDC_RATE)
+#define LEN_HALF_SEAL           1
 
 #define ADDR_IO_CTRL            (ADDR_HALF_SEAL+LEN_HALF_SEAL)
 #define LEN_IO_CTRL             1
@@ -160,51 +162,73 @@
 #define ADDR_PAUSE_TIME         (ADDR_IO_CTRL+LEN_IO_CTRL)
 #define LEN_PAUSE_TIME          4
 
-#define ADDR_BURN_CNT			(ADDR_PAUSE_TIME+LEN_PAUSE_TIME)
-#define LEN_BURN_CNT			 2
+#define ADDR_BURN_CNT           (ADDR_PAUSE_TIME+LEN_PAUSE_TIME)
+#define LEN_BURN_CNT            2
 
-#define ADDR_STATE_CHANNEL		(ADDR_BURN_CNT+LEN_BURN_CNT)
-#define LEN_STATE_CHANNEL		4
+#define ADDR_STATE_CHANNEL      (ADDR_BURN_CNT+LEN_BURN_CNT)
+#define LEN_STATE_CHANNEL       4
 
 #define ADDR_TOTAL_CNT          (ADDR_STATE_CHANNEL+LEN_STATE_CHANNEL)
 #define LEN_TOTAL_CNT           4
 
 //------------------------------------------------------------------------------------------------------------
 
-#define NORMAL_BLINK            1500       //正常运行的闪烁间隔
-#define RETRY_TIME_OUT          400        //异常运行的闪烁间隔
+// clang-format on
 
-#define	KEY		    PBin(5)
-#define	RX_EN()		(PBout(1)=0)
-#define	TX_EN()		(PBout(1)=1)
+#define NORMAL_BLINK   1500  // 正常运行的闪烁间隔
+#define RETRY_TIME_OUT 400   // 异常运行的闪烁间隔
 
-enum PROTOCAL {
-    MY_MODBUS,
-    EXT_COMM
-};
+#define KEY     PBin(5)
+#define RX_EN() (PBout(1) = 0)
+#define TX_EN() (PBout(1) = 1)
 
-typedef struct
-{
-    uint8   typeProtocal;
-    uint8   bdrate;
-    bool    bRdPulse;       /* ?读取脉冲标志 */
-    uint32  OptBlockLast;
-    uint32_t protectTimeOut;
-//    uint32_t totalCnt;        /* 切换次数 */
-    uint32_t burnCnt;       // 烧机次数
-    bool    bCountLastTime;
-    uint32_t lastTime;      /* 切换时间 */
-    uint32_t timeRamp[3];   /* 切换时间序列 */
-    uint8_t recordTimeRamp; /* 记录切换时间 */
-    bool ioCtrl;            /* IO控制位 */
-    uint32_t pauseTime;     /* 停留时间 */
-    bool ctrlPause;         /* 停留时间控制 */
-    uint32_t    totalCnt;           /* 切换次数 */
-    uint32_t    totalCntLst;
-}_SYS_T;
+/**
+ * @brief     : 控制协议枚举
+ */
+typedef enum PROTOCOL {
+        AGS_MODBUS, /* AGS协议 基于Modbus魔改 */
+        EXT_COMM,   /* HX协议 帧头+帧尾 */
+        MODBUS,     /* Modbus协议 */
+
+        PROTOCOL_NUM
+} Protocol_T;
+
+/**
+ * @brief     : 波特率枚举
+ */
+typedef enum BAUDRATETYPE {
+        BAUD_NONE = 0u,
+        BAUD_9600 = 1u,
+        BAUD_19200 = 2u,
+        BAUD_38400 = 3u,
+
+        BAUD_NUM
+} BaudRate_T;
+
+extern uint16_t BaudRate_V[BAUD_NUM];
+
+typedef struct {
+        /* 系统参数 */
+        Protocol_T protocol_type; /* 协议 */
+        BaudRate_T baudrate;      /* 波特率 */
+        bool bRdPulse; /* ?读取脉冲标志 */
+        uint32_t OptBlockLast;
+        uint32_t protectTimeOut;
+        //    uint32_t totalCnt;        /* 切换次数 */
+        uint32_t burnCnt;  // 烧机次数
+        bool bCountLastTime;
+        uint32_t lastTime;      /* 切换时间 */
+        uint32_t timeRamp[3];   /* 切换时间序列 */
+        uint8_t recordTimeRamp; /* 记录切换时间 */
+        bool ioCtrl;            /* IO控制位 */
+        uint32_t pauseTime;     /* 停留时间 */
+        bool ctrlPause;         /* 停留时间控制 */
+        uint32_t totalCnt;      /* 切换次数 */
+        uint32_t totalCntLst;
+} _SYS_T;
 PEXT _SYS_T syspara;
 
-PEXT uint8 intCtrl;
+PEXT uint8_t intCtrl;
 
 PEXT void ParameterInit(void);
 PEXT int main(void);

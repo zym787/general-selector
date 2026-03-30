@@ -43,10 +43,10 @@ bool GettCliffSignal(void)
 /*
     ≈≈–Ú
 */
-void BubbleWord(uint16* array,uint8 len)
+void BubbleWord(uint16_t* array,uint8_t len)
 {
-	uint8 i,j;
-	uint16 temp;
+	uint8_t i,j;
+	uint16_t temp;
 	for(j=1;j<len;j++)
 	{
 		for(i=0;i<len-j;i++)
@@ -65,10 +65,10 @@ void BubbleWord(uint16* array,uint8 len)
 /*
     æ˘÷µ
 */
-uint16 AverageN(uint16* array,uint8 len)
+uint16_t AverageN(uint16_t* array,uint8_t len)
 {
-	uint8 i=0;
-	uint32 sum=0;
+	uint8_t i=0;
+	uint32_t sum=0;
 	for(i=0;i<len;i++)
 	{
         sum += *(array+i);
@@ -81,19 +81,19 @@ uint16 AverageN(uint16* array,uint8 len)
 /*
 
 */
-uint8 SigSum(uint8 *array, uint8 len)
+uint8_t SigSum(uint8_t *array, uint8_t len)
 {
-    uint8 sum=0;
-    for(uint8 i=0; i<len; i++)
+    uint8_t sum=0;
+    for(uint8_t i=0; i<len; i++)
         sum += *(array+i);
     return sum;
 }
 
 
-uint16 SigSumU16(uint16 *array, uint8 len)
+uint16_t SigSumU16(uint16_t *array, uint8_t len)
 {
-    uint16 sum=0;
-    for(uint8 i=0; i<len; i++)
+    uint16_t sum=0;
+    for(uint8_t i=0; i<len; i++)
         sum += *(array+i);
     return sum;
 }
@@ -103,9 +103,9 @@ uint16 SigSumU16(uint16 *array, uint8 len)
 */
 void SignalScan(void)
 {
-    static uint8 pos=0;
-    uint8 i=0;
-    uint8 rwBuff[8]={0,0,0,0,0,0,0,0};
+    static uint8_t pos=0;
+    uint8_t i=0;
+    uint8_t rwBuff[8]={0,0,0,0,0,0,0,0};
     switch(sig.stpScan)
     {
         case 100:
@@ -188,7 +188,7 @@ void SignalScan(void)
                 sig.pulseBlock[0] <<= 8;
                 sig.pulseBlock[0] |= rwBuff[1];
                 // normal blade 10 percent
-                uint32 temp=0;
+                uint32_t temp=0;
                 temp = sig.pulseBlock[0]*PERCENT_TOLL;
                 sig.pulseBlock[3] = temp/PERCENT;
 

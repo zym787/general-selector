@@ -82,14 +82,6 @@ typedef struct
     unsigned char	tBuf[LENGTH_MB_DATA];	// 待发送数据
 } _MB_PRAR_T;
 
-/* 波特率 */
-enum
-{
-    UART_BAUD_DEF       = 0U,   /**< Default 9600bps */
-    UART_BAUD_9600      = 1U,   /**< 9600bps */
-    UART_BAUD_19200     = 2U,   /**< 19200bps */
-    UART_BAUD_38400     = 3U,   /**< 38400bps */
-};
 
 //线圈变量
 #define SUM_COIL_BIT				64		// 线圈的位个数
