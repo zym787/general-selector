@@ -1,7 +1,10 @@
 #define _AGS_MB_GLOBALS_
 #include "common.h"
 
-uint16_t BaudRate_V[BAUD_NUM] = {0, 9600, 19200, 38400};
+ELAB_TAG("ags_mb"); /* elog 标签 */
+
+uint16_t BaudRate_V[BAUD_NUM] = {9600, 9600, 19200, 38400};
+uint16_t BaudRate_Time[BAUD_NUM] = {520, 520, 260, 130};
 
 void ags_mbInit(void)
 {
@@ -37,10 +40,10 @@ void ags_mbInit(void)
                 TIM3_Init(MODBUS_TIME_9600, 71);  // 45us--0.45ms
         }
         delay_ms(100);
-        // printd("\r Init AGS UART2/3 Baud:%d", syspara.baudrate);
+        elog_debug(" Init AGS UART2/3 Baud:%dbps", BaudRate_V[syspara.baudrate]);
 
         // 参数配置
-        ags_mbParam.sRUN = MB_IDEL;
+        ags_mbParam.sRUN = MB_IDLE;
         ags_mbParam.sERR = ERR_NOT;
         ags_mbParam.times = 0;
         ags_mbParam.rCnt = 0;
@@ -75,9 +78,9 @@ void ags_mbTimesProcess(void)
                         if (ags_mbParam.sRUN == MB_RECIVE_ERR) {
                                 // 接收过程中 有出现数据存储空间溢出或间隔时间超过T1.5
                                 ags_mbParam.sERR = ERR_MB_DEVICE;
-                                ags_mbParam.sRUN = MB_IDEL;
+                                ags_mbParam.sRUN = MB_IDLE;
                         } else if (ags_mbParam.sRUN == MB_NO_RESPONSE) {
-                                ags_mbParam.sRUN = MB_IDEL;
+                                ags_mbParam.sRUN = MB_IDLE;
                         } else if (ags_mbParam.sRUN == MB_RECIVE) {
                                 ags_mbParam.sRUN = MB_RECIVE_END;
                         }
@@ -114,14 +117,14 @@ void ags_mbSend(unsigned char length)
         }
         while ((USART2->SR & 0X40) == 0)
                 ;  // 等待发送结束
-        ags_mbParam.sRUN = MB_IDEL;
+        ags_mbParam.sRUN = MB_IDLE;
         ags_mbParam.rCnt = 0;
 }
 
 void ags_mbReceive(unsigned char res)
 {
         ags_mbParam.times = 0;  // 重新计时
-        if (ags_mbParam.sRUN == MB_IDEL && !ags_mbParam.rCnt) {
+        if (ags_mbParam.sRUN == MB_IDLE && !ags_mbParam.rCnt) {
                 // 空闲并且数据处理结束,可以进行新的接收
                 if (ags_mbParam.mAddrs == res || res == MB_Broadcast_ADDR) {
                         // 开始接收数据
@@ -134,6 +137,7 @@ void ags_mbReceive(unsigned char res)
                         ags_mbParam.sRUN = MB_NO_RESPONSE;
                         //            ags_mbParam.sERR = ERR_MB_DEVICE_ADDR;
                         ags_mbParam.sERR = ERR_MB_DEVICE;
+                        elog_error("%d Address Error", res);
                 }
         } else if (ags_mbParam.sRUN == MB_RECIVE) {
                 // 如果溢出或者传输过程出现时间间隔超过T1.5,都不在接收
@@ -141,8 +145,8 @@ void ags_mbReceive(unsigned char res)
                         ags_mbParam.rBuf[ags_mbParam.rCnt] = res;
                 } else {
                         ags_mbParam.sRUN = MB_RECIVE_ERR;
+                        elog_error("%d Frame Error", res);
                 }
-
                 ++ags_mbParam.rCnt;
         }
 }
@@ -162,7 +166,7 @@ void ags_mbError(void)
                 if (ags_mbParam.tBuf[0] != MB_Broadcast_ADDR) {
                         ags_mbSend(5);
                 }
-#ifdef DEBUG_MODBUS
+#ifdef DEBUG_AGS_MB
                 printd("\r\n [%02x]error reply Func:%02x", ags_mbParam.sERR, ags_mbParam.tBuf[1]);
 #endif
         }
@@ -281,7 +285,7 @@ void ags_mbReadHoldingRegisters(void)
                     (ERR_NOT == ags_mbParam.sERR)) {
                         ags_mbSend(byteCount); /* 回复 */
                 }
-#ifdef DEBUG_MODBUS
+#ifdef DEBUG_AGS_MB
                 printd("\r s:");
                 for (uint8_t i = 0; i < byteCount; i++)
                         printd(" %02x", ags_mbParam.tBuf[i]);
@@ -459,7 +463,7 @@ void ags_mbPresetSingleHoldingRegister(void)
                 if ((ags_mbParam.tBuf[0] != MB_Broadcast_ADDR) && (ERR_NOT == ags_mbParam.sERR)) {
                         ags_mbSend(byteCount); /* 回复 */
                 }
-#ifdef DEBUG_MODBUS
+#ifdef DEBUG_AGS_MB
                 printd("\r s:");
                 for (uint8_t i = 0; i < byteCount; i++)
                         printd(" %02x", ags_mbParam.tBuf[i]);
@@ -547,7 +551,7 @@ void ags_mbPresetMultipleHoldingRegisters(void)
                         if ((ags_mbParam.tBuf[0] != MB_Broadcast_ADDR) && (ERR_NOT == ags_mbParam.sERR)) {
                                 ags_mbSend(byteCount); /* 回复 */
                         }
-#ifdef DEBUG_MODBUS
+#ifdef DEBUG_AGS_MB
                         printd("\r s:");
                         for (uint8_t i = 0; i < byteCount; i++)
                                 printd(" %02x", ags_mbParam.tBuf[i]);
@@ -566,8 +570,9 @@ void ags_mbProcess(void)
         if (MB_RECIVE_END == ags_mbParam.sRUN) {
                 if (LEAST_RCV_CNT < ags_mbParam.rCnt) {
                         LED_WORK = !LED_WORK;
+                        XF_LOG_BUFFER_HEX(ags_mbParam.rBuf, ags_mbParam.rCnt);
                         if (0 == ModbusCRC16(&ags_mbParam.rBuf[0], ags_mbParam.rCnt)) {
-#ifdef DEBUG_MODBUS
+#ifdef DEBUG_AGS_MB
                                 printd("\r r:");
                                 for (uint8_t i = 0; i < ags_mbParam.rCnt; i++)
                                         printd(" %02x", ags_mbParam.rBuf[i]);
@@ -580,7 +585,7 @@ void ags_mbProcess(void)
                                                 /* 读指令长度不匹配 重新接收 */
                                                 if (ags_mbParam.rCnt != 5) {
                                                         ags_mbParam.rCnt = 0;
-                                                        ags_mbParam.sRUN = MB_IDEL;
+                                                        ags_mbParam.sRUN = MB_IDLE;
                                                         return;
                                                 }
                                                 ags_mbReadHoldingRegisters();
@@ -604,12 +609,12 @@ void ags_mbProcess(void)
                         }
                         ags_mbParam.rCnt = 0;
                         ags_mbError();
-                        ags_mbParam.sRUN = MB_IDEL;
+                        ags_mbParam.sRUN = MB_IDLE;
                 } else {
                         /* 数据长度不足 即无效数据 */
                         ags_mbParam.rCnt = 0;
                         ags_mbError();
-                        ags_mbParam.sRUN = MB_IDEL;
+                        ags_mbParam.sRUN = MB_IDLE;
                 }
         }
 }

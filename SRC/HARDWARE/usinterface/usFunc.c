@@ -521,6 +521,10 @@ void TermProtocal(char rw)
         {
             printd(" HX");
         }
+        else if(MODBUS == syspara.protocol_type)
+        {
+            printd(" MODBUS");
+        }
         else
         {
             printd(" wrong type");
@@ -532,15 +536,21 @@ void TermProtocal(char rw)
                     return;
             }
 
-            if (syspara.protocol_type == AGS_MODBUS) {
-                    syspara.protocol_type = AGS_MODBUS;
-                    printd("\r\n set protocal to AGS");
-            } else if (syspara.protocol_type == EXT_COMM) {
-                    syspara.protocol_type = EXT_COMM;
-                    printd("\r\n set protocal to HX");
-            } else {
-                    syspara.protocol_type = AGS_MODBUS;
-                    printd("\r\n wrong type set default AGS");
+            switch (getInt) {
+                    default:
+                            printd("\r\n wrong type set default AGS");
+                    case AGS_MODBUS:
+                            syspara.protocol_type = AGS_MODBUS;
+                            printd("\r\n set protocal to AGS");
+                            break;
+                    case EXT_COMM:
+                            syspara.protocol_type = EXT_COMM;
+                            printd("\r\n set protocal to HX");
+                            break;
+                    case MODBUS:
+                            syspara.protocol_type = MODBUS;
+                            printd("\r\n set protocal to MODBUS");
+                            break;
             }
             I2CPageWrite_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.protocol_type);
     }

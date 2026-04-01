@@ -146,6 +146,8 @@ void USART2_IRQHandler(void)
                         ags_mbReceive(res);
                 } else if (syspara.protocol_type == EXT_COMM) {
                         RxUsart(res);
+                } else if (syspara.protocol_type == MODBUS) {
+                        mb_Receive(res);
                 }
         }
 }
@@ -214,6 +216,8 @@ void USART3_IRQHandler(void)
                         ags_mbReceive(res);
                 } else if (syspara.protocol_type == EXT_COMM) {
                         RxUsart(res);
+                } else if (syspara.protocol_type == MODBUS) {
+                        mb_Receive(res);
                 }
         }
 }

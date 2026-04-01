@@ -1,5 +1,6 @@
 #define _MAIN_H_GLOBALS_
 #include "common.h"
+ELAB_TAG("main"); /* elog 标签 */
 
 // clang-format off
 
@@ -77,7 +78,9 @@ void ParameterInit(void)
                 // 控制协议
                 I2CPageRead_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.protocol_type);
                 printd("\r\n 控制协议: %d %s", syspara.protocol_type,
-                       (syspara.protocol_type) == AGS_MODBUS ? "AGS" : "EXTCOM_HX");
+                       (syspara.protocol_type) == AGS_MODBUS ? "AGS"
+                       : (syspara.protocol_type) == EXT_COMM ? "EXTCOM_HX"
+                       : (syspara.protocol_type) == MODBUS ? "MODBUS" : "wrong type");
 
                 // 扫描标志
                 I2CPageRead_Nbytes(ADDR_SYMBOL, LEN_SYMBOL, ReadBuf);
@@ -500,18 +503,24 @@ int main(void)
         printd("\r\n 报错时: 无论IN1/IN2输入何值,ERROUT输出0,FBOUT输出1,OUT1/OUT2保持先前状态");
         printd("\r\n-------------------------------------------------------------\r\n");
 #endif
+        I2CPageRead_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.protocol_type);
         /* 根据协议初始化 */
         if (syspara.protocol_type == AGS_MODBUS) {
                 ags_mbInit(); /* AGS协议 */
         } else if (syspara.protocol_type == EXT_COMM) {
                 CommInit(); /* HX协议 */
+        } else if (syspara.protocol_type == MODBUS) {
+                mb_Init(); /* 初始化Modbus协议 */
         }
         ParameterInit();
         while (1) {
+                /* 协议栈轮询 */
                 if (syspara.protocol_type == AGS_MODBUS) {
                         ags_mbProcess(); /* AGS协议 */
                 } else if (syspara.protocol_type == EXT_COMM) {
                         UsartProcess(); /* HX协议 */
+                } else if (syspara.protocol_type == MODBUS) {
+                        mb_Poll(); /* 解析Modbus数据帧 */
                 }
                 InitValve();
                 ProcessValve();
@@ -529,7 +538,7 @@ void DebugOut(void)
                 Valve.bPassPort = 0;
                 printd("\r\n P %d  B %d", Valve.portCur, syspara.OptBlockLast);
         }
-        if (timerPara.timeDbg > SEC * 3) {
+        if (timerPara.timeDbg > SEC * 5) {
                 timerPara.timeDbg = 0;
                 // LED_WORK = !LED_WORK;
                 //        dbg_printf("\r\n >>重试:%d,OptBlock:%d,Opt:%d,bNewInit:%d",
@@ -537,10 +546,13 @@ void DebugOut(void)
                 dbg_printf("\r\n >>OptBlock:%d,Opt:%d,bNewInit:%d", Valve.OptBlock, VALVE_OPT, Valve.bNewInit);
                 dbg_printf("\r\n   状态:0x%02x,当前位:%d,目标位:%d,方向:%d", Valve.status, Valve.portCur, Valve.portDes,
                            srd[0].dir);
-                if (syspara.protocol_type == AGS_MODBUS)
-                        dbg_printf("  AGS");
-                else
+                if (syspara.protocol_type == AGS_MODBUS) {
+                        dbg_printf("  AGS %d %d", ags_mbParam.rCnt, ags_mbParam.times);
+                } else if (syspara.protocol_type == EXT_COMM) {
                         dbg_printf("  EXTCOM %d %d", protext.stepCnt, protext.time);
+                } else if (syspara.protocol_type == MODBUS) {
+                        dbg_printf("  Modbus %d %d", modbus.ReciveCount, modbus.times);
+                }
 #ifdef IOCTRL
                 dbg_printf("\r\n   IO_IN:%d IO_OUT:%d  停留时间:%d  Ctrl:%d", IO_IN, IO_OUT, syspara.pauseTime,
                            syspara.ctrlPause);

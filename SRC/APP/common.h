@@ -97,11 +97,11 @@
 ///调试模式定义
 #ifdef RELEASE
 #undef DEBUG
-#undef DEBUG_MODBUS
+#undef DEBUG_AGS_MB
 #undef PULSE_CNT_EN     /*  */
 #else
 #define DEBUG           /* 调试输出 */
-#define DEBUG_MODBUS    /* AGS调试输出 */
+#define DEBUG_AGS_MB    /* AGS调试输出 */
 #define PULSE_CNT_EN
 #endif
 
@@ -141,6 +141,7 @@
 #include "EEP24serial.h"
 #include "protext.h"
 #include "ags_mb.h"
+#include "modbus.h"
 #include "main.h"
 #include "signal.h"
 #include "valve.h"

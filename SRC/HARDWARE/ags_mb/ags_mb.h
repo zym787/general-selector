@@ -47,7 +47,7 @@
 #define NO_RESPONSE_TIME			500		// 通讯中断超时 约500*MODBUS_TIME
 #define NO_RESPONSE_TIME_BC			500		// 通讯中断超时 约500*MODBUS_TIME
 //---- 通信状态参数-------------------------------------------------
-#define MB_IDEL						0X00	// 总线空闲、结束帧、起始帧
+#define MB_IDLE						0X00	// 总线空闲、结束帧、起始帧
 #define MB_WAIT_HOST				0X01	// 主设备等待响应
 #define MB_BUSY						0X50	// 总线忙
 #define MB_RECIVE					0X51	// 总线接收
@@ -138,7 +138,7 @@ PEXT _AGS_MB_PRARM_T	    ags_mbParam;
 PEXT uint8_t 	CoilBitPara[LENGTH_COIL_REG];
 PEXT uint8_t 	DiscreteBitPara[LENGTH_DiscreteREG];
 PEXT uint8_t 	HoldingREGPara[LENGTH_HoldingREG];
-PEXT uint8_t 	InputREGPara[LENGTH_InputREG];
+PEXT uint8_t InputREGPara[LENGTH_InputREG];
 
 //----函数声明----------------
 PEXT uint16_t  ModbusCRC16( uint8_t  *puchMsg, uint16_t usDataLen) ;

@@ -10,8 +10,8 @@
 // clang-format off
 
 #define DESCRIPTION         "Selector Valve"
-#define SOFTWARE_VERSION    "r44"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0044     /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r45"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0045     /* 软件修改版次 */
 
 #define BOARD_0     0x88
 #define BOARD_1     0x66
@@ -104,6 +104,9 @@
 //  v2.0.0CDEF-r42  2025.12.16  F修复输入引脚持续为高问题
 //  v2.0.0CDEF-r43  2026.03.09  串口新增0D功能码读写半通道功能,点检模式支援波特率值显示
 //  v2.0.0CDEF-r44  2026.03.09  新增切换次数记录,下载口MOVES/串口0A功能码读写切换次数
+//                  2026.03.30  优化参数,新增log模块,重构AGS协议,读指令添加长度限制
+//  v2.0.0CDEF-r45  2026.04.01  新增modbus支援,实现03功能码
+
 
 
 //----EEPROM存储地址分配---//
@@ -206,6 +209,7 @@ typedef enum BAUDRATETYPE {
 } BaudRate_T;
 
 extern uint16_t BaudRate_V[BAUD_NUM];
+extern uint16_t BaudRate_Time[BAUD_NUM];
 
 typedef struct {
         /* 系统参数 */

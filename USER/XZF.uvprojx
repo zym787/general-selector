@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_MD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\SRC\APP;..\SRC\SYSTEM\timer;..\SRC\SYSTEM\delay;..\SRC\SYSTEM\sys;..\SRC\SYSTEM\usart;..\SRC\CoreSupport;..\SRC\HARDWARE\usinterface;..\SRC\HARDWARE\stmFlash;..\SRC\HARDWARE\motor;..\SRC\HARDWARE\valve;..\SRC\HARDWARE\EEPROM;..\SRC\HARDWARE\ags_mb;..\SRC\HARDWARE\protExt;..\SRC\HARDWARE\signal;..\SRC\HARDWARE\io;..\SRC\SYSTEM\adc;..\SRC\CoreSupport\STM32F10x_StdPeriph_Driver\inc;..\SRC\3rd\common;..\SRC\3rd\xfusion\xf_common;..\SRC\3rd\xfusion\xf_utils_log;..\SRC\3rd\xfusion</IncludePath>
+              <IncludePath>..\SRC\APP;..\SRC\SYSTEM\timer;..\SRC\SYSTEM\delay;..\SRC\SYSTEM\sys;..\SRC\SYSTEM\usart;..\SRC\CoreSupport;..\SRC\HARDWARE\usinterface;..\SRC\HARDWARE\stmFlash;..\SRC\HARDWARE\motor;..\SRC\HARDWARE\valve;..\SRC\HARDWARE\EEPROM;..\SRC\HARDWARE\ags_mb;..\SRC\HARDWARE\protExt;..\SRC\HARDWARE\signal;..\SRC\HARDWARE\io;..\SRC\SYSTEM\adc;..\SRC\CoreSupport\STM32F10x_StdPeriph_Driver\inc;..\SRC\3rd\common;..\SRC\3rd\xfusion\xf_common;..\SRC\3rd\xfusion\xf_utils_log;..\SRC\3rd\xfusion;..\SRC\HARDWARE\modbus</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -521,6 +521,11 @@
               <FileName>bsp_io.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\SRC\HARDWARE\io\bsp_io.c</FilePath>
+            </File>
+            <File>
+              <FileName>modbus.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SRC\HARDWARE\modbus\modbus.c</FilePath>
             </File>
           </Files>
         </Group>

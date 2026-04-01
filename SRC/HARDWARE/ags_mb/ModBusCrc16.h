@@ -7,9 +7,7 @@
 #define PEXT extern
 #endif
 
-
-//PEXT unsigned short  ModbusCRC16( unsigned char  *puchMsg, unsigned short usDataLen) ;
+// PEXT unsigned short  ModbusCRC16( unsigned char  *puchMsg, unsigned short usDataLen) ;
 
 #undef PEXT
 #endif
-
