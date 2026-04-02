@@ -10,8 +10,8 @@
 // clang-format off
 
 #define DESCRIPTION         "Selector Valve"
-#define SOFTWARE_VERSION    "r44"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0044     /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r45"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0045     /* 软件修改版次 */
 
 #define BOARD_0     0x88
 #define BOARD_1     0x66

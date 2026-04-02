@@ -152,16 +152,16 @@ void ADC_Configuration(void)
 void AdcPro(void)
 {
     static uint16_t buf[SAMP_COUNT];
-    static uint8_t write;
+    static uint8_t index;
     uint32_t sum;
     uint8_t i;
 
-    buf[write] = ADC_GetConversionValue(ADC1);
+    buf[index] = ADC_GetConversionValue(ADC1);
     /* Return the selected ADC conversion value */
-    // buf[write] = ADC1->DR;
-    if (++write >= SAMP_COUNT)
+    // buf[index] = ADC1->DR;
+    if (++index >= SAMP_COUNT)
     {
-        write = 0;
+        index = 0;
     }
 
     /* 下面这段代码采用求平均值的方法进行滤波
