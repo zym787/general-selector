@@ -6,11 +6,25 @@
 
 /* 类型定义 ------------------------------------------------------------------*/
 /**
+ * @brief    Modbus错误状态枚举
+ */
+typedef enum {
+        MB_ERROR_NONE = 0u,
+        MB_ERROR_FUNC = 1u,
+        MB_ERROR_ADDR = 2u,
+        MB_ERROR_DATA = 3u,
+        MB_ERROR_DEVICE = 4u,
+        MB_ERROR_CONFIRM = 5u,
+        MB_ERROR_BUSY = 6u,
+        MB_ERROR_PARITY = 8u
+} MB_ERROR_T;
+
+/**
  * @brief    Modbus结构体
  */
 typedef struct {
         __IO uint8_t RunState;    /* 总线运行状态 */
-        __IO uint8_t ErrorState;  /* 总线错误状态 */
+        __IO MB_ERROR_T ErrorState; /* 总线错误状态 */
         __IO uint16_t times;      /* 单帧接收超时时间 */
         __IO uint8_t ReciveCount; /* 接收数据长度 */
         __IO uint8_t Address;     /* 从站地址 */
@@ -54,118 +68,129 @@ typedef struct {
 #define EX_CODE_03H  0x03  // 异常码
 #define EX_CODE_04H  0x04  // 异常码
 
+/* Modbus寄存器定义 */
 /* 寄存器地址定义 */
-#define AP_PARAM_START                     0ul
-#define AP_PARAM_NUM                       100ul
-// 控制指令
-#define AP_PARAM_R_CTRL_SET_NORMAL         0ul  // 设置切换通道
-#define AP_PARAM_R_CTRL_SET_CW             1ul  // 设置切换通道[顺时针]
-#define AP_PARAM_R_CTRL_SET_CCW            2ul  // 设置切换通道[逆时针]
-#define AP_PARAM_R_CTRL_SET_FREE           3ul
-#define AP_PARAM_R_CTRL_REG_4              4ul  // 老化测试功能使能
-#define AP_PARAM_R_CTRL_SET_ZERO           5ul  //
-#define AP_PARAM_R_CTRL_SET_BREAK          6ul  //
-#define AP_PARAM_R_CTRL_SET_RESET_ERR      7ul  //
-#define AP_PARAM_R_CTRL_REG_8              8ul
-#define AP_PARAM_R_CTRL_COMMAND            9ul
-// 状态参数查询
-#define AP_PARAM_R_CHANNEL_CUR             10ul  // 当前通道
-#define AP_PARAM_R_CONTROL_STATE           11ul  // 控制状态
-#define AP_PARAM_R_BCKUP_REG_12            12ul  // PWM有效宽度
-#define AP_PARAM_R_BCKUP_REG_13            13ul  // mt6816校准的角度数据
-#define AP_PARAM_R_BCKUP_REG_14            14ul  // 目标位置
-#define AP_PARAM_R_BCKUP_REG_15            15ul  // 目标位置(由信号输入)
-#define AP_PARAM_R_BCKUP_REG_16            16ul  //
-#define AP_PARAM_R_BCKUP_REG_17            17ul  //
-#define AP_PARAM_R_BCKUP_REG_18            18ul
-#define AP_PARAM_R_SOFTWARE                19ul  // 软件版本号
-// 用户存储空间
-#define AP_PARAM_R_USER_00                 20ul
-#define AP_PARAM_R_USER_01                 21ul
-#define AP_PARAM_R_USER_02                 22ul
-#define AP_PARAM_R_USER_03                 23ul
-#define AP_PARAM_R_USER_04                 24ul
-#define AP_PARAM_R_USER_05                 25ul
-#define AP_PARAM_R_USER_06                 26ul
-#define AP_PARAM_R_USER_07                 27ul
-#define AP_PARAM_R_USER_08                 28ul
-#define AP_PARAM_R_USER_09                 29ul
-// 用户备用空间
-#define AP_PARAM_R_BCKUP_REG_30            30ul
-#define AP_PARAM_R_BCKUP_REG_31            31ul
-#define AP_PARAM_R_BCKUP_REG_32            32ul
-#define AP_PARAM_R_BCKUP_REG_33            33ul
-#define AP_PARAM_R_BCKUP_REG_34            34ul
-#define AP_PARAM_R_BCKUP_REG_35            35ul
-#define AP_PARAM_R_BCKUP_REG_36            36ul
-#define AP_PARAM_R_BCKUP_REG_37            37ul
-#define AP_PARAM_R_BCKUP_REG_38            38ul
-#define AP_PARAM_R_BCKUP_REG_39            39ul
-#define AP_PARAM_R_BCKUP_REG_40            40ul
-#define AP_PARAM_R_BCKUP_REG_41            41ul
-#define AP_PARAM_R_BCKUP_REG_42            42ul
-#define AP_PARAM_R_BCKUP_REG_43            43ul
-#define AP_PARAM_R_BCKUP_REG_44            44ul
-#define AP_PARAM_R_BCKUP_REG_45            45ul
-#define AP_PARAM_R_BCKUP_REG_46            46ul
-#define AP_PARAM_R_BCKUP_REG_47            47ul
-#define AP_PARAM_R_BCKUP_REG_48            48ul
-#define AP_PARAM_R_BCKUP_REG_49            49ul
-// 通讯及相关系统参数
-#define AP_PARAM_RW_MODBUS_BAUDRATE        50ul  // 485通讯速率
-#define AP_PARAM_RW_MODBUS_ADDR            51ul  // 485设备ID
-#define AP_PARAM_RW_MOVE_HALF_SETUP_NEABLE 52ul  // 开机切换至半通道使能位
-#define AP_PARAM_RW_MOVE_PROX_ENABLE       53ul  // 切换就近通道使能位
-#define AP_PARAM_RW_CAN_BAUDRATE           54ul  // CAN通讯速率
-#define AP_PARAM_RW_CAN_ADDR               55ul  // CAN设备ID
-#define AP_PARAM_RW_MOTOR_CTRL_WAITTIME    56ul  // 连续通道切换等待时间
-#define AP_PARAM_RW_MOTOR_CTRL_MODE        57ul
-#define AP_PARAM_RW_CTRL_AGING             58ul  // 老化测试指令
-#define AP_PARAM_RW_BCKUP_REG_59           59ul
-// 用户存储空间
-#define AP_PARAM_RW_USER_00                60ul
-#define AP_PARAM_RW_USER_01                61ul
-#define AP_PARAM_RW_USER_02                62ul
-#define AP_PARAM_RW_USER_03                63ul
-#define AP_PARAM_RW_USER_04                64ul
-#define AP_PARAM_RW_USER_05                65ul
-#define AP_PARAM_RW_USER_06                66ul
-#define AP_PARAM_RW_USER_07                67ul
-#define AP_PARAM_RW_USER_08                68ul
-#define AP_PARAM_RW_USER_09                69ul
-// 用户备用空间
-#define AP_PARAM_RW_BCKUP_REG_70           70ul
-#define AP_PARAM_RW_BCKUP_REG_71           71ul
-#define AP_PARAM_RW_BCKUP_REG_72           72ul
-#define AP_PARAM_RW_BCKUP_REG_73           73ul
-#define AP_PARAM_RW_BCKUP_REG_74           74ul
-#define AP_PARAM_RW_BCKUP_REG_75           75ul
-#define AP_PARAM_RW_BCKUP_REG_76           76ul
-#define AP_PARAM_RW_BCKUP_REG_77           77ul
-#define AP_PARAM_RW_BCKUP_REG_78           78ul
-#define AP_PARAM_RW_BCKUP_REG_79           79ul
-#define AP_PARAM_RW_BCKUP_REG_80           80ul
-#define AP_PARAM_RW_BCKUP_REG_81           81ul
-#define AP_PARAM_RW_BCKUP_REG_82           82ul
-#define AP_PARAM_RW_BCKUP_REG_83           83ul
-#define AP_PARAM_RW_OPTO_PERIOD            84ul  // 脉冲周期值
-#define AP_PARAM_RW_OPTO_WIDTH_MIN         85ul  // 脉宽最小值
-#define AP_PARAM_RW_OPTO_WIDTH_MAX         86ul  // 脉宽最大值
-#define AP_PARAM_RW_OPTO_CALI_SPEED        87ul  // 校准速度值
-#define AP_PARAM_RW_VALVE_DIR_GAP          88ul
-#define AP_PARAM_RW_BCKUP_REG_89           89ul
-// 电机控制参数
-#define AP_PARAM_RW_COMMAND                90ul  // 设置密码
-#define AP_PARAM_RW_RATED_SPEED            91ul  // 运行最大速度(转/秒)
-#define AP_PARAM_RW_RATED_UP_ACC           92ul  // 运行最大加速度(r/ss)
-#define AP_PARAM_RW_RATED_DOWN_ACC         93ul  // 运行最大减速度(r/ss)
-#define AP_PARAM_RW_RATED_CURRENT          94ul  // 额定电流
-#define AP_PARAM_RW_CALI_CURRENT           95ul  // 校准电流
-#define AP_PARAM_RW_CHANNEL_MAX            96ul  // 最大通道数
-#define AP_PARAM_RW_MOTOR_TYPE             97ul  // 电机类型: 1->选择阀 2->切换阀
-#define AP_PARAM_RW_COMPEN                 98ul  // 原点补偿值(单位: 0.1度)
-#define AP_PARAM_RW_DEC_RATIO              99ul  // 减速比
+#define MODBUS_START                0ul
+#define MODBUS_NUMBER               100ul
 
+/* 保持寄存器 */
+extern __IO uint16_t g_mb_Holding[MODBUS_NUMBER];
+
+/* 定义保持寄存器操作接口 */
+#define MB_SET_HOLDING(addr, data) (g_mb_Holding[addr] = data)
+#define MB_GET_HOLDING(addr) (g_mb_Holding[addr])
+//------------------------------------------------------------------------------
+/* 控制指令 CTRL */
+#define MB_RW_CTRL_SET_NORMAL       0ul  // 设置切换通道
+#define MB_RW_CTRL_SET_CW           1ul  // 设置切换通道[顺时针]
+#define MB_RW_CTRL_SET_CCW          2ul  // 设置切换通道[逆时针]
+#define MB_RW_CTRL_SET_FREE         3ul
+#define MB_RW_CTRL_REG_4            4ul  //
+#define MB_RW_CTRL_SET_ZERO         5ul  // 复位
+#define MB_RW_CTRL_REG_6            6ul  //
+#define MB_RW_CTRL_REG_7            7ul  //
+#define MB_RW_CTRL_REG_8            8ul
+#define MB_RW_CTRL_SET_MODE         9ul  // 设置模式
+// 只读参数查询 STATUS
+#define MB_R_STATUS_CHANNEL_CUR     10ul  // 当前通道
+#define MB_R_STATUS_CONTROL_STATE   11ul  // 控制状态
+#define MB_R_STATUS_MOVE_TIME       12ul  // 上次移动耗时
+#define MB_R_STATUS_SW_CODE         13ul  // 软件代号
+#define MB_R_STATUS_SW_VERSION      14ul  // 软件版本号
+#define MB_R_STATUS_COUNT_1         15ul  // 内部计数1
+#define MB_R_STATUS_COUNT_2         16ul  // 内部计数2
+#define MB_R_STATUS_REG_17          17ul  //
+#define MB_R_STATUS_REG_18          18ul  //
+#define MB_R_STATUS_REG_19          19ul  //
+// 运行参数1 OPERATE1
+#define MB_RW_OPERATE1_ADDRESS      20ul  // 地址
+#define MB_RW_OPERATE1_SPEED        21ul  // 速度
+#define MB_RW_OPERATE1_DIRECTION    22ul  // 方向
+#define MB_RW_OPERATE1_BAUDRATE     23ul  // 波特率
+#define MB_RW_OPERATE1_MOVE_COUNT_1 24ul  // 移动次数1
+#define MB_RW_OPERATE1_MOVE_COUNT_2 25ul  // 移动次数2
+#define MB_RW_OPERATE1_REG_26       26ul
+#define MB_RW_OPERATE1_REG_27       27ul
+#define MB_RW_OPERATE1_REG_28       28ul
+#define MB_RW_OPERATE1_REG_29       29ul
+// 运行参数2 OPERATE2
+#define MB_RW_OPERATE2_REG_30       30ul
+#define MB_RW_OPERATE2_REG_31       31ul
+#define MB_RW_OPERATE2_REG_32       32ul
+#define MB_RW_OPERATE2_REG_33       33ul
+#define MB_RW_OPERATE2_REG_34       34ul
+#define MB_RW_OPERATE2_REG_35       35ul
+#define MB_RW_OPERATE2_REG_36       36ul
+#define MB_RW_OPERATE2_REG_37       37ul
+#define MB_RW_OPERATE2_REG_38       38ul
+#define MB_RW_OPERATE2_REG_39       39ul
+// 序列号 USER
+#define MB_RW_USER_SN_1             40ul
+#define MB_RW_USER_SN_2             41ul
+#define MB_RW_USER_SN_3             42ul
+#define MB_RW_USER_SN_4             43ul
+#define MB_RW_USER_SN_5             44ul
+#define MB_RW_USER_SN_6             45ul
+#define MB_RW_USER_SN_7             46ul
+#define MB_RW_USER_SN_8             47ul
+#define MB_RW_USER_SN_9             48ul
+#define MB_RW_USER_SN_10            49ul
+// 出厂参数1 FACTORY1
+#define MB_RW_FACTORY1_UID_X0       50ul  // 产品唯一ID
+#define MB_RW_FACTORY1_UID_X1       51ul  // 产品唯一ID
+#define MB_RW_FACTORY1_UID_Y0       52ul  // 产品唯一ID
+#define MB_RW_FACTORY1_UID_Y1       53ul  // 产品唯一ID
+#define MB_RW_FACTORY1_UID_Z0       54ul  // 产品唯一ID
+#define MB_RW_FACTORY1_UID_Z1       55ul  // 产品唯一ID
+#define MB_RW_FACTORY1_DATA_01      56ul  // 内部数据01
+#define MB_RW_FACTORY1_DATA_02      57ul  // 内部数据02
+#define MB_RW_FACTORY1_DATA_03      58ul  // 内部数据03
+#define MB_RW_FACTORY1_DATA_04      59ul  // 内部数据04
+// 出厂参数2 FACTORY2
+#define MB_RW_FACTORY2_VALVE_TYPE   60ul  // 阀类型
+#define MB_RW_FACTORY2_CTRL_MODE    61ul  // 控制模式
+#define MB_RW_FACTORY2_CHANNEL_NUM  62ul  // 通道数
+#define MB_RW_FACTORY2_HALF_MODE    63ul  // 半通道
+#define MB_RW_FACTORY2_REPLY_MODE   64ul  // 回复模式
+#define MB_RW_FACTORY2_SECURE_CODE  65ul  // 安全码
+#define MB_RW_FACTORY2_COMPEN_ORG   66ul  // 原点补偿值(单位: 0.1度)
+#define MB_RW_FACTORY2_COMPEN_DIR   67ul  // 方向补偿值(单位: 0.1度)
+#define MB_RW_FACTORY2_COMPEN_CW    68ul  // 顺时针补偿值(单位: 0.1度)
+#define MB_RW_FACTORY2_COMPEN_CCW   69ul  // 逆时针补偿值(单位: 0.1度)
+// 出厂参数3 FACTORY3
+#define MB_RW_FACTORY3_REG_70       70ul
+#define MB_RW_FACTORY3_REG_71       71ul
+#define MB_RW_FACTORY3_REG_72       72ul
+#define MB_RW_FACTORY3_REG_73       73ul
+#define MB_RW_FACTORY3_REG_74       74ul
+#define MB_RW_FACTORY3_REG_75       75ul
+#define MB_RW_FACTORY3_REG_76       76ul
+#define MB_RW_FACTORY3_REG_77       77ul
+#define MB_RW_FACTORY3_REG_78       78ul
+#define MB_RW_FACTORY3_REG_79       79ul
+// 后备1 BACKUP1
+#define MB_RW_BACKUP1_REG_80        80ul
+#define MB_RW_BACKUP1_REG_81        81ul
+#define MB_RW_BACKUP1_REG_82        82ul
+#define MB_RW_BACKUP1_REG_83        83ul
+#define MB_RW_BACKUP1_REG_84        84ul
+#define MB_RW_BACKUP1_REG_85        85ul
+#define MB_RW_BACKUP1_REG_86        86ul
+#define MB_RW_BACKUP1_REG_87        87ul
+#define MB_RW_BACKUP1_REG_88        88ul
+#define MB_RW_BACKUP1_REG_89        89ul
+// 后备2 BACKUP2
+#define MB_RW_BACKUP2_REG_90        90ul
+#define MB_RW_BACKUP2_REG_91        91ul
+#define MB_RW_BACKUP2_REG_92        92ul
+#define MB_RW_BACKUP2_REG_93        93ul
+#define MB_RW_BACKUP2_REG_94        94ul
+#define MB_RW_BACKUP2_REG_95        95ul
+#define MB_RW_BACKUP2_REG_96        96ul
+#define MB_RW_BACKUP2_REG_97        97ul
+#define MB_RW_BACKUP2_REG_98        98ul
+#define MB_RW_BACKUP2_REG_99        99ul
+//------------------------------------------------------------------------------
 /* 扩展变量 ------------------------------------------------------------------*/
 extern Modbus_T modbus;
 extern uint8_t Rx_Buffer[LENGTH_MB_DATA];

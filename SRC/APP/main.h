@@ -10,8 +10,8 @@
 // clang-format off
 
 #define DESCRIPTION         "Selector Valve"
-#define SOFTWARE_VERSION    "r45"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0045     /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r46"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0046     /* 软件修改版次 */
 
 #define BOARD_0     0x88
 #define BOARD_1     0x66
@@ -106,7 +106,7 @@
 //  v2.0.0CDEF-r44  2026.03.09  新增切换次数记录,下载口MOVES/串口0A功能码读写切换次数
 //                  2026.03.30  优化参数,新增log模块,重构AGS协议,读指令添加长度限制
 //  v2.0.0CDEF-r45  2026.04.01  新增modbus支援,实现03功能码
-
+//  v2.0.0CDEF-r45  2026.04.02  回滚,读指令添加长度限制
 
 
 //----EEPROM存储地址分配---//
