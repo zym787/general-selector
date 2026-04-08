@@ -44,20 +44,20 @@ enum CMD
 
 typedef struct 
 {
-    uint16  dataLen;
-    uint8   time;
-    uint8   stepCnt;
-    uint8   rxCount;
-    uint8   rxTimeOn;
-    uint8   rxTimeCnt;
-    uint8   f_RxErr;
-    uint8   usartBuf[128];
-    uint8   replyBuf[128];
+    uint16_t  dataLen;
+    uint8_t   time;
+    uint8_t   stepCnt;
+    uint8_t   rxCount;
+    uint8_t   rxTimeOn;
+    uint8_t   rxTimeCnt;
+    uint8_t   f_RxErr;
+    uint8_t   usartBuf[128];
+    uint8_t   replyBuf[128];
 }_PROTEXT_T;
 PEXT _PROTEXT_T protext;
 
 
-PEXT void RxUsart(uint8 res);
+PEXT void RxUsart(uint8_t res);
 PEXT void UsartProcess(void);
 PEXT void CommInit(void);
 

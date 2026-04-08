@@ -92,3 +92,9 @@
 /VALVEViciX2.si4project/*
 Utils.em
 /.history/*
+
+# keil build viewer record
+/USER/keil-build-viewer-record.txt
+/USER/keil-build-viewer-record.log
+/USER/keil-build-viewer.txt
+/USER/keil-build-viewer.log

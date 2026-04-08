@@ -1,53 +1,134 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
-typedef unsigned char  uint8;                    /* Unsigned  8 bit quantity                           */
-typedef unsigned short uint16;                   /* Unsigned 16 bit quantity                           */
-typedef unsigned int   uint32;                   /* Unsigned 32 bit quantity                           */
 
 #define read            false
 #define write           true
 #define end             false
 #define start           true
-typedef enum
-{
-    false,
-    true
-}bool;
 
-/* 是否开机末端孔 默认不开启 ! */
-//#define END_HOLE    /* 开机末端孔 */
 
-/* 是否限制临时速度 默认不开启 仅r5特殊定制使用! */
-//#define LIMIT_TEMP_SPD
+#define FIRST_HOLE_C        /* 开机1号孔 C版本 */
+//#define END_HOLE_D          /* 开机末端孔 D版本 */
+//#define FIRST_HOLE_IO_E     /* 开机1号孔带IO控制 E版本 */
+// #define FIRST_HOLE_MUT_IO_F /* 开机1号孔多IO控制 F版本 */
 
-//#define DEBUG       /* 调试输出 */
+/* 发行模式 屏蔽调试输出 */
+#define RELEASE
 
-// PCB定义
-//#define A12_906_B1    /* 不用 */
-#define A12_909_A2
+/* 是否限制临时速度 默认不开启 现已成为事实标准 */
+#define LIMIT_TEMP_SPD
 
-#ifdef A12_906_B1
-    #define PCB_VR                  "A12_906_B1"
+/// PCB定义
+// #define A12_906    /* 不用 */
+#define A12_909 /* 901-C1套用 */
+
+///E版本有两种方向: 
+/// FIRST_HOLE_IO_E_DIR  1   E1: 1->2->3
+/// FIRST_HOLE_IO_E_DIR  2   E2: 1->6->5
+#define FIRST_HOLE_IO_E_DIR 2
+
+///C版本 开机1号孔
+#ifdef FIRST_HOLE_C
+#undef USE_STDPERIPH_DRIVER
+#define FIRST_HOLE  /* 开机1号孔 */
+#undef END_HOLE
+#undef IOCTRL       /* 禁用IO控制 */
+#undef MUT_IOCTRL   /* 禁用多IO控制 */
+#undef END_HOLE_D
+#undef FIRST_HOLE_IO_E
+#undef FIRST_HOLE_MUT_IO_F
+#define HOLE_INFO ">First< Hole"
+#define SOFT_NAME "v2.0.0C"
+#define SOFT_VER_NUM (uint32_t)0x200C0000
+#define CONTROL             "232/485 AGS"
+#endif
+
+///D版本 开机末端孔
+#ifdef END_HOLE_D
+#undef USE_STDPERIPH_DRIVER
+#define END_HOLE  /* 开机末端孔 */
+#undef FIRST_HOLE
+#undef IOCTRL     /* 禁用IO控制 */
+#undef MUT_IOCTRL /* 禁用多IO控制 */
+#undef FIRST_HOLE_C
+#undef FIRST_HOLE_IO_E
+#undef FIRST_HOLE_MUT_IO_F
+#define HOLE_INFO ">End< Hole"
+#define SOFT_NAME "v2.0.0D"
+#define SOFT_VER_NUM (uint32_t)0x200D0000
+#define CONTROL             "232/485 AGS"
+#endif
+
+///E版本 开机1号孔带IO控制
+#ifdef FIRST_HOLE_IO_E
+#undef USE_STDPERIPH_DRIVER
+#define FIRST_HOLE  /* 开机1号孔 */
+#define IOCTRL      /* 启用IO控制 */
+#undef END_HOLE
+#undef MUT_IOCTRL   /* 禁用多IO控制 */
+#undef FIRST_HOLE_C
+#undef END_HOLE_D
+#undef FIRST_HOLE_MUT_IO_F
+#define HOLE_INFO ">First< Hole with IO"
+#define SOFT_NAME "v2.0.0E"
+#define SOFT_VER_NUM (uint32_t)0x200E0000
+#define CONTROL             "IO (Active High) + 232/485 AGS"
+#endif
+
+///F版本 开机1号孔带多IO控制
+#ifdef FIRST_HOLE_MUT_IO_F
+#define FIRST_HOLE  /* 开机1号孔 */
+#define MUT_IOCTRL  /* 启用多IO控制 */
+#define A12_926     /* 926-B2套用909 */
+#undef A12_906
+#undef A12_909
+#undef END_HOLE
+#undef IOCTRL       /* 禁用IO控制 */
+#undef FIRST_HOLE_C
+#undef END_HOLE_D
+#undef FIRST_HOLE_IO_E
+#define HOLE_INFO ">First< Hole with Mut IO"
+#define SOFT_NAME "v2.0.0F"
+#define SOFT_VER_NUM (uint32_t)0x200F0000
+#define CONTROL             "IO (Active Low)"
+#endif
+
+///调试模式定义
+#ifdef RELEASE
+#undef DEBUG
+#undef DEBUG_AGS_MB
+#undef PULSE_CNT_EN     /*  */
+#else
+#define DEBUG           /* 调试输出 */
+#define DEBUG_AGS_MB    /* AGS调试输出 */
+#define PULSE_CNT_EN
+#endif
+
+///PCB版本定义
+#ifdef A12_906
+    #define PCB_VR                  "A12-906"
     #define HARDWARE_DESCRIPTION    "Horizontal Version (2.5A Max)"
 #endif
-#ifdef A12_909_A2
-    #define PCB_VR                  "A12_909_A2"
+#ifdef A12_909
+    #define PCB_VR                  "A12-909"
     #define HARDWARE_DESCRIPTION     "Vertical Version (2.2A Max)"
+#endif
+#ifdef A12_926
+    #define PCB_VR                  "A12-926"
+    #define HARDWARE_DESCRIPTION    "Vertical Version (2.2A Max) with Multiple IO"
 #endif
 
 #ifdef LIMIT_TEMP_SPD
     #define LTS                     "LTS"
+#else
+    #define LTS                     ""
 #endif
-
-//#define RED4
-//#define RED5
-//#define RED10
-//#define RED16
 
 //#define HALF_CHN
 //#define NEW_SCALE
-//#define PULSE_CNT_EN
+
+#include <stdbool.h>
 
 #include <stm32f10x.h>
 #include "sys.h"
@@ -59,10 +140,18 @@ typedef enum
 #include "smotor.h"
 #include "EEP24serial.h"
 #include "protext.h"
+#include "ags_mb.h"
 #include "modbus.h"
 #include "main.h"
 #include "signal.h"
 #include "valve.h"
+#include "bsp_io.h"
+#ifdef MUT_IOCTRL
+#include "adc.h"
+#endif
+
+#include "../3rd/common/elab_log.h"
+#include "../3rd/xfusion/xf_utils.h"
 
 //正常的开关定义
 #define ON      1
@@ -71,7 +160,14 @@ typedef enum
 #define ON_OP   0
 #define OFF_OP  1
 
+///调试printd  屏蔽DEBUG时无效
+#ifdef DEBUG
+#define dbg_printf(fmt, ...) printf(fmt, ##__VA_ARGS__)
+#else
+#define dbg_printf(...)
+#endif
 
+#ifndef MUT_IOCTRL
 //-------------------------rcc----------------------------------
 #define RCC_APB1Periph_TIM2              ((vu32)0x00000001)
 #define RCC_APB1Periph_TIM3              ((vu32)0x00000002)
@@ -139,6 +235,7 @@ typedef enum
 #define GPIO_Pin_14                     ((vu16)0x4000)
 #define GPIO_Pin_15                     ((vu16)0x8000)
 #define GPIO_Pin_All                    ((vu16)0xFFFF)
+#endif
 
 #define GPIO_Crl_P0                     ((vu32)0XFFFFFFF0)
 #define GPIO_Crl_P1                     ((vu32)0XFFFFFF0f)

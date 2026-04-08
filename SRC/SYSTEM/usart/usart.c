@@ -137,18 +137,20 @@ void USART2_SendStr(char *s)
 
 void USART2_IRQHandler(void)
 {
-	char res;
-	res = res;
-	if(USART2->SR&(1<<5))//接收到数据
-	{
-		res=USART2->DR;
-        if(syspara.typeProtocal==MY_MODBUS)
-            ModbusReceive(res);
-        else
-            RxUsart(res);
-    }
+        volatile char res;
+        res = res;
+        if (USART2->SR & (1 << 5))  // 接收到数据
+        {
+                res = USART2->DR;
+                if (syspara.protocol_type == AGS_MODBUS) {
+                        ags_mbReceive(res);
+                } else if (syspara.protocol_type == EXT_COMM) {
+                        RxUsart(res);
+                } else if (syspara.protocol_type == MODBUS) {
+                        mb_Receive(res);
+                }
+        }
 }
-
 
 //----------------------------------------------------------------------------------
 //初始化IO 串口3
@@ -206,16 +208,18 @@ void USART3_SendStr(char *s)
 
 void USART3_IRQHandler(void)
 {
-	volatile u8 res;
-	res = res;
-	if(USART3->SR&(1<<5))//接收到数据
-	{
-		res = USART3->DR;
-        if(syspara.typeProtocal==MY_MODBUS)
-            ModbusReceive(res);
-        else
-            RxUsart(res);
-	}
+        volatile char res;
+        if (USART3->SR & (1 << 5))  // 接收到数据
+        {
+                res = USART3->DR;
+                if (syspara.protocol_type == AGS_MODBUS) {
+                        ags_mbReceive(res);
+                } else if (syspara.protocol_type == EXT_COMM) {
+                        RxUsart(res);
+                } else if (syspara.protocol_type == MODBUS) {
+                        mb_Receive(res);
+                }
+        }
 }
 
 #if 0

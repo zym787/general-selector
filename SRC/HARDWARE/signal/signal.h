@@ -7,6 +7,7 @@
 #define PEXT extern
 #endif
 
+///Âö³åÈÝÈÌ¶È
 #define PERCENT_TOLL    10
 #define PERCENT         100
 
@@ -32,7 +33,7 @@ PEXT SIGNAL_T sig;
 PEXT void getOptStartStatus(void);
 PEXT bool GettCliffSignal(void);
 PEXT void SignalScan(void);
-PEXT uint8 SigSum(uint8 *array, uint8 len);
+PEXT uint8_t SigSum(uint8_t *array, uint8_t len);
 
 #undef PEXT
 #endif

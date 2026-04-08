@@ -43,10 +43,10 @@ bool GettCliffSignal(void)
 /*
     排序
 */
-void BubbleWord(uint16* array,uint8 len)
+void BubbleWord(uint16_t* array,uint8_t len)
 {
-	uint8 i,j;
-	uint16 temp;
+	uint8_t i,j;
+	uint16_t temp;
 	for(j=1;j<len;j++)
 	{
 		for(i=0;i<len-j;i++)
@@ -65,10 +65,10 @@ void BubbleWord(uint16* array,uint8 len)
 /*
     均值
 */
-uint16 AverageN(uint16* array,uint8 len)
+uint16_t AverageN(uint16_t* array,uint8_t len)
 {
-	uint8 i=0;
-	uint32 sum=0;
+	uint8_t i=0;
+	uint32_t sum=0;
 	for(i=0;i<len;i++)
 	{
         sum += *(array+i);
@@ -81,19 +81,19 @@ uint16 AverageN(uint16* array,uint8 len)
 /*
 
 */
-uint8 SigSum(uint8 *array, uint8 len)
+uint8_t SigSum(uint8_t *array, uint8_t len)
 {
-    uint8 sum=0;
-    for(uint8 i=0; i<len; i++)
+    uint8_t sum=0;
+    for(uint8_t i=0; i<len; i++)
         sum += *(array+i);
     return sum;
 }
 
 
-uint16 SigSumU16(uint16 *array, uint8 len)
+uint16_t SigSumU16(uint16_t *array, uint8_t len)
 {
-    uint16 sum=0;
-    for(uint8 i=0; i<len; i++)
+    uint16_t sum=0;
+    for(uint8_t i=0; i<len; i++)
         sum += *(array+i);
     return sum;
 }
@@ -103,9 +103,9 @@ uint16 SigSumU16(uint16 *array, uint8 len)
 */
 void SignalScan(void)
 {
-    static uint8 pos=0;
-    uint8 i=0;
-    uint8 rwBuff[8]={0,0,0,0,0,0,0,0};
+    static uint8_t pos=0;
+    uint8_t i=0;
+    uint8_t rwBuff[8]={0,0,0,0,0,0,0,0};
     switch(sig.stpScan)
     {
         case 100:
@@ -123,35 +123,45 @@ void SignalScan(void)
         case 101:
             if(!MotionStatus[AXSV])
             {
-                VALVE_ENA = ON;
+                VALVE_ENA = ENABLE;
                 sig.bRdPulse = true;
                 AxisMoveRel(AXSV, -(int)rdc.stepRound*13/12, accel[AXSV]/2, decel[AXSV]/2, speed[AXSV]/2);
                 memset(sig.pulseGap, 0, SIGNAL_CNT*2);
                 memset(sig.pulseBlock, 0, SIGNAL_CNT*2);
-                printd("\r\n scanning and reset buffer");
+                printd("\r\n 可扫描信号总数: %d", SIGNAL_CNT);
+                printd("\r\n 重置扫描寄存器");
                 sig.stpScan = 102;
             }
             break;
         case 102:
             if(!MotionStatus[AXSV])
             {
+                printd("\r\n 计算并存储特征值");
                 sig.bRdPulse = false;
                 BubbleWord(sig.pulseGap, SIGNAL_CNT);
                 BubbleWord(sig.pulseBlock, SIGNAL_CNT);
+                // Gap 缺口
+                printd("\r\n G:");
                 for(i=0; i<SIGNAL_CNT; i++)
                 {
+                    printd(" %d", *(sig.pulseGap+i));
                     if(!*(sig.pulseGap+i))
                         break;
                 }
-                printd("\r\n num=%d", i);
-                rwBuff[4] = sig.pulseGap[i-1]>>8;
-                rwBuff[5] = sig.pulseGap[i-1];
+                printd("\r\n Gap不为零个数: %d", i);
+                rwBuff[4] = sig.pulseGap[i - 1] >> 8;
+                rwBuff[5] = sig.pulseGap[i - 1];
+                // Block 挡块
+                printd("\r\n B:");
                 for(i=0; i<SIGNAL_CNT; i++)
                 {
+                    printd(" %d", *(sig.pulseBlock+i));
                     if(!*(sig.pulseBlock+i))
                         break;
                 }
-                printd("\r\n num=%d", i);
+                printd("\r\n Block不为零个数: %d", i);
+
+                // Block 取均值
                 sig.pulseBlock[i-3] = AverageN(sig.pulseBlock, i-2);
                 rwBuff[0] = sig.pulseBlock[i-3]>>8;
                 rwBuff[1] = sig.pulseBlock[i-3];
@@ -160,10 +170,10 @@ void SignalScan(void)
                 rwBuff[6] = sig.pulseBlock[i-1]>>8;
                 rwBuff[7] = sig.pulseBlock[i-1];
 
-                printd("\r\n mainblock%d, second block%d, lit block%d, gap%d",
+                printd("\r\n 主挡片%d, 次挡片%d, 小挡片%d, 缺口%d",
                 sig.pulseBlock[i-3], sig.pulseBlock[i-2], sig.pulseBlock[i-1], sig.pulseGap[i-1]);
                 I2CPageWrite_Nbytes(ADDR_SYMBOL, LEN_SYMBOL, rwBuff);
-                printd("\r\n start inited");
+                printd("\r\n 启动复位");
                 sig.stpScan = 1;
             }
             break;
@@ -171,12 +181,14 @@ void SignalScan(void)
         case 4:
             if(sig.stpScan==1)
             {
+                printd("\r\n 读取特征值");
                 I2CPageRead_Nbytes(ADDR_SYMBOL, LEN_SYMBOL, rwBuff);
+                // 重新排序,B0为主挡片,B1次挡片,B2为小挡片,B3为主挡块误差,B4为次挡片误差,B5为小挡片误差
                 sig.pulseBlock[0] = rwBuff[0];
                 sig.pulseBlock[0] <<= 8;
                 sig.pulseBlock[0] |= rwBuff[1];
-                // normal blade 8 percent
-                uint32 temp=0;
+                // normal blade 10 percent
+                uint32_t temp=0;
                 temp = sig.pulseBlock[0]*PERCENT_TOLL;
                 sig.pulseBlock[3] = temp/PERCENT;
 
@@ -194,14 +206,21 @@ void SignalScan(void)
                 temp = sig.pulseBlock[2]*PERCENT_TOLL;
                 sig.pulseBlock[5] = temp/PERCENT;
 
+                // G0为缺口,G1为缺口误差
                 sig.pulseGap[0] = rwBuff[4];
                 sig.pulseGap[0] <<= 8;
                 sig.pulseGap[0] |= rwBuff[5];
                 // normal Gap 20 percent
                 temp = sig.pulseGap[0]*PERCENT_TOLL;
                 sig.pulseGap[1] = temp/PERCENT;
+
+                printd("\r\n B(Err):  %d(%d) %d(%d) %d(%d)",
+                       sig.pulseBlock[0], sig.pulseBlock[3],
+                       sig.pulseBlock[1], sig.pulseBlock[4],
+                       sig.pulseBlock[2], sig.pulseBlock[5]);
+                printd("\r\n G(Err):  %d(%d)", sig.pulseGap[0], sig.pulseGap[1]);
             }
-            VALVE_ENA = ON;
+            VALVE_ENA = ENABLE;
             Valve.status = VALVE_INITING;
             Valve.ErrBlinkTime = NORMAL_BLINK;
             Valve.passByOne = 0;
@@ -229,8 +248,8 @@ void SignalScan(void)
                 }
                 else
                 {
-                    sig.sum = SigSum(sig.arrCount, valveFix.fix.portCnt);
-                    I2CPageWrite_Nbytes(ADDR_SIG, LEN_SIG, sig.arrCount);
+//                    sig.sum = SigSum(sig.arrCount, valveFix.fix.portCnt);
+//                    I2CPageWrite_Nbytes(ADDR_SIG, LEN_SIG, sig.arrCount);
                     sig.stpScan = 4;
                 }
             }
@@ -238,9 +257,9 @@ void SignalScan(void)
         case 3:
             if(Valve.status==VALVE_RUN_END)
             {
-                sig.arrCount[pos-1] = sig.scanCount;
-                sig.pulse[pos-1] = sig.basicPulse;
-                printd("\r\n pos%d sig %d", pos, sig.arrCount[pos-1]);
+//                sig.arrCount[pos-1] = sig.scanCount;
+//                sig.pulse[pos-1] = sig.basicPulse;
+                printd("\r\n pos%d sig %d", pos, sig.arrCount[pos - 1]);
                 sig.scanCount = 0;
                 sig.stpScan = 2;
             }

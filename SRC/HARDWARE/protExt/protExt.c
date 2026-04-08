@@ -1,30 +1,36 @@
 #define _PROTEXT_GLOBALS_
 #include "common.h"
 
-
-
 void CommInit(void)
 {
     protext.stepCnt = PROTOCOL_HEAD;
     protext.rxCount = 0;
     protext.rxTimeOn = 0;
     protext.rxTimeCnt = 0;
-	I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
-    if(syspara.bdrate==2)
+    I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.baudrate);
+    if(syspara.baudrate == BAUD_19200)
     {
-        Usart2_Init(36, BAUD_RATE_19200);				//串口初始化默认为19200
-    	delay_ms(100);
-    	Usart3_Init(36, BAUD_RATE_19200);	            // 串口2 485初始化为19200
-    	delay_ms(100);
+        Usart2_Init(36, BAUD_RATE_19200);   // 串口2 232 初始化默认为19200
+        delay_ms(100);
+        Usart3_Init(36, BAUD_RATE_19200);   // 串口3 485初始化为19200
+        delay_ms(100);
+    }
+    else if(syspara.baudrate == BAUD_38400)
+    {
+        Usart2_Init(36, BAUD_RATE_38400);   // 串口2 232 初始化默认为38400
+        delay_ms(100);
+        Usart3_Init(36, BAUD_RATE_38400);   // 串口3 485初始化为38400
+        delay_ms(100);
     }
     else
     {
-        Usart2_Init(36, BAUD_RATE_9600);				//串口初始化默认为9600
-    	delay_ms(100);
-    	Usart3_Init(36, BAUD_RATE_9600);	        // 串口2 485初始化为9600
-    	delay_ms(100);
+        syspara.baudrate = BAUD_9600;
+        Usart2_Init(36, BAUD_RATE_9600);    // 串口2 232 初始化默认为9600
+        delay_ms(100);
+        Usart3_Init(36, BAUD_RATE_9600);    // 串口3 485初始化为9600
+        delay_ms(100);
     }
-	delay_ms(100);
+    delay_ms(100);
 }
 
 /*
@@ -59,7 +65,7 @@ void RCV_Buf(unsigned char buf)
 
 /*
 */
-void RxUsart(uint8 res)
+void RxUsart(uint8_t res)
 {
 //     if(protext.time>100)
 //     {
@@ -77,7 +83,7 @@ void RxUsart(uint8 res)
 			}
 			break;
 		case PROTOCOL_ADDR:
-			if(res == ModbusPara.mAddrs)
+			if(res == ags_mbParam.mAddrs)
 			{
 				RCV_Buf(res);
 				protext.stepCnt = PROTOCOL_COMMAND;
@@ -126,7 +132,7 @@ void RxUsart(uint8 res)
 //	}
 //	else if(protext.stepCnt==PROTOCOL_ADDR)
 //	{
-//        if(ModbusPara.mAddrs==res)
+//        if(ags_mbParam.mAddrs==res)
 //    	{// 开始接收数据
 //    	    protext.stepCnt = PROTOCOL_COMMAND;
 //    		protext.rxCount = 2;
@@ -140,7 +146,7 @@ void RxUsart(uint8 res)
 //	else if(protext.stepCnt>PROTOCOL_COMMAND)
 //	{
 //		// 如果溢出或者传输过程出现时间间隔超过T1.5，都不在接收
-//		if(ModbusPara.times<FRAME_ERR_TIME)
+//		if(ags_mbParam.times<FRAME_ERR_TIME)
 //			protext.usartBuf[protext.rxCount] = res;
 //		else
 //		    ERR_Reset();
@@ -154,10 +160,10 @@ void RxUsart(uint8 res)
 /*
 
 */
-uint8 CommCheckSum(uint32 lenth, uint8 *sendbuf)
+uint8_t CommCheckSum(uint32_t lenth, uint8_t *sendbuf)
 {
-	uint16 cnt;
-    uint32 checkSum=0;
+	uint16_t cnt;
+    uint32_t checkSum=0;
 
     checkSum = 0;
 	if(lenth)
@@ -168,7 +174,7 @@ uint8 CommCheckSum(uint32 lenth, uint8 *sendbuf)
 		}
 	}
     if(cnt==lenth)
-        return (uint8)checkSum;
+        return (uint8_t)checkSum;
     else
         return 0;
 }
@@ -176,10 +182,10 @@ uint8 CommCheckSum(uint32 lenth, uint8 *sendbuf)
 
 /*
 */
-void CommSend(uint32 length, uint8 *sendbuf)
+void CommSend(uint32_t length, uint8_t *sendbuf)
 {
-	uint16 cnt;
-    uint8 temp;
+	uint16_t cnt;
+    uint8_t temp;
 	TX_EN();
 	if(length)
 	{
@@ -203,9 +209,9 @@ void CommSend(uint32 length, uint8 *sendbuf)
 
 /*
 */
-void AskStaProcess(uint32 sta8)
+void AskStaProcess(uint32_t sta8)
 {
-    uint32 sdLen=0, checkSum=0;
+    uint32_t sdLen=0, checkSum=0;
 
     memset(protext.replyBuf, 0, sizeof(protext.replyBuf));
     protext.replyBuf[0] = HEAD_BYTE;
@@ -260,7 +266,7 @@ void AskStaProcess(uint32 sta8)
             protext.replyBuf[2] = 0x00;
             protext.replyBuf[3] = 0x00;
             protext.replyBuf[4] = 0x00;
-            if(protext.usartBuf[3]==MY_MODBUS || protext.usartBuf[3]==EXT_COMM)
+            if(protext.usartBuf[3]==AGS_MODBUS || protext.usartBuf[3]==EXT_COMM)
                 protext.replyBuf[5] = 0x00;
             else
                 protext.replyBuf[5] = 0X01;
@@ -295,15 +301,15 @@ void AskStaProcess(uint32 sta8)
 */
 void NormalAction(void)
 {
-    uint32 Itemp=0;
+    uint32_t Itemp=0;
     if(Valve.status==VALVE_RUN_END)
     {
         Valve.dir = 0xff;		//
     	if(!Valve.spd)
     	{
             I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
-            if(!Valve.spd || Valve.spd>SPD_MAX)
-                Valve.spd = INIT_SPD;
+            if(tBoundary.spd_min > Valve.spd || tBoundary.spd_max < Valve.spd)
+                Valve.spd = tBoundary.spd_min;
         }
         Itemp = protext.usartBuf[3];
         Itemp <<= 8;
@@ -326,15 +332,15 @@ void NormalAction(void)
 */
 void CWAction(void)
 {
-    uint32 Itemp=0;
+    uint32_t Itemp=0;
     if(Valve.status==VALVE_RUN_END)
     {
         Valve.dir = CW;		//
     	if(!Valve.spd)
     	{
             I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
-            if(!Valve.spd || Valve.spd>SPD_MAX)
-                Valve.spd = INIT_SPD;
+            if(tBoundary.spd_min > Valve.spd || tBoundary.spd_max < Valve.spd)
+                Valve.spd = tBoundary.spd_min;
         }
         Itemp = protext.usartBuf[3];
         Itemp <<= 8;
@@ -358,15 +364,15 @@ void CWAction(void)
 */
 void CCWAction(void)
 {
-    uint32 Itemp=0;
+    uint32_t Itemp=0;
     if(Valve.status==VALVE_RUN_END)
     {
         Valve.dir = CCW;		//
     	if(!Valve.spd)
     	{
             I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
-            if(!Valve.spd || Valve.spd>SPD_MAX)
-                Valve.spd = INIT_SPD;
+            if(tBoundary.spd_min > Valve.spd || tBoundary.spd_max < Valve.spd)
+                Valve.spd = tBoundary.spd_min;
         }
         Itemp = protext.usartBuf[3];
         Itemp <<= 8;
@@ -428,10 +434,10 @@ void RDAction(void)
 */
 void ProtocalSet(void)
 {
-    if(protext.usartBuf[6]==MY_MODBUS || protext.usartBuf[6]==EXT_COMM)
+    if(protext.usartBuf[6]==AGS_MODBUS || protext.usartBuf[6]==EXT_COMM)
     {
-//        syspara.typeProtocal = ModbusPara.rBuf[3];
-        I2CPageWrite_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &ModbusPara.rBuf[3]);
+//        syspara.protocol_type = ags_mbParam.rBuf[3];
+        I2CPageWrite_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &ags_mbParam.rBuf[3]);
     }
 }
 

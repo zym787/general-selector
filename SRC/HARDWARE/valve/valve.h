@@ -7,7 +7,6 @@
 #define PEXT extern
 #endif
 
-#define INIT_SPD            20  /* 初始化找位速度 */
 //#define SPD_VALVE             28                     // 转阀速度
 #define SPD_VALVE           100                     // 转阀速度
 
@@ -19,7 +18,7 @@
 #define I_16A               0x03
 #define I_05A               0x04
 
-#ifdef A12_909_A2
+#if ((defined A12_909) || (defined A12_926))
 #define LED_WORK            PCout(15)
 #define VALVE_OPT           PAin(15)
 #define VALVE_ENA		    PAout(4)
@@ -31,7 +30,7 @@
 #define M_ISET_2           PBout(12)
 #define M_ISET_3           PAout(11)
 #endif
-#ifdef A12_906_B1
+#ifdef A12_906
 #define LED_WORK            PCout(14)
 #define VALVE_OPT           PCin(15)
 #define VALVE_ENA		    PAout(6)
@@ -48,21 +47,15 @@
     M_ISET_2=(val>>1&0x01);\
     M_ISET_3=(val>>2&0x01);
 
-
-#define RDC01					1
-#define RDC04					4
-#define RDC10					10
-#define RDC16					16
-    
-#ifdef A12_909_A2
+#if ((defined A12_909) || (defined A12_926))
 #define SCALE               64                      //当前细分数为64
 #endif
-#ifdef A12_906_B1
+#ifdef A12_906
 #define SCALE               16                      //当前细分数为64
 #endif
 #define P_ROUND                 200                     //每圈大步数为200
 
-#ifdef A12_909_A2
+#if ((defined A12_909) || (defined A12_926))           /* A12_909 64细分 64*200=12800 */
 #define STEPS_1_DEGREE_RD01      (35.6)                 //每度需走的步数为12800/360=35.555~
 #define STEPS_01_DEGREE_RD01     (3.6)                  //每0.1度需走的步数为12800/3600=3.555~
 #define STEPS_1_DEGREE_RD04      (142.2)                 //每度需走的步数为12800/360=35.555~
@@ -72,7 +65,7 @@
 #define STEPS_1_DEGREE_RD16      (568.9)                 //每度需走的步数为12800/360=35.555~
 #define STEPS_01_DEGREE_RD16     (56.9)                  //每0.1度需走的步数为12800/3600=3.555~
 #endif
-#ifdef A12_906_B1
+#ifdef A12_906  /* A12_906 16细分 16*200=3200 */
 #define STEPS_1_DEGREE_RD01      (8.9)                 //每度需走的步数为12800/360=35.555~
 #define STEPS_01_DEGREE_RD01     (0.9)                  //每0.1度需走的步数为12800/3600=3.555~
 #define STEPS_1_DEGREE_RD04      (35.6)                 //每度需走的步数为12800/360=35.555~
@@ -110,17 +103,17 @@ enum
 #define AGS_ADDR_MAX        63      /* AGS地址最大 63 */
 #define BURN_ADDR           64      /* 老化地址 64 */
 #define AGS_ADDR_DEF        1       /* 默认地址 1 */
-#define INIT_SPD            20      /* 初始化找位速度 */
+#define INIT_SPD            15      /* 初始化找位速度 */
 #define SPD_MIN             1       /* 最小速度 */
-#define SPD_MAX             70      /* 最大速度 */
-#define SPD_MIN_RDCR20      1       /* 20减速比 最小速度 */
-#define SPD_MAX_RDCR20      50      /* 20减速比 最大速度 */
+#define SPD_MAX             100     /* 最大速度 */
+#define SPD_MIN_RDCR20      8       /* 20减速比 最小速度 */
+#define SPD_MAX_RDCR20      35      /* 20减速比 最大速度 */
 #define CHANNEL_MIN         3       /* 最小通道数 */
 #define CHANNEL_MAX         32      /* 最大通道数 */
 #define CHANNEL_DEF         10      /* 默认通道数 */
-#define BAUD_MIN            1       /* 最小波特率 */
-#define BAUD_MAX            3       /* 最大波特率 */
-#define BAUD_DEF            2       /* 默认波特率 */
+#define BAUD_MIN            BAUD_9600 /* 最小波特率 */
+#define BAUD_MAX            BAUD_38400 /* 最大波特率 */
+#define BAUD_DEF            BAUD_9600 /* 默认波特率 */
 
 #define RDCR_1              1       /* 减速比 1 */
 #define RDCR_4              4       /* 减速比 4 */
@@ -161,32 +154,42 @@ typedef struct
     unsigned int stpCnt;            //初始化后开始补偿的步数
 
     unsigned int BaudRate;          //运行的波特率值
-    unsigned char fDirCw;              // 寻位减速值
-    unsigned char fDirCCw;              // 寻位减速值
+    unsigned char fDirCw;              // 寻位减速值 电机顺时针，阀头逆时针
+    unsigned char fDirCCw;             // 寻位减速值 电机逆时针，阀头顺时针
     unsigned char SnCode[LEN_SN];   // 序列码
     unsigned char serialNum;        // 连续目标孔位，不知道哪个傻逼想的，确定一个孔位要连续分多次走位
     unsigned char serialPort[PREPORTCNT];    // 连续目标孔位，不知道哪个傻逼想的，确定一个孔位要连续分多次走位
+    uint8_t StatusChannel[4];   /* 通道状态序列 */
+    uint8_t goFirstFlag;    /* 执行开机1号孔步骤 */
 }_VALVE_T;
 PEXT _VALVE_T Valve;
 
 
 typedef struct
 {
-	uint8	rate;
-	uint32	stepRound;
+	uint8_t	rate;
+	uint32_t	stepRound;
 	float	stepP1dgr;
 	float	stepP01dgr;
 }RDC_T;
 PEXT RDC_T rdc;
 
+/* 限制值 */
+typedef struct
+{
+    uint8_t spd_min;/* 速度最小值 */
+    uint8_t spd_max;/* 速度最大值 */
+    uint8_t spd_init;/* 初始化速度 */
+} Boundary_T;
+PEXT Boundary_T tBoundary;
 
 typedef struct
 {
     bool    bEnable;            // retry bit
     bool    typeCtrl;           // type of ctrl shortest coord or define direction
-    uint8   dir;                // retry direction
-    uint8   times;              // retry times
-    uint8   totalSignalCnt;     // total signal count
+    uint8_t   dir;                // retry direction
+    uint8_t   times;              // retry times
+    uint8_t   totalSignalCnt;     // total signal count
 }_RETRY_T;
 PEXT _RETRY_T try;
 

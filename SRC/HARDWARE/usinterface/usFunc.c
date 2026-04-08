@@ -37,10 +37,9 @@ void TermVR(char rw)
     }
 }
 
-
 /*
-
-*/
+ * 显示所有指令
+ */
 void TermList(char rw)
 {
     printd("\r\n %s", S_LIST_M);
@@ -245,7 +244,7 @@ void TermFetch(char rw)
 void TermTs(char rw)
 {
     int getInt[2]={0, 0};
-//    uint8 buffer[2]={0,0};
+//    uint8_t buffer[2]={0,0};
     if(rw == READ_ACT)
     {
         printd("%s", S_LIST_SH);
@@ -273,9 +272,9 @@ void TermTs(char rw)
             case 2:
                 if(getInt[1]<=64)
                 {
-                    ModbusPara.mAddrs = getInt[1];
+                    ags_mbParam.mAddrs = getInt[1];
                     printd("\r\n Set addrs %d", getInt[1]);
-                    I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, (uint8 *)&getInt[1]);
+                    I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, (uint8_t *)&getInt[1]);
                 }
                 break;
             case 59686681:
@@ -309,7 +308,7 @@ void TermPos(char rw)
         {
             Valve.portDes = Valve.portCur + 1;
         }
-        printd("\r\n Nearby:%d==>%d", Valve.portCur, Valve.portDes);
+        printd("\r\n 就近:%d==>%d", Valve.portCur, Valve.portDes);
     }
     else
     {
@@ -325,7 +324,7 @@ void TermPos(char rw)
             Valve.dir = getInt[1];
             printd("\r\n %d==>%d", Valve.portCur, getInt[0]);
             if(getInt[1]==255)
-                printd(" short");
+                printd(" 就近");
         }
     }
 }
@@ -383,8 +382,8 @@ void TermAddr(char rw)
     int getInt=0;
     if(rw == READ_ACT)
     {
-        I2CPageRead_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, (uint8*)&getInt);
-        printd("\r\n Addr:%d", getInt);
+        I2CPageRead_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ags_mbParam.mAddrs);
+        printd("\r\n 读取地址 %d", ags_mbParam.mAddrs);
     }
     else
     {
@@ -396,16 +395,16 @@ void TermAddr(char rw)
         }
         if(AGS_ADDR_MIN <= getInt && BURN_ADDR >= getInt)
         {
-            ModbusPara.mAddrs = getInt;
-            printd("\r\n Set Addr to %d", ModbusPara.mAddrs);
+            ags_mbParam.mAddrs = getInt;
+            printd("\r\n 设置地址 %d", ags_mbParam.mAddrs);
         }
         else
         {
-            printd("\r\n %d Address out of range (%d-%d)", getInt, AGS_ADDR_MIN, BURN_ADDR);
-            ModbusPara.mAddrs = AGS_ADDR_DEF;
-            printd("\r\n Use default Address %d", ModbusPara.mAddrs);
+            printd("\r\n %d 地址超出范围 (合法地址:%d-%d)", getInt, AGS_ADDR_MIN, BURN_ADDR);
+            ags_mbParam.mAddrs = AGS_ADDR_DEF;
+            printd("\r\n 使用默认地址 %d", ags_mbParam.mAddrs);
         }
-        I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ModbusPara.mAddrs);
+        I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ags_mbParam.mAddrs);
     }
 }
 
@@ -419,7 +418,7 @@ void TermInt(char rw)
     if(rw == READ_ACT)
     {
         I2CPageRead_Nbytes(ADDR_INTVL, LEN_INTVL, &intCtrl);
-        printd("\r Interval:%d Sec", intCtrl);
+        printd("\r\n 读取老化间隔 %d 秒", intCtrl);
     }
     else
     {
@@ -431,7 +430,7 @@ void TermInt(char rw)
         }
         if(getInt&&getInt<=255)
         {
-            printd("\r\n set Interval to %d Sec", getInt);
+            printd("\r\n 设置老化间隔 %d 秒", getInt);
             intCtrl = getInt;
             I2CPageWrite_Nbytes(ADDR_INTVL, LEN_INTVL, &intCtrl);
         }
@@ -447,7 +446,7 @@ void TermSpd(char rw)
     if(rw == READ_ACT)
     {
         I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
-        printd("\r\n read Spd %d RPM", Valve.spd);
+        printd("\r\n 读取速度 %d 转/分", Valve.spd);
     }
     else
     {
@@ -457,34 +456,18 @@ void TermSpd(char rw)
             printd("\r\n Err code %d", ret);
             return;
         }
-        if(RDCR_20 == rdc.rate)
+        
+        if(tBoundary.spd_min <= getInt && tBoundary.spd_max >= getInt)
         {
-            if(SPD_MIN_RDCR20 <= getInt && SPD_MAX_RDCR20 >= getInt)
-            {
-                Valve.spd = getInt;
-                printd("\r\n set speed to %d", Valve.spd);
-            }
-            else
-            {
-                printd("\r\n %d Speed out of range (%dRDCR: %d-%d)", 
-                    getInt, rdc.rate, SPD_MIN_RDCR20, SPD_MAX_RDCR20);
-                Valve.spd = INIT_SPD / 2;
-                printd("\r\n Use default Speed %d", Valve.spd);
-            }
+            Valve.spd = getInt;
+            printd("\r\n 设置速度 %d转/分", Valve.spd);
         }
         else
         {
-            if(SPD_MIN <= getInt && SPD_MAX >= getInt)
-            {
-                Valve.spd = getInt;
-                printd("\r\n set Spd to %d", Valve.spd);
-            }
-            else
-            {
-                printd("\r\n %d Speed out of range (%d-%d)", getInt, SPD_MIN, SPD_MAX);
-                Valve.spd = INIT_SPD;
-                printd("\r\n Use default Speed %d", Valve.spd);
-            }
+            printd("\r\n %d 速度超限 (%d减速比速度范围: %d-%d)", 
+                getInt, rdc.rate, tBoundary.spd_min, tBoundary.spd_max);
+            Valve.spd = tBoundary.spd_init;
+            printd("\r\n 使用默认速度 %d", Valve.spd);
         }
         I2CPageWrite_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
     }
@@ -500,9 +483,9 @@ void TermSN(char rw)
     if(rw == READ_ACT)
     {
         I2CPageRead_Nbytes(ADDR_SN, LEN_SN, Valve.SnCode);
-        printd("\r\n read SN:");
-        for(uint8 i=0; i<10; i++)
-            printd(" %02x", Valve.SnCode[i]);
+        printd("\r\n 读序列号:");
+        for (uint8_t i = 0; i < LEN_SN; i++)
+          printd(" %02x", Valve.SnCode[i]);
     }
     else
     {
@@ -513,8 +496,10 @@ void TermSN(char rw)
             return;
         }
 
-        printd("\r\n set sn code");
-        I2CPageWrite_Nbytes(ADDR_SN, LEN_SN, (uint8*)getInt);
+        printd("\r\n 设置序列号: ");
+        I2CPageWrite_Nbytes(ADDR_SN, LEN_SN, (uint8_t*)getInt);
+        for (uint8_t i = 0; i < LEN_SN; i++)
+          printd(" %02x", Valve.SnCode[i]);
     }
 }
 
@@ -526,42 +511,48 @@ void TermProtocal(char rw)
     int getInt=0;
     if(rw == READ_ACT)
     {
-        I2CPageRead_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.typeProtocal);
-        if(MY_MODBUS == syspara.typeProtocal)
+        I2CPageRead_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.protocol_type);
+        printd("\r\n now protocol is");
+        if(AGS_MODBUS == syspara.protocol_type)
         {
-            printd("\r\n AGS");
+            printd(" AGS");
         }
-        else if(EXT_COMM == syspara.typeProtocal)
+        else if(EXT_COMM == syspara.protocol_type)
         {
-            printd("\r\n EXTCOM");
+            printd(" HX");
         }
-        else
+        else if(MODBUS == syspara.protocol_type)
         {
-            printd("\r\n read wrong type");
-        }
-    }
-    else
-    {
-        unsigned char ret = FetchInt(5, 0, str.rcvStr, &getInt);
-        if(ret)
-        {
-            printd("\r\n Err code %d", ret);
-            return;
-        }
-        if(getInt==MY_MODBUS || getInt==EXT_COMM)
-        {
-            syspara.typeProtocal = getInt;
-            printd("\r\n set protocal to");
-            if(syspara.typeProtocal==MY_MODBUS)
-                printd("\r\n AGS");
-            else
-                printd("\r\n EXTCOM");
-            I2CPageWrite_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.typeProtocal);
+            printd(" MODBUS");
         }
         else
         {
-            printd("\r\n wrong type  0:AGS  1:EXT");
+            printd(" wrong type");
         }
+    } else {
+            unsigned char ret = FetchInt(5, 0, str.rcvStr, &getInt);
+            if (ret) {
+                    printd("\r\n Err code %d", ret);
+                    return;
+            }
+
+            switch (getInt) {
+                    default:
+                            printd("\r\n wrong type set default AGS");
+                    case AGS_MODBUS:
+                            syspara.protocol_type = AGS_MODBUS;
+                            printd("\r\n set protocal to AGS");
+                            break;
+                    case EXT_COMM:
+                            syspara.protocol_type = EXT_COMM;
+                            printd("\r\n set protocal to HX");
+                            break;
+                    case MODBUS:
+                            syspara.protocol_type = MODBUS;
+                            printd("\r\n set protocal to MODBUS");
+                            break;
+            }
+            I2CPageWrite_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.protocol_type);
     }
 }
 
@@ -575,8 +566,8 @@ void TermBaud(char rw)
     int getInt = 0;
     if(rw == READ_ACT)
     {
-        I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
-        printd("\r\n Baud:%d", syspara.bdrate);
+        I2CPageRead_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.baudrate);
+        printd("\r 波特率:%d %dbps", syspara.baudrate, BaudRate_V[syspara.baudrate]);
     }
     else
     {
@@ -585,32 +576,26 @@ void TermBaud(char rw)
         {
             printd("\r\n Err code %d", ret);
             return;
-        }
-        if(getInt%9600)
-        {
-            printd("\r\n baud rate %d not exist", getInt);
-            return;
-        }
-        
+        } 
         if(9600 == getInt)
         {
-            syspara.bdrate = 1;
+                syspara.baudrate = BAUD_9600;
         }
         else if(19200 == getInt)
         {
-            syspara.bdrate = 2;
+                syspara.baudrate = BAUD_19200;
         }
         else if(38400 == getInt)
         {
-            syspara.bdrate = 3;
+                syspara.baudrate = BAUD_38400;
         }
         else
         {
-            printd("\r\n baud rate overflow");
+            printd("\r\n %d 波特率超出范围", getInt);
             return;
         }
-        printd("\r set baud rate to %d %dbps", syspara.bdrate, getInt);
-        I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.bdrate);
+        printd("\r\n 设置波特率为 %d %dbps", syspara.baudrate, getInt);
+        I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.baudrate);
     }
 }
 
@@ -619,14 +604,17 @@ void TermBaud(char rw)
 */
 void TermPulse(char rw)
 {
+#if 0
     if(rw == READ_ACT)
     {
+        
         if(syspara.bRdPulse==false)
             syspara.bRdPulse = true;
         else
             syspara.bRdPulse = false;
         I2CPageWrite_Nbytes(ADDR_RDP, LEN_RDP, &syspara.bRdPulse);
     }
+#endif
 }
 
 /*
@@ -638,21 +626,22 @@ void TermScan(char rw)
     {
         sig.stpScan = 100;
         sig.num = 0;
-        printd("\r\n start signal scan");
+        printd("\r\n 开始信号扫描");
     }
 }
 
 
 /*
-
+ * 电机顺时针减速值
+ * 阀头逆时针
 */
 void TermDirCw(char rw)
 {
     int getInt = 0;
     if(rw == READ_ACT)
     {
-        I2CPageRead_Nbytes(ADDR_DIR_SD, LEN_DIR_SD-1, (uint8 *)&getInt);
-        printd("\r\n 顺时针减速值:%d", getInt);
+        I2CPageRead_Nbytes(ADDR_DIR_SD, LEN_DIR_SD-1, (uint8_t *)&getInt);
+        printd("\r\n 逆时针减速值:%d", getInt);
     }
     else
     {
@@ -664,23 +653,24 @@ void TermDirCw(char rw)
         }
         if(getInt<=255)
         {
-            I2CPageWrite_Nbytes(ADDR_DIR_SD, LEN_DIR_SD-1, (uint8 *)&getInt);
+            I2CPageWrite_Nbytes(ADDR_DIR_SD, LEN_DIR_SD-1, (uint8_t *)&getInt);
             Valve.fDirCw = getInt;
-            printd("\r\n 设置顺时针减速值:%d", getInt);
+            printd("\r\n 设置逆时针减速值:%d", getInt);
         }
     }
 }
 
 /*
-
-*/
+ * 电机逆时针减速值
+ * 阀头顺时针
+ */
 void TermDirCCw(char rw)
 {
     int getInt = 0;
     if(rw == READ_ACT)
     {
-        I2CPageRead_Nbytes(ADDR_DIR_SD+1, LEN_DIR_SD-1, (uint8 *)&getInt);
-        printd("\r\n 逆时针减速值:%d", getInt);
+        I2CPageRead_Nbytes(ADDR_DIR_SD+1, LEN_DIR_SD-1, (uint8_t *)&getInt);
+        printd("\r\n 顺时针减速值:%d", getInt);
     }
     else
     {
@@ -692,9 +682,9 @@ void TermDirCCw(char rw)
         }
         if(getInt<=255)
         {
-            I2CPageWrite_Nbytes(ADDR_DIR_SD+1, LEN_DIR_SD-1, (uint8 *)&getInt);
+            I2CPageWrite_Nbytes(ADDR_DIR_SD+1, LEN_DIR_SD-1, (uint8_t *)&getInt);
             Valve.fDirCCw = getInt;
-            printd("\r\n 设置逆时针减速值:%d", getInt);
+            printd("\r\n 设置顺时针减速值:%d", getInt);
         }
     }
 }
@@ -711,11 +701,12 @@ void TermReset(char rw)
         Valve.bNewInit = 0xff;
         Valve.passByOne = 0;
         Valve.bReInit = 1;
+        Valve.goFirstFlag = 0;
         I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
         (valveFix.fix.portCnt&&valveFix.fix.portCnt>32)?(valveFix.fix.portCnt=10):(valveFix.fix.portCnt);
         I2CPageRead_Nbytes(ADDR_VALVE_FIX, LEN_VALVE_FIX, &Valve.fixOrg);
         I2CPageRead_Nbytes(ADDR_DIR_FIX, LEN_DIR_FIX, &valveFix.fix.dirGap);
-        printd("\r\n 复位");
+        printd("\r\n 复位... 请10秒后操作设备");
     }
 }
 
@@ -734,20 +725,20 @@ void TermCnt(char rw)
     if(rw == READ_ACT)
     {
         I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
-        printd("\r\n portCnt:%d", valveFix.fix.portCnt);
+        printd("\r\n 读通道数:%d", valveFix.fix.portCnt);
     }
     else
     {
         if(CHANNEL_MIN <= getInt && CHANNEL_MAX >= getInt)
         {
             valveFix.fix.portCnt = getInt;
-            printd("\r\n set Channel to %d", valveFix.fix.portCnt);
+            printd("\r\n 设置通道数:%d", valveFix.fix.portCnt);
         }
         else
         {
-            printd("\r\n %d Channel out of range (%d-%d)", getInt, CHANNEL_MIN, CHANNEL_MAX);
+            printd("\r\n %d 通道数超出范围 (%d-%d)", getInt, CHANNEL_MIN, CHANNEL_MAX);
             valveFix.fix.portCnt = CHANNEL_DEF;
-            printd("\r\n Use default Channel %d", valveFix.fix.portCnt);
+            printd("\r\n 使用默认通道数 %d", valveFix.fix.portCnt);
         }
         I2CPageWrite_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
     }
@@ -762,7 +753,7 @@ void TermRDCR(char rw)
     if(rw == READ_ACT)
     {
         I2CPageRead_Nbytes(ADDR_RDC_RATE, LEN_RDC_RATE, &rdc.rate);
-        printd("\r\n read rate %d", rdc.rate);
+        printd("\r\n 读取减速比 %d", rdc.rate);
     }
     else
     {
@@ -776,12 +767,12 @@ void TermRDCR(char rw)
             RDCR_16 == getInt || RDCR_20 == getInt)
         {
             rdc.rate = getInt;
-            printd("\r\n set Rate to %d", rdc.rate);
+            printd("\r\n 设置减速比 %d", rdc.rate);
         }
         else
         {
-            rdc.rate = RDCR_4;
-            printd("\r\n %d Rate out of range. Use default Rate %d", getInt, rdc.rate);
+            rdc.rate = RDCR_10;
+            printd("\r\n %d 减速比超出范围 使用默认减速比 %d", getInt, rdc.rate);
         }
         I2CPageWrite_Nbytes(ADDR_RDC_RATE, LEN_RDC_RATE, &rdc.rate);
     }
@@ -796,8 +787,8 @@ void TermHalf(char rw)
     if(rw == READ_ACT)
     {
         I2CPageRead_Nbytes(ADDR_HALF_SEAL, LEN_HALF_SEAL, &Valve.bHalfSeal);
-        printd("\r Half Seal:%d  %s", Valve.bHalfSeal, 
-                (Valve.bHalfSeal) == 0 ? "OFF" : "ON");
+        printd("\r\n 读取半通道 :%d  %s", Valve.bHalfSeal,
+                (Valve.bHalfSeal) == 0 ? "关闭" : "开启");
     }
     else
     {
@@ -809,18 +800,205 @@ void TermHalf(char rw)
         }
         if(0 == getInt || 1 == getInt)
         {
-            printd("\r\n set Half Seal:%d  %s", getInt, 
-                    (getInt) == 0 ? "OFF" : "ON");
+            printd("\r\n 设置半通道 :%d  %s", getInt, 
+                    (getInt) == 0 ? "关闭" : "开启");
             Valve.bHalfSeal = getInt;
             
         }
         else
         {
-            printd("\r\n Non-zero valuse MUST BE forced to 1\
-                    \r\n ENABLE Half Seal");
+            printd("\r\n 非0值必须强制设置为1\
+                    \r\n 开启半通道");
             Valve.bHalfSeal = 1;
         }
         I2CPageWrite_Nbytes(ADDR_HALF_SEAL, LEN_HALF_SEAL, &Valve.bHalfSeal);
+    }
+}
+
+/*
+ * 停留时间
+ */
+void TermPauseTime(char rw)
+{
+    int getInt = 0;
+    if (rw == READ_ACT)
+    {
+        I2CPageRead_Nbytes(ADDR_PAUSE_TIME, LEN_PAUSE_TIME, (uint8_t*)&syspara.pauseTime);
+        printd("\r\n 停留时间 %d毫秒", syspara.pauseTime);
+    }
+    else
+    {
+        unsigned char ret = FetchInt(6, 0, str.rcvStr, &getInt);
+        if (ret)
+        {
+            printd("\r Err code %d", ret);
+            return;
+        }
+        if (0 <= getInt && ADZ_PT_MAX >= getInt)
+        {
+            syspara.pauseTime = getInt;
+            printd("\r\n 写入停留时间 %d毫秒", syspara.pauseTime);
+        }
+        else
+        {
+            syspara.pauseTime = 0;
+            printd("\r\n %d 停留时间超限 写入默认值0 %d (0-%d)", getInt, syspara.pauseTime, ADZ_PT_MAX);
+        }
+        I2CPageWrite_Nbytes(ADDR_PAUSE_TIME, LEN_PAUSE_TIME, (uint8_t*)&syspara.pauseTime);
+    }
+}
+
+/*
+ * IO 
+ */
+void TermIO(char rw)
+{
+    if (rw == READ_ACT)
+    {
+        syspara.ioCtrl = !syspara.ioCtrl;
+        I2CPageWrite_Nbytes(ADDR_IO_CTRL, LEN_IO_CTRL, (uint8_t *)&syspara.ioCtrl);
+        printd("\r IO控制:%d %s", syspara.ioCtrl, (0 == syspara.ioCtrl ? "关闭" : "开启"));
+    }
+}
+
+/*
+ * 点检模式：打印出所有关键参数
+ */
+void TermInspection(char rw)
+{
+    printd("\r\n ***************< 点检模式 >***************");
+    /* 点检参数 */
+    printd("\r\n 版本       (VR)   : %s", SOFT_VER_C);               /* 版本号 */
+    printd("\r\n 电路板     (PCB)  : %s", PCB_VR);                   /* PCB版本号 */
+    printd("\r\n 编译时间   (TIME) : %s %s", __DATE__, __TIME__);    /* 时间 */
+    printd("\r\n 地址       (ADDR) : %d", ags_mbParam.mAddrs);        /* 地址 */
+    printd("\r\n 通道数     (CNT)  : %d", valveFix.fix.portCnt);     /* 通道数 */
+    printd("\r\n 波特率     (BAUD) : %d %dbps", syspara.baudrate, BaudRate_V[syspara.baudrate]); /* 波特率 */
+    printd("\r\n 速度       (SPD)  : %d", Valve.spd);                /* 速度 */
+    printd("\r\n 减速比     (RDCR) : %d", rdc.rate);                 /* 减速比 */
+    printd("\r\n 半通道     (HALF) : %d", Valve.bHalfSeal);          /* 半通道 */
+    printd("\r\n 逆时针补偿 (CW)   : %d", Valve.fDirCw);             /* 顺时针补偿 */
+    printd("\r\n 顺时针补偿 (CCW)  : %d", Valve.fDirCCw);            /* 逆时针补偿 */
+    printd("\r\n 原点补偿   (FIXO) : %d", Valve.fixOrg);             /* 原点补偿 */
+    printd("\r\n 方向补偿   (FIXG) : %d", valveFix.fix.dirGap);      /* 方向补偿 */
+    printd("\r\n 老化次数  (TESTC) : %d", syspara.burnCnt);          /* 老化次数 */
+    printd("\r\n 切换次数  (MOVES) : %d", syspara.totalCnt);      /* 切换次数 */
+#ifdef FIRST_HOLE_IO_E
+    printd("\r\n IO控制     (IOE) : %d", syspara.ioCtrl);            /* IO */
+    printd("\r\n 停留时间   (REPLY): %d", syspara.pauseTime);        /* 停留时间 */
+#endif // FIRST_HOLE_IO_E
+#ifdef FIRST_HOLE_MUT_IO_F
+    printd("\r\n IO控制     (IOE) : %d", syspara.ioCtrl);            /* IO */
+    printd("\r\n                         1  2  3  4");
+    printd("\r\n 切换顺序     (STATC)  : %d %d %d %d", Valve.StatusChannel[0], Valve.StatusChannel[1], Valve.StatusChannel[2], Valve.StatusChannel[3]);                            /* IO */
+#endif // FIRST_HOLE_MUT_IO_F
+    /* 序列号 */
+    printd("\r\n 序列号     (SN)   : %02X %02X %02X %02X %02X", 
+        Valve.SnCode[0], Valve.SnCode[1], Valve.SnCode[2], Valve.SnCode[3], Valve.SnCode[4]);
+    printd("\r\n ***************< 点检模式 >***************\r\n");
+}
+
+/*
+ * 老化次数
+ */
+void TermTestCnt(char rw)
+{
+    int getInt = 0;
+    uint32_t saveCnt = 0;
+    if (rw == READ_ACT)
+    {
+        I2CPageRead_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&saveCnt);
+        if(saveCnt <= syspara.burnCnt)
+        {
+            I2CPageWrite_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
+            dbg_printf("Saved");
+        }
+        printd("\r\n 老化次数 %d", syspara.burnCnt);
+    }
+    else
+    {
+        unsigned char ret = FetchInt(5, 0, str.rcvStr, &getInt);
+        if (ret)
+        {
+            printd("\r Err code %d", ret);
+            return;
+        }
+        printd("\r\n 设置老化次数 %d", getInt);
+        syspara.burnCnt = getInt;
+        I2CPageWrite_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
+    }
+}
+
+/*
+ * 通道状态
+ */
+void TermStateChannel(char rw)
+{
+#ifdef MUT_IOCTRL
+    int getInt[4] = {1, 1, 1, 1};
+    if (rw == READ_ACT)
+    {
+        I2CPageRead_Nbytes(ADDR_STATE_CHANNEL, LEN_STATE_CHANNEL, Valve.StatusChannel);
+        printd("\r\n                1  2  3  4");
+        printd("\r\n 读取通道状态:");
+        for (uint8_t i = 0; i < 4; ++i)
+            printd(" %d", *(Valve.StatusChannel + i));
+        printd("\r\n");
+    }
+    else
+    {
+        unsigned char ret = FetchInt(5, 0, str.rcvStr, getInt);
+        if (ret)
+        {
+            printd("\r\n Err code %d", ret);
+            return;
+        }
+        printd("\r\n                1  2  3  4");
+        printd("\r\n 设置通道状态: ");
+        ///范围检查
+        for (uint8_t i = 0; i < 4; i++)
+        {
+            if (1 <= getInt[i] && getInt[i] <= valveFix.fix.portCnt)
+            {
+                Valve.StatusChannel[i] = getInt[i];
+                printd(" %d", Valve.StatusChannel[i]);
+            }
+            else
+            {
+                printd("\r\n 错误! 第%d个通道值%d超限 请重新检查", i + 1, Valve.StatusChannel[i]);
+                return;
+            }
+        }
+        I2CPageWrite_Nbytes(ADDR_STATE_CHANNEL, LEN_STATE_CHANNEL, Valve.StatusChannel);
+    }
+#else
+        printd("\r\n 该版本不支持通道状态功能");
+#endif
+}
+
+/*
+ * 切换次数
+ */
+void TermMovesCnt(char rw)
+{
+    int getInt = 0;
+    printd("\r\n func %s", __func__);
+    if(rw == READ_ACT)
+    {
+        I2CPageRead_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, ((uint8_t*)&syspara.totalCnt));
+        printd("\r 切换次数:%d", syspara.totalCnt);
+    }
+    else
+    {
+        unsigned char ret = FetchInt(5, 0, str.rcvStr, &getInt);
+        if(ret)
+        {
+            printd("\r Err code %d", ret);
+            return;
+        }
+        syspara.totalCnt = getInt;
+        printd("\r 写入切换次数:%d", syspara.totalCnt);
+        I2CPageWrite_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, (uint8_t*)&syspara.totalCnt);
     }
 }
 
@@ -852,6 +1030,12 @@ _TAB_T TermTab[]=
     {21,    (*TermCnt)},
     {22,    (*TermRDCR)},
     {23,    (*TermHalf)},
+    {24,    (*TermInspection)},
+    {25,    (*TermPauseTime)},
+    {26,    (*TermIO)},
+    {27,    (*TermTestCnt)},
+    {28,    (*TermStateChannel)},
+    {29,    (*TermMovesCnt)},
 };
 
 /*
@@ -972,6 +1156,36 @@ void ChRUN(char *cmdName)
     {
         (!strcasecmp(cmdName, "HALF"))?(bRw = READ_ACT):(bRw = WRITE_ACT);
         FuncIndex = 23;
+    }
+    else if(!strcasecmp(cmdName, "INSP") || !strncasecmp(cmdName, "INSP", 4))
+    {
+        (!strcasecmp(cmdName, "INSP"))?(bRw = READ_ACT):(bRw = WRITE_ACT);
+        FuncIndex = 24;
+    }
+    else if(!strcasecmp(cmdName, "PAUSET") || !strncasecmp(cmdName, "PAUSET", 5))
+    {
+        (!strcasecmp(cmdName, "PAUSET"))?(bRw = READ_ACT):(bRw = WRITE_ACT);
+        FuncIndex = 25;
+    }
+    else if(!strcasecmp(cmdName, "IOE") || !strncasecmp(cmdName, "IOE", 3))
+    {
+        (!strcasecmp(cmdName, "IOE"))?(bRw = READ_ACT):(bRw = WRITE_ACT);
+        FuncIndex = 26;
+    }
+    else if (!strcasecmp(cmdName, "TESTC") || !strncasecmp(cmdName, "TESTC", 5))
+    {
+        (!strcasecmp(cmdName, "TESTC")) ? (bRw = READ_ACT) : (bRw = WRITE_ACT);
+        FuncIndex = 27;
+    }
+    else if (!strcasecmp(cmdName, "STATC") || !strncasecmp(cmdName, "STATC", 5))
+    {
+        (!strcasecmp(cmdName, "STATC")) ? (bRw = READ_ACT) : (bRw = WRITE_ACT);
+        FuncIndex = 28;
+    }
+    else if (!strcasecmp(cmdName, "MOVES") || !strncasecmp(cmdName, "MOVES", 5))
+    {
+        (!strcasecmp(cmdName, "MOVES")) ? (bRw = READ_ACT) : (bRw = WRITE_ACT);
+        FuncIndex = 29;
     }
     else
     {
