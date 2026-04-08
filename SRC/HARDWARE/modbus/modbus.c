@@ -7,41 +7,31 @@ ELAB_TAG("modbus"); /* elog 标签 */
 /* 私有变量 ------------------------------------------------------------------*/
 REG_VALUE R_value;
 Modbus_T modbus;
-uint8_t Rx_Buffer[LENGTH_MB_DATA];
-uint8_t Tx_Buffer[LENGTH_MB_DATA];
-__IO uint16_t g_mb_Holding[MODBUS_NUMBER];
+uint8_t Rx_Buffer[MODBUS_LENGTH];
+uint8_t Tx_Buffer[MODBUS_LENGTH];
+
+__IO uint16_t g_mb_Holding[MODBUS_NUMBER] = {0}; /* 保持寄存器buf */
 
 /* 扩展变量 ------------------------------------------------------------------*/
 /* 私有函数原形 --------------------------------------------------------------*/
-#if (SUPPORT_FUN_CODE_01H != 0)
-static uint16_t MB_RSP_01H(uint16_t _TxCount, uint16_t _AddrOffset, uint16_t _CoilNum);
-#endif
-#if (SUPPORT_FUN_CODE_02H != 0)
-static uint16_t MB_RSP_02H(uint16_t _TxCount, uint16_t _AddrOffset, uint16_t _CoilNum);
-#endif
 #if (SUPPORT_FUN_CODE_03H != 0)
-static uint8_t MB_RSP_03H(uint16_t _TxCount, uint16_t *_AddrOffset, uint16_t _RegNum);
-#endif
-#if (SUPPORT_FUN_CODE_04H != 0)
-static uint8_t MB_RSP_04H(uint16_t _TxCount, uint16_t _AddrOffset, uint16_t _RegNum);
-#endif
-#if (SUPPORT_FUN_CODE_05H != 0)
-static uint8_t MB_RSP_05H(uint16_t _TxCount, uint16_t _AddrOffset, uint16_t _RegDATA);
+static void mb_03H(void);
 #endif
 #if (SUPPORT_FUN_CODE_06H != 0)
-static uint8_t MB_RSP_06H(uint16_t _TxCount, uint16_t _AddrOffset, uint16_t _RegNum, uint16_t *_AddrAbs);
+static void mb_06H(void);
 #endif
 #if (SUPPORT_FUN_CODE_10H != 0)
-static uint8_t MB_RSP_10H(uint16_t _TxCount, uint16_t _AddrOffset, uint16_t _RegNum, uint16_t *_AddrAbs,
-                          uint8_t *_Datebuf);
+static void mb_10H(void);
 #endif
 void mb_ReadHolding(uint16_t _regAddr);
+void mb_ReadHoldingOnce(void);
+void mb_WriteHolding(uint16_t _regAddr, uint16_t _value);
 void Get_Chip_UID(uint32_t *pID);
 /* 函数体 --------------------------------------------------------------------*/
 
 /**
-    * @brief     : 初始化Modbus协议
-    */
+ * @brief     : 初始化Modbus协议
+ */
 void mb_Init(void)
 {
         RX_EN(); /* 开机为接收模式 */
@@ -67,6 +57,13 @@ void mb_Init(void)
 
         memset(Rx_Buffer, 0, sizeof(Rx_Buffer));
         memset(Tx_Buffer, 0, sizeof(Tx_Buffer));
+        uint8_t i = 0;
+        do {
+                MB_SET_HOLDING(i, 0);
+                i++;
+        } while (i < MODBUS_NUMBER);
+
+        mb_ReadHoldingOnce();
 }
 
 /**
@@ -97,12 +94,12 @@ void mb_TimesProcess(void)
  * @brief     : 发送数据
  * @param    _length
  */
-void mb_Send(uint8_t _length)
+void mb_SendBuffer(uint8_t _length)
 {
-        elog_debug("%s(): L%d", __FUNCTION__, _length);
-#if (DEBUG_MODBUS != 0)
-        XF_LOG_BUFFER_HEX(Tx_Buffer, _length);
-#endif
+//         elog_debug("%s(): L%d", __FUNCTION__, _length);
+// #if (DEBUG_MODBUS != 0)
+//         XF_LOG_BUFFER_HEX(Tx_Buffer, _length);
+// #endif
         TX_EN();
         if (_length) {
                 modbus.RunState = MB_SEND;
@@ -141,7 +138,7 @@ void mb_Receive(uint8_t _recStr)
         modbus.times = 0; /* 重新计时 */
         if (modbus.RunState == MB_IDLE && !modbus.ReciveCount) {
                 /* 空闲并且数据处理结束,可以进行新的接收 */
-                if (modbus.Address == _recStr || MB_Broadcast_ADDR == _recStr) {
+                if (modbus.Address == _recStr || MB_ALLSLAVEADDR == _recStr) {
                         modbus.RunState = MB_RECIVE;
                         modbus.ErrorState = MB_ERROR_NONE;
                         modbus.ReciveCount = 1;
@@ -150,15 +147,15 @@ void mb_Receive(uint8_t _recStr)
                         /* 非本设备地址,或非当前查询的设备,且非广播地址*/
                         modbus.RunState = MB_NO_RESPONSE;
                         modbus.ErrorState = MB_ERROR_DEVICE;
-						elog_error("%d Address Error", _recStr);
+                        elog_error("%d Address Error", _recStr);
                 }
         } else if (modbus.RunState == MB_RECIVE) {
                 /* 如果溢出或者传输过程出现时间间隔超过T1.5,都不再接收*/
-                if (modbus.ReciveCount < LENGTH_MB_DATA && modbus.times < FRAME_ERR_TIME) {
+                if (modbus.ReciveCount < MODBUS_LENGTH && modbus.times < FRAME_ERR_TIME) {
                         Rx_Buffer[modbus.ReciveCount] = _recStr;
                 } else {
                         modbus.RunState = MB_RECIVE_ERR;
-						elog_error("%d Frame Error", _recStr);
+                        elog_error("%d Frame Error", _recStr);
                 }
                 ++modbus.ReciveCount;
         }
@@ -181,7 +178,7 @@ void mb_Error(void)
                 Tx_Buffer[3] = crc16 >> 8;
                 Tx_Buffer[4] = crc16 & 0xFF;
                 if (Rx_Buffer[0] != MB_Broadcast_ADDR) {
-                        mb_Send(5);
+                        mb_SendBuffer(5);
                 }
                 elog_error("Error %d", modbus.ErrorState);
         }
@@ -191,7 +188,8 @@ void mb_Error(void)
 /**
  * @brief     : 03 读保持寄存器
  */
-void mb_03H(void)
+#if (SUPPORT_FUN_CODE_03H != 0)
+static void mb_03H(void)
 {
         /*
          从机地址为01H。保持寄存器的起始地址为0010H，结束地址为0011H。该次查询总共访问2个保持寄存器。
@@ -221,8 +219,8 @@ void mb_03H(void)
                  发送：	01 03 00 10 00 01            85 CF ---- 读 0010H一个寄存器内容
                  返回：	01 03 02 12 34               B5 33 ---- 返回10H功能码写入的内容（10H功能码会介绍）
  */
-
-        uint8_t recAddr = Rx_Buffer[0];                          /* 设备地址 */
+        /* 解析 */
+        uint8_t recAddr = Rx_Buffer[0];                             /* 设备地址 */
         uint16_t recRegAddr = ((Rx_Buffer[2] << 8) | Rx_Buffer[3]); /* 寄存器首地址 */
         uint16_t regNum = ((Rx_Buffer[4] << 8) | Rx_Buffer[5]);     /* 寄存器数量 */
 #if (DEBUG_MODBUS != 0)
@@ -230,20 +228,17 @@ void mb_03H(void)
 #endif
 
         /* 响应 */
-        Tx_Buffer[0] = recAddr;         /* 第1个字节 设备地址 */
-        Tx_Buffer[1] = Rx_Buffer[1];     /* 第2个字节 功能码 */
-        Tx_Buffer[2] = 2 * regNum;           /* 第3个字节 寄存器数量 */
+        Tx_Buffer[0] = recAddr;      /* 第1个字节 设备地址 */
+        Tx_Buffer[1] = Rx_Buffer[1]; /* 第2个字节 功能码 */
+        Tx_Buffer[2] = 2 * regNum;   /* 第3个字节 寄存器数量 */
 
         /* 确保读取的地址存在 */
-        if (recAddr + regNum > MODBUS_NUMBER + 1) {
-                elog_error(" Address Over");
+        if (recRegAddr + regNum > MODBUS_NUMBER) {
+                elog_error(" Reg Address Over");
                 modbus.ErrorState = MB_ERROR_ADDR;
                 mb_Error();
                 return;
         }
-
-       
-
 
         /* 返回保持寄存器内的数据 */
         for (uint8_t i = 0; i < regNum; i++) {
@@ -257,35 +252,37 @@ void mb_03H(void)
         }
 
         /* 拼接CRC */
-        uint16_t crc16 = ModbusCRC16((uint8_t *)&Tx_Buffer[0], 2 * (regNum - 1) + 5);
+        uint16_t crc16 = ModbusCRC16((uint8_t *)&Tx_Buffer[0], 2 * regNum + 3);
 
-        Tx_Buffer[2 * (regNum - 1) + 5] = crc16 >> 8;
-        Tx_Buffer[2 * (regNum - 1) + 6] = crc16 & 0xFF;
+        Tx_Buffer[2 * regNum + 3] = crc16 >> 8;   /* 最后2个字节 CRC高字节 */
+        Tx_Buffer[2 * regNum + 4] = crc16 & 0xFF; /* 最后1个字节 CRC低字节 */
 #if (DEBUG_MODBUS != 0)
-        elog_debug(" CRC:%04X  (%d)%02X, (%d)%02X L:%d", crc16, 2 * (regNum - 1) + 5, Tx_Buffer[2 * (regNum - 1) + 5],
-                   2 * (regNum - 1) + 6, Tx_Buffer[2 * (regNum - 1) + 6], 2 * (regNum - 1) + 7);
+        elog_debug(" CRC:%04X  (%d)%02X, (%d)%02X L:%d", crc16, 2 * regNum + 3, Tx_Buffer[2 * regNum + 3],
+                   2 * regNum + 4, Tx_Buffer[2 * regNum + 4]);
 #endif
-#if (DEBUG_MODBUS != 0)
-        printd("\r\n TxBuffer:");
-        for (uint8_t i = 0; i < 2 * (regNum - 1) + 7; i++) {
-                printd(" (%d)%02X", i, Tx_Buffer[i]);
-        }
-        printd("\r\n");
-#endif
+// #if (DEBUG_MODBUS != 0)
+//         printd("\r\n TxBuffer:");
+//         for (uint8_t i = 0; i < 2 * regNum + 5; i++) {
+//                 printd(" (%d)%02X", i, Tx_Buffer[i]);
+//         }
+//         printd("\r\n");
+// #endif
 
         /* 只有无报错时才回复 */
         if (modbus.ErrorState == MB_ERROR_NONE) {
-                mb_Send(2 * (regNum - 1) + 7);
+                mb_SendBuffer(2 * regNum + 5);
 #if (DEBUG_MODBUS != 0)
-                XF_LOG_BUFFER_HEX(Tx_Buffer, 2 * (regNum - 1) + 7);
+                // XF_LOG_BUFFER_HEX(Tx_Buffer, 2 * regNum + 5);
 #endif
         }
 }
+#endif
 
 /**
  * @brief     : 06 写单个保持寄存器
  */
-void mb_06H(void)
+#if (SUPPORT_FUN_CODE_06H != 0)
+static void mb_06H(void)
 {
         /*
                 写保持寄存器。注意06指令只能操作单个保持寄存器，10H指令可以设置单个或多个保持寄存器
@@ -313,29 +310,31 @@ void mb_06H(void)
                         发送：	01 06 00 10 67 4A  23 C8    ---- 将0010地址寄存器设置为67 4A
                         返回：	01 06 00 10 67 4A  23 C8    ---- 返回同样数据
 */
+        /* 解析 */
         uint8_t recAddr = Rx_Buffer[0];                             /* 设备地址 */
         uint16_t recRegAddr = ((Rx_Buffer[2] << 8) | Rx_Buffer[3]); /* 寄存器首地址 */
         uint16_t regValve = ((Rx_Buffer[4] << 8) | Rx_Buffer[5]);   /* 寄存器值 */
 
         /* 响应 */
-        Tx_Buffer[0] = recAddr;      /* 第1个字节 设备地址 */
-        Tx_Buffer[1] = Rx_Buffer[1]; /* 第2个字节 功能码 */
+        Tx_Buffer[0] = recAddr;           /* 第1个字节 设备地址 */
+        Tx_Buffer[1] = Rx_Buffer[1];      /* 第2个字节 功能码 */
         Tx_Buffer[2] = recRegAddr >> 8;   /* 第3个字节 寄存器地址高字节 */
         Tx_Buffer[3] = recRegAddr & 0xFF; /* 第4个字节 寄存器地址低字节 */
 
         /* 确保写入的地址存在 */
-        if (recAddr > MODBUS_NUMBER) {
+        if (recRegAddr > MODBUS_NUMBER) {
+                elog_error(" Reg Address Over");
                 modbus.ErrorState = MB_ERROR_ADDR;
                 mb_Error();
                 return;
         }
 
         /* 写入保持寄存器内的数据 */
-        MB_SET_HOLDING(recRegAddr, regValve);
+        mb_WriteHolding(recRegAddr, regValve);
 
         /* 返回保持寄存器内的数据 */
-        Tx_Buffer[4] = MB_GET_HOLDING(recRegAddr) >> 8;
-        Tx_Buffer[5] = MB_GET_HOLDING(recRegAddr) & 0xFF;
+        Tx_Buffer[4] = MB_GET_HOLDING(recRegAddr) >> 8; /* 第5个字节 寄存器值高字节 */
+        Tx_Buffer[5] = MB_GET_HOLDING(recRegAddr) & 0xFF; /* 第6个字节 寄存器值低字节 */
 #if (DEBUG_MODBUS != 0)
         elog_debug(" R%d|Write%02X(%d): %d", 0, recRegAddr, recRegAddr, regValve);
 #endif
@@ -359,17 +358,19 @@ void mb_06H(void)
 
         /* 只有无报错时才回复 */
         if (modbus.ErrorState == MB_ERROR_NONE) {
-                mb_Send(8);
+                mb_SendBuffer(8);
 #if (DEBUG_MODBUS != 0)
-                XF_LOG_BUFFER_HEX(Tx_Buffer,8);
+                // XF_LOG_BUFFER_HEX(Tx_Buffer, 8);
 #endif
         }
 }
+#endif
 
 /**
  * @brief     : 10 写多个保持寄存器
  */
-void mb_10H(void)
+#if (SUPPORT_FUN_CODE_10H != 0)
+static void mb_10H(void)
 {
         /*
         主机发送:
@@ -416,7 +417,8 @@ void mb_10H(void)
         Tx_Buffer[5] = regNum & 0xFF;     /* 第6个字节 寄存器数量低字节 */
 
         /* 确保写入的地址存在 */
-        if (recAddr + regNum > MODBUS_NUMBER) {
+        if (recRegAddr + regNum > MODBUS_NUMBER) {
+                elog_error(" Reg Address Over");
                 modbus.ErrorState = MB_ERROR_ADDR;
                 mb_Error();
                 return;
@@ -456,21 +458,22 @@ void mb_10H(void)
 
         /* 只有无报错时才回复 */
         if (modbus.ErrorState == MB_ERROR_NONE) {
-                mb_Send(8);
+                mb_SendBuffer(8);
 #if (DEBUG_MODBUS != 0)
-                XF_LOG_BUFFER_HEX(Tx_Buffer, 8);
+                // XF_LOG_BUFFER_HEX(Tx_Buffer, 8);
 #endif
         }
 }
+#endif
 
 void mb_Poll(void)
 {
         if (MB_RECIVE_END == modbus.RunState) {
                 if (LEAST_RCV_CNT < modbus.ReciveCount) {
                         LED_WORK = !LED_WORK;
-#if (DEBUG_MODBUS != 0)
-                        XF_LOG_BUFFER_HEX(Rx_Buffer, modbus.ReciveCount);
-#endif
+// #if (DEBUG_MODBUS != 0)
+//                         XF_LOG_BUFFER_HEX(Rx_Buffer, modbus.ReciveCount);
+// #endif
                         if (0 == ModbusCRC16(&Rx_Buffer[0], modbus.ReciveCount)) {
                                 /* 第2字节 功能码 */
                                 /* 确认模块存在并且工作正常 */
@@ -500,118 +503,265 @@ void mb_Poll(void)
                         }
                         modbus.ReciveCount = 0;
                         mb_Error();
-                        modbus.ErrorState = MB_IDLE;
+                        modbus.ErrorState = MB_ERROR_NONE;
                 } else {
                         modbus.ReciveCount = 0;
                         mb_Error();
-                        modbus.ErrorState = MB_IDLE;
+                        modbus.ErrorState = MB_ERROR_NONE;
                 }
         }
 }
 
 /**
  * @brief     : 更新保持寄存器
+ * @detail    : 分区 根据寄存器地址,更新保持寄存器的值,以便在读保持寄存器时返回正确的数据
  */
 void mb_ReadHolding(uint16_t _regAddr)
 {
-        if (MB_R_STATUS_CHANNEL_CUR <= _regAddr && MB_R_STATUS_SW_VERSION >= _regAddr) {
-                MB_SET_HOLDING(MB_R_STATUS_CHANNEL_CUR, Valve.portCur);  /* 当前通道 */
-                MB_SET_HOLDING(MB_R_STATUS_CONTROL_STATE, Valve.status); /* 当前状态 */
-                MB_SET_HOLDING(MB_R_STATUS_MOVE_TIME, syspara.lastTime); /* 上次运动耗时 */
-                MB_SET_HOLDING(MB_R_STATUS_SW_CODE, SOFT_VER_NUM);       /* 软件代码*/
-                MB_SET_HOLDING(MB_R_STATUS_SW_VERSION, SOFT_REVISION);   /* 软件版本*/
+        /* 只读参数寄存器 STATUS */
+        if (MB_R_STATUS_CHANNEL_CUR <= _regAddr && MB_R_STATUS_COUNT_2 >= _regAddr) {
+                MB_SET_HOLDING(MB_R_STATUS_CHANNEL_CUR, Valve.portCur);        /* 当前通道 */
+                MB_SET_HOLDING(MB_R_STATUS_CONTROL_STATE, Valve.status);       /* 当前状态 */
+                MB_SET_HOLDING(MB_R_STATUS_MOVE_TIME, syspara.lastTime);       /* 上次运动耗时 */
+                MB_SET_HOLDING(MB_R_STATUS_SW_CODE, (SOFT_VER_NUM >> 16));     /* 软件代码*/
+                MB_SET_HOLDING(MB_R_STATUS_SW_VERSION, SOFT_REVISION);         /* 软件版本*/
+                MB_SET_HOLDING(MB_R_STATUS_COUNT_1, syspara.burnCnt >> 16);    /* 老化次数1 */
+                MB_SET_HOLDING(MB_R_STATUS_COUNT_2, syspara.burnCnt & 0xFFFF); /* 老化次数2 */
                 return;
         }
-        if (MB_RW_OPERATE1_ADDRESS <= _regAddr && MB_RW_OPERATE1_MOVE_COUNT_2 >= _regAddr) {
-                MB_SET_HOLDING(MB_RW_OPERATE1_ADDRESS, ags_mbParam.mAddrs); /* 地址 */
-                MB_SET_HOLDING(MB_RW_OPERATE1_SPEED, Valve.spd); /* 速度 */
-                MB_SET_HOLDING(MB_RW_OPERATE1_DIRECTION, Valve.dir); /* 方向 */
-                MB_SET_HOLDING(MB_RW_OPERATE1_BAUDRATE, syspara.baudrate); /* 波特率 */
-                MB_SET_HOLDING(MB_RW_OPERATE1_MOVE_COUNT_1, syspara.totalCnt >> 16); /* 移动次数1 */
+        /* 运行参数1寄存器 OPERATE1 */
+        else if (MB_RW_OPERATE1_ADDRESS <= _regAddr && MB_RW_OPERATE1_MOVE_COUNT_2 >= _regAddr) {
+                MB_SET_HOLDING(MB_RW_OPERATE1_ADDRESS, ags_mbParam.mAddrs);             /* 地址 */
+                MB_SET_HOLDING(MB_RW_OPERATE1_SPEED, Valve.spd);                        /* 速度 */
+                MB_SET_HOLDING(MB_RW_OPERATE1_DIRECTION, Valve.dir);                    /* 方向 */
+                MB_SET_HOLDING(MB_RW_OPERATE1_BAUDRATE, syspara.baudrate);              /* 波特率 */
+                MB_SET_HOLDING(MB_RW_OPERATE1_MOVE_COUNT_1, syspara.totalCnt >> 16);    /* 移动次数1 */
                 MB_SET_HOLDING(MB_RW_OPERATE1_MOVE_COUNT_2, syspara.totalCnt & 0xFFFF); /* 移动次数2 */
                 return;
         }
-        if (MB_RW_USER_SN_1 <= _regAddr && MB_RW_USER_SN_3 >= _regAddr) {
+        /* 序列号寄存器 USER */
+        else if (MB_RW_USER_SN_1 <= _regAddr && MB_RW_USER_SN_3 >= _regAddr) {
                 MB_SET_HOLDING(MB_RW_USER_SN_1, Valve.SnCode[0] << 8 | Valve.SnCode[1]); /* 序列号 */
                 MB_SET_HOLDING(MB_RW_USER_SN_2, Valve.SnCode[2] << 8 | Valve.SnCode[3]); /* 序列号 */
-                MB_SET_HOLDING(MB_RW_USER_SN_3, Valve.SnCode[4] << 8); /* 序列号 */
+                MB_SET_HOLDING(MB_RW_USER_SN_3, Valve.SnCode[4] << 8 | 0x00);                   /* 序列号 */
                 return;
         }
-        /* 出厂参数2 FACTORY2 */
-        if (MB_RW_FACTORY2_VALVE_TYPE <= _regAddr && MB_RW_FACTORY2_COMPEN_CCW >= _regAddr) {
+        /* 出厂参数1寄存器 FACTORY1 */
+        else if (MB_R_FACTORY1_UID_X0 <= _regAddr && MB_R_FACTORY1_UID_Z1 >= _regAddr) {
+                return;
+        }
+        /* 出厂参数2寄存器 FACTORY2 */
+        else if (MB_RW_FACTORY2_VALVE_TYPE <= _regAddr && MB_RW_FACTORY2_COMPEN_CCW >= _regAddr) {
                 MB_SET_HOLDING(MB_RW_FACTORY2_CHANNEL_NUM, valveFix.fix.portCnt); /* 通道数 */
-                MB_SET_HOLDING(MB_RW_FACTORY2_HALF_MODE, Valve.bHalfSeal); /* 半通道 */
-                MB_SET_HOLDING(MB_RW_FACTORY2_COMPEN_ORG, Valve.fixOrg); /* 原点补偿 */
-                MB_SET_HOLDING(MB_RW_FACTORY2_COMPEN_CW, Valve.fDirCw); /* CW补偿 */
-                MB_SET_HOLDING(MB_RW_FACTORY2_COMPEN_CCW, Valve.fDirCCw); /* CCW补偿 */
+                MB_SET_HOLDING(MB_RW_FACTORY2_HALF_MODE, Valve.bHalfSeal);        /* 半通道 */
+                MB_SET_HOLDING(MB_RW_FACTORY2_COMPEN_ORG, Valve.fixOrg);          /* 原点补偿 */
+                MB_SET_HOLDING(MB_RW_FACTORY2_COMPEN_CW, Valve.fDirCw);           /* CW补偿 */
+                MB_SET_HOLDING(MB_RW_FACTORY2_COMPEN_CCW, Valve.fDirCCw);         /* CCW补偿 */
+                return;
+        } else {
+                // MB_SET_HOLDING(_regAddr, 0); /* 其他寄存器暂时返回0 */
                 return;
         }
-        switch (_regAddr) {
-                /* 只读参数 STATUS */
-                case MB_R_STATUS_CHANNEL_CUR:
-                        MB_SET_HOLDING(MB_R_STATUS_CHANNEL_CUR, Valve.portCur); /* 当前通道 */
-                        break;
-                case MB_R_STATUS_CONTROL_STATE:
-                        MB_SET_HOLDING(MB_R_STATUS_CONTROL_STATE, Valve.status); /* 当前状态 */
-                        break;
-                case MB_R_STATUS_MOVE_TIME:
-                        MB_SET_HOLDING(MB_R_STATUS_MOVE_TIME, syspara.lastTime); /* 上次运动耗时 */
-                        break;
-                case MB_R_STATUS_SW_CODE:
-                        MB_SET_HOLDING(MB_R_STATUS_SW_CODE, SOFT_VER_NUM); /* 软件代码*/
-                        break;
-                case MB_R_STATUS_SW_VERSION:
-                        MB_SET_HOLDING(MB_R_STATUS_SW_VERSION, SOFT_REVISION); /* 软件版本*/
-                        break;
-                        /* 运行参数 OPERATE1 */
-                case MB_RW_OPERATE1_ADDRESS:
-                        MB_SET_HOLDING(MB_RW_OPERATE1_ADDRESS, ags_mbParam.mAddrs); /* 地址 */
-                        break;
-                case MB_RW_OPERATE1_SPEED:
-                        MB_SET_HOLDING(MB_RW_OPERATE1_SPEED, Valve.spd); /* 速度 */
-                        break;
-                case MB_RW_OPERATE1_DIRECTION:
-                        MB_SET_HOLDING(MB_RW_OPERATE1_DIRECTION, Valve.dir); /* 方向 */
-                        break;
-                case MB_RW_OPERATE1_BAUDRATE:
-                        MB_SET_HOLDING(MB_RW_OPERATE1_BAUDRATE, syspara.baudrate); /* 波特率 */
-                        break;
-                case MB_RW_OPERATE1_MOVE_COUNT_1:
-                        MB_SET_HOLDING(MB_RW_OPERATE1_MOVE_COUNT_1, syspara.totalCnt >> 16); /* 移动次数1 */
-                        break;
-                case MB_RW_OPERATE1_MOVE_COUNT_2:
-                        MB_SET_HOLDING(MB_RW_OPERATE1_MOVE_COUNT_2, syspara.totalCnt & 0xFFFF); /* 移动次数2 */
-                        break;
-                        /* 序列号 USER */
-                case MB_RW_USER_SN_1:
-                        MB_SET_HOLDING(MB_RW_USER_SN_1, Valve.SnCode[0] << 8 | Valve.SnCode[1]); /* 序列号 */
-                        break;
-                case MB_RW_USER_SN_2:
-                        MB_SET_HOLDING(MB_RW_USER_SN_2, Valve.SnCode[2] << 8 | Valve.SnCode[3]); /* 序列号 */
-                        break;
-                case MB_RW_USER_SN_3:
-                        MB_SET_HOLDING(MB_RW_USER_SN_3, Valve.SnCode[4] << 8); /* 序列号 */
-                        break;
-                        /* 出厂参数1 FACTORY1 */
-                case MB_RW_FACTORY1_UID_X0:
-                case MB_RW_FACTORY1_UID_X1:
-                case MB_RW_FACTORY1_UID_Y0:
-                case MB_RW_FACTORY1_UID_Y1:
-                case MB_RW_FACTORY1_UID_Z0:
-                case MB_RW_FACTORY1_UID_Z1:
-                        uint32_t uid[3];
-                        Get_Chip_UID(uid);
-                        MB_SET_HOLDING(MB_RW_FACTORY1_UID_X0, uid[0] >> 16);    /* UID */
-                        MB_SET_HOLDING(MB_RW_FACTORY1_UID_X1, uid[0] & 0xFFFF); /* UID */
-                        MB_SET_HOLDING(MB_RW_FACTORY1_UID_Y0, uid[1] >> 16);    /* UID */
-                        MB_SET_HOLDING(MB_RW_FACTORY1_UID_Y1, uid[1] & 0xFFFF); /* UID */
-                        MB_SET_HOLDING(MB_RW_FACTORY1_UID_Z0, uid[2] >> 16);    /* UID */
-                        MB_SET_HOLDING(MB_RW_FACTORY1_UID_Z1, uid[2] & 0xFFFF); /* UID */
-                        break;
-       
-                default:
-                        MB_SET_HOLDING(_regAddr, 0);
-                        break;
+}
+
+void mb_ReadHoldingOnce(void)
+{
+        uint32_t uid[3];
+        Get_Chip_UID(uid);
+        /* 出厂参数1寄存器 FACTORY1 */
+        MB_SET_HOLDING(MB_R_FACTORY1_UID_X0, uid[0] >> 16);    /* UID */
+        MB_SET_HOLDING(MB_R_FACTORY1_UID_X1, uid[0] & 0xFFFF); /* UID */
+        MB_SET_HOLDING(MB_R_FACTORY1_UID_Y0, uid[1] >> 16);    /* UID */
+        MB_SET_HOLDING(MB_R_FACTORY1_UID_Y1, uid[1] & 0xFFFF); /* UID */
+        MB_SET_HOLDING(MB_R_FACTORY1_UID_Z0, uid[2] >> 16);    /* UID */
+        MB_SET_HOLDING(MB_R_FACTORY1_UID_Z1, uid[2] & 0xFFFF); /* UID */
+}
+
+void mb_WriteHolding(uint16_t _regAddr, uint16_t _value)
+{
+        MB_SET_HOLDING(_regAddr, _value);
+#if (DEBUG_MODBUS != 0)
+        elog_debug(" Write Holding %02X(%d): %d", _regAddr, _regAddr, _value);
+#endif
+        /* 控制指令寄存器 CTRL */
+        if (MB_RW_CTRL_SET_NORMAL <= _regAddr && MB_RW_CTRL_SET_GOD_MODE >= _regAddr) {
+                switch (_regAddr) {
+                        case MB_RW_CTRL_SET_NORMAL:
+                                Valve.dir = 0xff;       /* 就近切换 */
+                                Valve.portDes = _value; /* 更新目标通道 */
+                                break;
+                        case MB_RW_CTRL_SET_CW:
+                                Valve.dir = 0x00;       /* CW切换 */
+                                Valve.portDes = _value; /* 更新目标通道 */
+                                break;
+                        case MB_RW_CTRL_SET_CCW:
+                                Valve.dir = 0x01;       /* CCW切换 */
+                                Valve.portDes = _value; /* 更新目标通道 */
+                                break;
+                        case MB_RW_CTRL_SET_FREE:
+                                Valve.dir = MB_GET_HOLDING(MB_RW_OPERATE1_DIRECTION); /* 方向 */
+                                Valve.spd = MB_GET_HOLDING(MB_RW_OPERATE1_SPEED);     /* 速度 */
+                                speed[AXSV] = accel[AXSV] = 100;
+                                decel[AXSV] = 200;
+                                speed[AXSV] *= (Valve.spd);
+                                speed[AXSV] *= (rdc.rate);
+                                accel[AXSV] *= (Valve.spd);
+                                accel[AXSV] *= (rdc.rate);
+                                decel[AXSV] *= (Valve.spd);
+                                decel[AXSV] *= (rdc.rate);
+                                Valve.portDes = _value; /* 更新目标通道 */
+                                break;
+                        case MB_RW_CTRL_SET_ZERO:
+                                Valve.status = VALVE_INITING;
+                                Valve.initStep = 0; /* 复位指令 */
+                                Valve.bNewInit = 0xff;
+                                Valve.passByOne = 0;
+                                Valve.bReInit = 1;
+                                Valve.goFirstFlag = 0;
+                                Valve.ErrBlinkTime = RETRY_TIME_OUT;
+                                break;
+                        case MB_RW_CTRL_SET_GOD_MODE:
+                                if (_value == AGING_CODE) {
+                                        syspara.GodMode = GD_AGING; /* 进入老化模式 */
+                                } else if (_value == SECURITY_CODE) {
+                                        syspara.GodMode = GD_FACTORY; /* 进入工厂模式 */
+                                } else if (_value == NORMAL_CODE) {
+                                        syspara.GodMode = GD_NORMAL; /* 进入正常模式 */
+                                        syspara.burnCnt = 0;         /* 老化次数清零 */
+                                        I2CPageWrite_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
+                                } else {
+                                        syspara.GodMode = GD_NORMAL;
+                                }
+                                I2CPageWrite_Nbytes(ADDR_GOD_MODE, LEN_GOD_MODE, &syspara.GodMode);
+                                break;
+                        default:
+                                break;
+                }
+        }
+        /* 运行参数1寄存器 OPERATE1 */
+        if (MB_RW_OPERATE1_ADDRESS <= _regAddr && MB_RW_OPERATE1_MOVE_COUNT_2 >= _regAddr) {
+                switch (_regAddr) {
+                        case MB_RW_OPERATE1_ADDRESS:
+                                ags_mbParam.mAddrs = _value;
+                                I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ags_mbParam.mAddrs);
+                                break;
+                        case MB_RW_OPERATE1_SPEED:
+                                Valve.spd = _value;
+                                I2CPageWrite_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
+                                break;
+                        case MB_RW_OPERATE1_DIRECTION:
+                                Valve.dir = _value;
+                                break;
+                        case MB_RW_OPERATE1_BAUDRATE:
+                                syspara.baudrate = (_value == 2 ? BAUD_19200 : (_value == 3 ? BAUD_38400 : BAUD_9600));
+                                I2CPageWrite_Nbytes(ADDR_BAUD, LEN_BAUD, &syspara.baudrate);
+                                break;
+                        case MB_RW_OPERATE1_MOVE_COUNT_1:
+                                syspara.totalCnt |= _value << 16; /* 移动次数1 */
+                                I2CPageWrite_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, (uint8_t *)&syspara.totalCnt);
+                                break;
+                        case MB_RW_OPERATE1_MOVE_COUNT_2:
+                                syspara.totalCnt |= _value; /* 移动次数2 */
+                                I2CPageWrite_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, (uint8_t *)&syspara.totalCnt);
+                                break;
+                        default:
+                                break;
+                }
+        }
+        /* 序列号寄存器 USER */
+        if (MB_RW_USER_SN_1 <= _regAddr && MB_RW_USER_SN_3 >= _regAddr) {
+                switch (_regAddr) {
+                        case MB_RW_USER_SN_1:
+                                Valve.SnCode[0] = _value >> 8;
+                                Valve.SnCode[1] = _value & 0xFF;
+                                I2CPageWrite_Nbytes(ADDR_SN, LEN_SN, Valve.SnCode);
+                                break;
+                        case MB_RW_USER_SN_2:
+                                Valve.SnCode[2] = _value >> 8;
+                                Valve.SnCode[3] = _value & 0xFF;
+                                I2CPageWrite_Nbytes(ADDR_SN, LEN_SN, Valve.SnCode);
+                                break;
+                        case MB_RW_USER_SN_3:
+                                Valve.SnCode[4] = _value >> 8;
+                                I2CPageWrite_Nbytes(ADDR_SN, LEN_SN, Valve.SnCode);
+                                break;
+                        default:
+                                break;
+                }
+        }
+
+        /******************** 工厂模式寄存器 FACTORY *******************/
+        if (GD_NORMAL == syspara.GodMode) {
+                return;
+        }
+#if (DEBUG_MODBUS != 0)
+        elog_debug(" Write Factory Holding %02X(%d): %d", _regAddr, _regAddr, _value);
+#endif
+        /* 出厂参数1寄存器 FACTORY1 */
+        //  if (MB_R_FACTORY1_UID_X0 <= _regAddr && MB_R_FACTORY1_UID_Z1 >= _regAddr) {
+        //          /* UID寄存器为只读,不处理写入 */
+        //  }
+        if (MB_RW_FACTORY1_DATA_01 <= _regAddr && MB_RW_FACTORY1_DATA_04 >= _regAddr) {
+                switch (_regAddr) {
+                        case MB_RW_FACTORY1_DATA_01:
+                                break;
+                        case MB_RW_FACTORY1_DATA_02:
+                                break;
+                        case MB_RW_FACTORY1_DATA_03:
+                                break;
+                        case MB_RW_FACTORY1_DATA_04:
+                                break;
+                        default:
+                                break;
+                }
+        }
+        /* 工厂模式安全码寄存器 FACTORY2_SECURE_CODE */
+        // if (MB_RW_FACTORY2_SECURE_CODE == _regAddr) {
+        //         if (_value == SECURITY_CODE) {
+        //                 syspara.GodMode = GD_FACTORY; /* 进入工厂模式 */
+        //         }
+        // }
+
+        /* 出厂参数2寄存器 FACTORY2 */
+        if (MB_RW_FACTORY2_VALVE_TYPE <= _regAddr && MB_RW_FACTORY2_SECURE_CODE > _regAddr ||
+            MB_RW_FACTORY2_SECURE_CODE < _regAddr && MB_RW_FACTORY2_COMPEN_CCW >= _regAddr) {
+                switch (_regAddr) {
+                        case MB_RW_FACTORY2_VALVE_TYPE:
+                                break;
+                        case MB_RW_FACTORY2_CTRL_MODE:
+                                break;
+                        case MB_RW_FACTORY2_CHANNEL_NUM:
+                                valveFix.fix.portCnt = _value;
+                                I2CPageWrite_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
+                                break;
+                        case MB_RW_FACTORY2_HALF_MODE:
+                                Valve.bHalfSeal = _value;
+                                I2CPageWrite_Nbytes(ADDR_HALF_SEAL, LEN_HALF_SEAL, &Valve.bHalfSeal);
+                                break;
+                        case MB_RW_FACTORY2_REPLY_MODE:
+                                break;
+                        case MB_RW_FACTORY2_COMPEN_ORG:
+                                Valve.fixOrg = _value;
+                                I2CPageWrite_Nbytes(ADDR_VALVE_FIX, LEN_VALVE_FIX, &Valve.fixOrg);
+                                break;
+                        case MB_RW_FACTORY2_COMPEN_DIR:
+                                // I2CPageWrite_Nbytes(ADDR_DIR_FIX, LEN_DIR_FIX, &valveFix.fix.dirGap);
+                                break;
+                        case MB_RW_FACTORY2_COMPEN_CW:
+                                Valve.fDirCw = _value;
+                                _value <<= 8;
+                                _value |= Valve.fDirCCw;
+                                I2CPageWrite_Nbytes(ADDR_DIR_SD, LEN_DIR_SD, (uint8_t *)&_value);
+                                break;
+                        case MB_RW_FACTORY2_COMPEN_CCW:
+                                Valve.fDirCCw = _value;
+                                _value <<= 8;
+                                _value |= Valve.fDirCw;
+                                I2CPageWrite_Nbytes(ADDR_DIR_SD, LEN_DIR_SD, (uint8_t *)&_value);
+                                break;
+                        default:
+                                break;
+                }
         }
 }
 

@@ -107,6 +107,7 @@
 //                  2026.03.30  优化参数,新增log模块,重构AGS协议,读指令添加长度限制
 //  v2.0.0CDEF-r45  2026.04.01  新增modbus支援,实现03功能码
 //  v2.0.0CDEF-r45  2026.04.02  回滚,读指令添加长度限制
+//  v2.0.0CDEF-r46  2026.04.08  新增modbus支援,实现03/06功能码,支援广播地址0x00
 
 
 //----EEPROM存储地址分配---//
@@ -174,6 +175,9 @@
 #define ADDR_TOTAL_CNT          (ADDR_STATE_CHANNEL+LEN_STATE_CHANNEL)
 #define LEN_TOTAL_CNT           4
 
+#define ADDR_GOD_MODE           (ADDR_TOTAL_CNT+LEN_TOTAL_CNT)
+#define LEN_GOD_MODE            1
+
 //------------------------------------------------------------------------------------------------------------
 
 // clang-format on
@@ -208,6 +212,12 @@ typedef enum BAUDRATETYPE {
         BAUD_NUM
 } BaudRate_T;
 
+typedef enum GODMODE {
+        GD_NORMAL = 0u,
+        GD_FACTORY = 1u,
+        GD_AGING = 2u,
+} GodMode_T;
+
 extern uint16_t BaudRate_V[BAUD_NUM];
 extern uint16_t BaudRate_Time[BAUD_NUM];
 
@@ -215,11 +225,11 @@ typedef struct {
         /* 系统参数 */
         Protocol_T protocol_type; /* 协议 */
         BaudRate_T baudrate;      /* 波特率 */
-        bool bRdPulse; /* ?读取脉冲标志 */
+        bool bRdPulse;           /* ?读取脉冲标志 */
         uint32_t OptBlockLast;
         uint32_t protectTimeOut;
-        uint32_t burnCnt;  // 烧机次数
-        bool bCountLastTime;
+        uint32_t burnCnt;       /* 烧机次数 */
+        bool bCountLastTime;    /* 是否记录切换时间 */
         uint32_t lastTime;      /* 切换时间 */
         uint32_t timeRamp[3];   /* 切换时间序列 */
         uint8_t recordTimeRamp; /* 记录切换时间 */
@@ -228,6 +238,7 @@ typedef struct {
         bool ctrlPause;         /* 停留时间控制 */
         uint32_t totalCnt;      /* 切换次数 */
         uint32_t totalCntLst;
+        GodMode_T GodMode;      /* 当前模式 */
 } _SYS_T;
 PEXT _SYS_T syspara;
 

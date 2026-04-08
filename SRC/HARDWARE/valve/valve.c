@@ -575,43 +575,48 @@ void ValveLimitDetect(void)
 */
 void TestBurn(void)
 {
-    static uint32_t bDir = 0;
-    if(BURN_ADDR == ags_mbParam.mAddrs)
-    {
-        if(timerPara.timeWaitMill > intCtrl*SEC)
-        {// 30秒间隔，启动模块运转到下一个通道
-            timerPara.timeWaitMill = 0;
-            if(Valve.status==VALVE_RUN_END)
-            {
-                if(Valve.portCur==0xff)
-                    Valve.portDes = 1;
-                if(!bDir && Valve.portCur==valveFix.fix.portCnt)
-                {
-                    (!bDir)?(bDir=1):(bDir);
-                }
-                else if(!bDir && Valve.portCur<valveFix.fix.portCnt)
-                {
-                    Valve.portDes = Valve.portCur+1;
-                    syspara.burnCnt++;
-                    Valve.dir = CCW;
-                    if(Valve.portDes==valveFix.fix.portCnt)
-                        bDir = 1;
-                }
-                else if(bDir && Valve.portCur>1)
-                {
-                    Valve.portDes = Valve.portCur-1;
-                    syspara.burnCnt++;
-                    Valve.dir = CW;
-                    if(Valve.portDes==1)
-                        bDir = 0;
-                }
-                printd("\r\n %d->%d 方向:%d",Valve.portCur, Valve.portDes, Valve.dir);
-                if (0 == syspara.burnCnt % 10)
-                {
-                    printd("  老化次数:%d(断电保存)", syspara.burnCnt);
-                    I2CPageWrite_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
-                }
-            }
+        static uint32_t bDir = 0;
+        static uint8_t bFirstEnter = 0;
+        /* AGS协议 */
+        if (syspara.protocol_type == AGS_MODBUS && BURN_ADDR == ags_mbParam.mAddrs) {
         }
-    }
+        /* Modbus */
+        else if (syspara.protocol_type == MODBUS && GD_AGING == syspara.GodMode) {
+        }
+        else {
+                return;
+        }
+
+        if (0 == bFirstEnter) {
+                printd("\r\n 进入烧机测试模式 开始循环切换!");
+                bFirstEnter = 1;
+        }
+
+        if (timerPara.timeWaitMill > intCtrl * SEC) {  // 30秒间隔，启动模块运转到下一个通道
+                timerPara.timeWaitMill = 0;
+                if (Valve.status == VALVE_RUN_END) {
+                        if (Valve.portCur == 0xff)
+                                Valve.portDes = 1;
+                        if (!bDir && Valve.portCur == valveFix.fix.portCnt) {
+                                (!bDir) ? (bDir = 1) : (bDir);
+                        } else if (!bDir && Valve.portCur < valveFix.fix.portCnt) {
+                                Valve.portDes = Valve.portCur + 1;
+                                syspara.burnCnt++;
+                                Valve.dir = CCW;
+                                if (Valve.portDes == valveFix.fix.portCnt)
+                                        bDir = 1;
+                        } else if (bDir && Valve.portCur > 1) {
+                                Valve.portDes = Valve.portCur - 1;
+                                syspara.burnCnt++;
+                                Valve.dir = CW;
+                                if (Valve.portDes == 1)
+                                        bDir = 0;
+                        }
+                        printd("\r\n %d->%d 方向:%d", Valve.portCur, Valve.portDes, Valve.dir);
+                        if (0 == syspara.burnCnt % 10) {
+                                printd("  老化次数:%d(断电保存)", syspara.burnCnt);
+                                I2CPageWrite_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
+                        }
+                }
+        }
 }
