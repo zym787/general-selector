@@ -85,6 +85,7 @@
 !Smotor.lib
 !USINTF_CR-0.lib
 !/SRC/*
+!/Version/release_version.txt
 
 # Source Insight Project Files
 *si4project*/
@@ -92,9 +93,6 @@
 /VALVEViciX2.si4project/*
 Utils.em
 /.history/*
-
-# keil build viewer record
-/USER/keil-build-viewer-record.txt
-/USER/keil-build-viewer-record.log
-/USER/keil-build-viewer.txt
-/USER/keil-build-viewer.log
+OBJ
+Version/output/*
+Version/**keil_compile_log.txt

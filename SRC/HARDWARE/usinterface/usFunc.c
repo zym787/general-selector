@@ -880,8 +880,8 @@ void TermInspection(char rw)
     printd("\r\n 逆时针补偿 (CW)   : %d", Valve.fDirCw);             /* 顺时针补偿 */
     printd("\r\n 顺时针补偿 (CCW)  : %d", Valve.fDirCCw);            /* 逆时针补偿 */
     printd("\r\n 原点补偿   (FIXO) : %d", Valve.fixOrg);             /* 原点补偿 */
-    printd("\r\n 方向补偿   (FIXG) : %d", valveFix.fix.dirGap);      /* 方向补偿 */
-    printd("\r\n 老化次数  (TESTC) : %d", syspara.burnCnt);          /* 老化次数 */
+    // printd("\r\n 方向补偿   (FIXG) : %d", valveFix.fix.dirGap);      /* 方向补偿 */
+    // printd("\r\n 老化次数  (TESTC) : %d", syspara.burnCnt);          /* 老化次数 */
     printd("\r\n 切换次数  (MOVES) : %d", syspara.totalCnt);      /* 切换次数 */
 #ifdef FIRST_HOLE_IO_E
     printd("\r\n IO控制     (IOE) : %d", syspara.ioCtrl);            /* IO */

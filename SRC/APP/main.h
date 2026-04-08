@@ -10,8 +10,8 @@
 // clang-format off
 
 #define DESCRIPTION         "Selector Valve"
-#define SOFTWARE_VERSION    "r46"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0046     /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r47"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0047     /* 软件修改版次 */
 
 #define BOARD_0     0x88
 #define BOARD_1     0x66
@@ -108,6 +108,8 @@
 //  v2.0.0CDEF-r45  2026.04.01  新增modbus支援,实现03功能码
 //  v2.0.0CDEF-r45  2026.04.02  回滚,读指令添加长度限制
 //  v2.0.0CDEF-r46  2026.04.08  新增modbus支援,实现03/06功能码,支援广播地址0x00
+//  v2.0.0CDEF-r47  2026.04.08  去除老化次数显示,防呆设计
+
 
 
 //----EEPROM存储地址分配---//

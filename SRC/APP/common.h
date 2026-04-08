@@ -8,7 +8,7 @@
 #define start           true
 
 
-#define FIRST_HOLE_C        /* 开机1号孔 C版本 */
+//#define FIRST_HOLE_C        /* 开机1号孔 C版本 */
 //#define END_HOLE_D          /* 开机末端孔 D版本 */
 //#define FIRST_HOLE_IO_E     /* 开机1号孔带IO控制 E版本 */
 // #define FIRST_HOLE_MUT_IO_F /* 开机1号孔多IO控制 F版本 */

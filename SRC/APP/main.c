@@ -168,7 +168,7 @@ void ParameterInit(void)
                 I2CPageRead_Nbytes(ADDR_PAUSE_TIME, LEN_PAUSE_TIME, (uint8_t *)&syspara.pauseTime);
                 printd("\r\n 中间状态停留时间: %d 毫秒", syspara.pauseTime);
                 I2CPageRead_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
-                printd("\r\n 老化次数 %d", syspara.burnCnt);
+                // printd("\r\n 老化次数 %d", syspara.burnCnt);
                 /// 通道状态
 #ifdef MUT_IOCTRL
                 I2CPageRead_Nbytes(ADDR_STATE_CHANNEL, LEN_STATE_CHANNEL, Valve.StatusChannel);
@@ -294,7 +294,6 @@ void ParameterInit(void)
                 Valve.bReInit = 1;
         }
         Valve.bNewInit = 0xff;
-        // syspara.burnCnt = 0;    // 清空单次开机老化次数
         Valve.goFirstFlag = 0;
 }
 
@@ -470,10 +469,10 @@ int main(void)
 {
         Stm32_Clock_Init(9); /* 系统时钟设置 */
         delay_init(72);      /* 延时初始化 */
-#if 0
-        JTAG_Set(JTAG_SWD_DISABLE);
+#ifdef RELEASE
+    JTAG_Set(JTAG_SWD_DISABLE);
 #else
-        JTAG_Set(JTAG_SWD_ENABLE);
+    JTAG_Set(JTAG_SWD_ENABLE);
 #endif
         delay_ms(100);
         Usart1_Init(72, 115200); /* 串口初始化为115200 */
