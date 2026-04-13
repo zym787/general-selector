@@ -181,6 +181,16 @@ void mb_Error(void)
                         mb_SendBuffer(5);
                 }
                 elog_error("Error %d", modbus.ErrorState);
+        } else if (modbus.ErrorState == MB_ERROR_DEVICE) {
+                uint8_t test[6] = {0, 3, 0, 16, 0 ,0};
+                uint16_t crc = ModbusCRC16(test, 4);
+                test[4] = crc >> 8;
+                test[5] = crc & 0xFF;
+                if (crc == 61460 && ModbusCRC16(test, 6) == 0) {
+                                elog_error("CRC Module is Normal %d", modbus.ErrorState);
+                } else {
+                        elog_error("CRC Module Error %d", modbus.ErrorState);
+                }
         }
         modbus.ErrorState = MB_ERROR_NONE;
 }
@@ -499,14 +509,18 @@ void mb_Poll(void)
                                 }
                         } else {
                                 modbus.ErrorState = MB_ERROR_DEVICE;
-                                elog_error("CRC Error");
+                                elog_error("CRC Error %d", modbus.ErrorState);
                         }
                         modbus.ReciveCount = 0;
-                        mb_Error();
+                        if (MB_ERROR_NONE != modbus.ErrorState) {
+                                mb_Error();
+                        }
                         modbus.ErrorState = MB_ERROR_NONE;
                 } else {
                         modbus.ReciveCount = 0;
-                        mb_Error();
+                        if (MB_ERROR_NONE != modbus.ErrorState) {
+                                mb_Error();
+                        }
                         modbus.ErrorState = MB_ERROR_NONE;
                 }
         }

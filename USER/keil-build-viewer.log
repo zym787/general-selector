@@ -2,17 +2,16 @@
 =================================================== keil-build-viewer v1.6 ==================================================
  
 [Search keil project] 1 item(s)
-	E:\workdir\zym_new\general-selector\USER\XZF.uvprojx
+	e:\workdir\zym_new\general-selector\USER\XZF.uvprojx
 
 [User input] 
-[Current folder] E:\workdir\zym_new\general-selector\USER
+[Current folder] e:\workdir\zym_new\general-selector\USER
 [Encoding] 936
-[Keil project path] E:\workdir\zym_new\general-selector\USER\XZF.uvprojx
+[Keil project path] e:\workdir\zym_new\general-selector\USER\XZF.uvprojx
 [Keil project name] XZF.uvprojx
 [Is keil v4] 0
 [target name] XZF_VALVE
-[target name] C_1FH
-[final target name] C_1FH
+[final target name] XZF_VALVE
 
 [Device] STM32F103C8
 [Target name] 
@@ -24,30 +23,28 @@
 [Is has user library] 1
 [Is custom scatter file] 0
 
-[XZF.uvprojx]  [C_1FH]  [STM32F103C8]  [LTO disable]
+[XZF.uvprojx]  [XZF_VALVE]  [STM32F103C8]  [LTO disable]
  
 [memory info]
 [name] IRAM [base addr] 0x20000000 [size] 0x00005000 [type] 1 [off-chip] 0 [is pack] 1 [ID] 2 
 [name] IROM [base addr] 0x08000000 [size] 0x00010000 [type] 2 [off-chip] 0 [is pack] 1 [ID] 3 
 
 
-[map file path] E:\workdir\zym_new\general-selector\LIST\XZF.map
+[map file path] e:\workdir\zym_new\general-selector\LIST\XZF.map
 
 [region info]
 [load region] LR_IROM1
-	[execution region] ER_IROM1, 0x08000000, 0x00010000, 0x0000C75C [memory type] 2 [memory ID] 3
+	[execution region] ER_IROM1, 0x08000000, 0x00010000, 0x0000B73C [memory type] 2 [memory ID] 3
 
-	[execution region] RW_IRAM1, 0x20000000, 0x00005000, 0x000013E8 [memory type] 1 [memory ID] 2
-		[ZI block] addr: 0x2000022C, size: 0x000011BC (4540)
+	[execution region] RW_IRAM1, 0x20000000, 0x00005000, 0x000013A8 [memory type] 1 [memory ID] 2
+		[ZI block] addr: 0x20000214, size: 0x00001194 (4500)
 
 
 [object name max length] 22
 [object path max length] 66
 
 [object in map file]
-[object name] adc.o                   [path] ..\SRC\SYSTEM\adc\adc.c
 [object name] ags_mb.o                [path] ..\SRC\HARDWARE\ags_mb\ags_mb.c
-[object name] bsp_io.o                [path] ..\SRC\HARDWARE\io\bsp_io.c
 [object name] delay.o                 [path] ..\SRC\SYSTEM\delay\delay.c
 [object name] eep24serial.o           [path] ..\SRC\HARDWARE\EEPROM\EEP24Serial.c
 [object name] elab_log.o              [path] ..\SRC\3rd\common\elab_log.c
@@ -57,8 +54,6 @@
 [object name] protext.o               [path] ..\SRC\HARDWARE\protExt\protExt.c
 [object name] signal.o                [path] ..\SRC\HARDWARE\signal\signal.c
 [object name] startup_stm32f10x_md.o  [path] ..\SRC\APP\startup_stm32f10x_md.s
-[object name] stm32f10x_adc.o         [path] ..\SRC\CoreSupport\STM32F10x_StdPeriph_Driver\src\stm32f10x_adc.c
-[object name] stm32f10x_rcc.o         [path] ..\SRC\CoreSupport\STM32F10x_StdPeriph_Driver\src\stm32f10x_rcc.c
 [object name] sys.o                   [path] ..\SRC\SYSTEM\sys\sys.c
 [object name] timer.o                 [path] ..\SRC\SYSTEM\timer\timer.c
 [object name] usart.o                 [path] ..\SRC\SYSTEM\usart\usart.c
@@ -97,30 +92,26 @@
 
 [record region info]
 [load region] LR_IROM1
-	[execution region] ER_IROM1, 0x08000000, 0x00010000, 0x0000B910 [type] 2 [ID] 3
+	[execution region] ER_IROM1, 0x08000000, 0x00010000, 0x0000B714 [type] 2 [ID] 3
 	[execution region] RW_IRAM1, 0x20000000, 0x00005000, 0x000013A8 [type] 1 [ID] 2
 -------------------------------------------------------------------------------
          FILE(s)        |         RAM (byte)       |       FLASH (byte)       |
 -------------------------------------------------------------------------------
-adc.o                   |          43  [NEW]       |         291  [NEW]       |
 ags_mb.o                |         800              |        3459              |
-bsp_io.o                |           0  [-1]        |         545  [+56]       |
 delay.o                 |           4              |         180              |
 eep24serial.o           |           0              |        1256              |
 elab_log.o              |         256              |         105              |
-main.o                  |          76  [+1]        |        4648  [+932]      |
-modbus.o                |         722              |        2675              |
+main.o                  |          75              |        3636              |
+modbus.o                |         722              |        2851  [+40]       |
 modbuscrc16.o           |           0              |         568              |
 protext.o               |         264              |        1744              |
 signal.o                |         236              |        1706              |
 startup_stm32f10x_md.o  |        1536              |         300              |
-stm32f10x_adc.o         |           0  [NEW]       |        1102  [NEW]       |
-stm32f10x_rcc.o         |          20  [NEW]       |         952  [NEW]       |
 sys.o                   |           0              |         708              |
 timer.o                 |          21              |         581              |
 usart.o                 |           8              |        1020              |
-usfunc.o                |         248              |       10269  [+384]      |
-valve.o                 |         107              |        3653  [-36]       |
+usfunc.o                |         248              |        9809              |
+valve.o                 |         107              |        3689              |
 xf_utils_log_dump.o     |           0              |         716              |
 Smotor.lib              |         485              |        2569              |
 USINTF_CR-0.lib         |         160              |        1506              |
@@ -129,14 +120,14 @@ USINTF_CR-0.lib         |         160              |        1506              |
 LR_IROM1
         RAM 1             [0x20000000 | 0x00005000 (20480)]
                 [zi start] 1   [zi end] 12
-                RW_IRAM1  [0x20000000]|¡ö¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ______________________________________| (   4.9 KB /  20.0 KB )  24.9%  [+64]
+                RW_IRAM1  [0x20000000]|¡ö¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ______________________________________| (   4.9 KB /  20.0 KB )  24.6%  
  
         FLASH 1           [0x08000000 | 0x00010000 (65536)]
-                ER_IROM1  [0x08000000]|¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö____________| (  49.8 KB /  64.0 KB )  77.9%  [+3660]
+                ER_IROM1  [0x08000000]|¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö_______________| (  45.8 KB /  64.0 KB )  71.6%  [+40]
  
-[htm file path] E:\workdir\zym_new\general-selector\OBJ\XZF.htm
+[htm file path] e:\workdir\zym_new\general-selector\OBJ\XZF.htm
 Maximum Stack Usage =        324 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)
  
 =============================================================================================================================
 
-run time: 0.083 s
+run time: 0.102 s

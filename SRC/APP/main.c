@@ -311,6 +311,7 @@ void GPIOInit(void)
 #endif
 #endif
 
+        /* PB1 为485芯片收发切换引脚 */
         RCC->APB2ENR |= (RCC_APB2Periph_GPIOB);
         GPIOB->CRL &= (GPIO_Crl_P1);
         GPIOB->CRL |= (GPIO_Mode_Out_PP_50MHz_P1);
