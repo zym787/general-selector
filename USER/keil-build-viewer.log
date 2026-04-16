@@ -2,16 +2,17 @@
 =================================================== keil-build-viewer v1.6 ==================================================
  
 [Search keil project] 1 item(s)
-	e:\workdir\zym_new\general-selector\USER\XZF.uvprojx
+	E:\workdir\zym_new\general-selector\USER\XZF.uvprojx
 
 [User input] 
-[Current folder] e:\workdir\zym_new\general-selector\USER
+[Current folder] E:\workdir\zym_new\general-selector\USER
 [Encoding] 936
-[Keil project path] e:\workdir\zym_new\general-selector\USER\XZF.uvprojx
+[Keil project path] E:\workdir\zym_new\general-selector\USER\XZF.uvprojx
 [Keil project name] XZF.uvprojx
 [Is keil v4] 0
 [target name] XZF_VALVE
-[final target name] XZF_VALVE
+[target name] C_1FH
+[final target name] C_1FH
 
 [Device] STM32F103C8
 [Target name] 
@@ -23,14 +24,14 @@
 [Is has user library] 1
 [Is custom scatter file] 0
 
-[XZF.uvprojx]  [XZF_VALVE]  [STM32F103C8]  [LTO disable]
+[XZF.uvprojx]  [C_1FH]  [STM32F103C8]  [LTO disable]
  
 [memory info]
 [name] IRAM [base addr] 0x20000000 [size] 0x00005000 [type] 1 [off-chip] 0 [is pack] 1 [ID] 2 
 [name] IROM [base addr] 0x08000000 [size] 0x00010000 [type] 2 [off-chip] 0 [is pack] 1 [ID] 3 
 
 
-[map file path] e:\workdir\zym_new\general-selector\LIST\XZF.map
+[map file path] E:\workdir\zym_new\general-selector\LIST\XZF.map
 
 [region info]
 [load region] LR_IROM1
@@ -92,7 +93,7 @@
 
 [record region info]
 [load region] LR_IROM1
-	[execution region] ER_IROM1, 0x08000000, 0x00010000, 0x0000B714 [type] 2 [ID] 3
+	[execution region] ER_IROM1, 0x08000000, 0x00010000, 0x0000B73C [type] 2 [ID] 3
 	[execution region] RW_IRAM1, 0x20000000, 0x00005000, 0x000013A8 [type] 1 [ID] 2
 -------------------------------------------------------------------------------
          FILE(s)        |         RAM (byte)       |       FLASH (byte)       |
@@ -102,7 +103,7 @@ delay.o                 |           4              |         180              |
 eep24serial.o           |           0              |        1256              |
 elab_log.o              |         256              |         105              |
 main.o                  |          75              |        3636              |
-modbus.o                |         722              |        2851  [+40]       |
+modbus.o                |         722              |        2851              |
 modbuscrc16.o           |           0              |         568              |
 protext.o               |         264              |        1744              |
 signal.o                |         236              |        1706              |
@@ -123,11 +124,11 @@ LR_IROM1
                 RW_IRAM1  [0x20000000]|¡ö¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ______________________________________| (   4.9 KB /  20.0 KB )  24.6%  
  
         FLASH 1           [0x08000000 | 0x00010000 (65536)]
-                ER_IROM1  [0x08000000]|¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö_______________| (  45.8 KB /  64.0 KB )  71.6%  [+40]
+                ER_IROM1  [0x08000000]|¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö_______________| (  45.8 KB /  64.0 KB )  71.6%  
  
-[htm file path] e:\workdir\zym_new\general-selector\OBJ\XZF.htm
+[htm file path] E:\workdir\zym_new\general-selector\OBJ\XZF.htm
 Maximum Stack Usage =        324 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)
  
 =============================================================================================================================
 
-run time: 0.102 s
+run time: 0.106 s
