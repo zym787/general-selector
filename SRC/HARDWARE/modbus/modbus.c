@@ -170,7 +170,7 @@ void mb_Error(void)
 
         if (modbus.ErrorState == MB_ERROR_FUNC || modbus.ErrorState == MB_ERROR_ADDR ||
             modbus.ErrorState == MB_ERROR_DATA) {
-                /* 从模式,发送响应数据 */
+                /* 从模式,发送异常响应 */
                 Tx_Buffer[0] = Rx_Buffer[0];
                 Tx_Buffer[1] = Rx_Buffer[1] | 0x80;
                 Tx_Buffer[2] = modbus.ErrorState;
@@ -181,16 +181,6 @@ void mb_Error(void)
                         mb_SendBuffer(5);
                 }
                 elog_error("Error %d", modbus.ErrorState);
-        } else if (modbus.ErrorState == MB_ERROR_DEVICE) {
-                uint8_t test[6] = {0, 3, 0, 16, 0 ,0};
-                uint16_t crc = ModbusCRC16(test, 4);
-                test[4] = crc >> 8;
-                test[5] = crc & 0xFF;
-                if (crc == 61460 && ModbusCRC16(test, 6) == 0) {
-                                elog_error("CRC Module is Normal %d", modbus.ErrorState);
-                } else {
-                        elog_error("CRC Module Error %d", modbus.ErrorState);
-                }
         }
         modbus.ErrorState = MB_ERROR_NONE;
 }
@@ -508,21 +498,21 @@ void mb_Poll(void)
                                                 break;
                                 }
                         } else {
+                                /* CRC校验失败 */
                                 modbus.ErrorState = MB_ERROR_DEVICE;
                                 elog_error("CRC Error %d", modbus.ErrorState);
                         }
                         modbus.ReciveCount = 0;
-                        if (MB_ERROR_NONE != modbus.ErrorState) {
-                                mb_Error();
-                        }
-                        modbus.ErrorState = MB_ERROR_NONE;
+                        
                 } else {
+                        /* 数据长度不足 即无效数据 */
                         modbus.ReciveCount = 0;
-                        if (MB_ERROR_NONE != modbus.ErrorState) {
-                                mb_Error();
-                        }
-                        modbus.ErrorState = MB_ERROR_NONE;
                 }
+                if (MB_ERROR_NONE != modbus.ErrorState) {
+                        mb_Error();
+                }
+                modbus.ErrorState = MB_ERROR_NONE;
+                modbus.RunState = MB_ERROR_NONE;
         }
 }
 

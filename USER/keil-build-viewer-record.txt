@@ -4,7 +4,7 @@
       1256          0          0          0          0          0   eep24serial.o
        100          0          5          0        256          0   elab_log.o
       3404          0        217         15         60          0   main.o
-      2832          0          7         12        710          0   modbus.o
+      2664          0          7         12        710          0   modbus.o
         56          0        512          0          0          0   modbuscrc16.o
       1744          0          0          0        264          0   protext.o
       1704          0          0          2        234          0   signal.o
@@ -24,7 +24,7 @@ Memory Map of the image
 
 	Load Region LR_IROM1 
 
-		Execution Region ER_IROM1 (Exec base: 0x08000000, Size: 0x0000B73C, Max: 0x00010000, END)
+		Execution Region ER_IROM1 (Exec base: 0x08000000, Size: 0x0000B694, Max: 0x00010000, END)
 
 		Execution Region RW_IRAM1 (Exec base: 0x20000000, Size: 0x000013A8, Max: 0x00005000, END)
 
