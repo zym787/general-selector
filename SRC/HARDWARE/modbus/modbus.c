@@ -852,8 +852,8 @@ void mb_WriteHolding(uint16_t _regAddr, uint16_t _value)
         // }
 
         /* 出厂参数2寄存器 FACTORY2 */
-        if (MB_RW_FACTORY2_VALVE_TYPE <= _regAddr && MB_RW_FACTORY2_SECURE_CODE > _regAddr ||
-            MB_RW_FACTORY2_SECURE_CODE < _regAddr && MB_RW_FACTORY2_COMPEN_CCW >= _regAddr) {
+        if ((MB_RW_FACTORY2_VALVE_TYPE <= _regAddr && MB_RW_FACTORY2_SECURE_CODE > _regAddr) ||
+            (MB_RW_FACTORY2_SECURE_CODE < _regAddr && MB_RW_FACTORY2_COMPEN_CCW >= _regAddr)) {
                 switch (_regAddr) {
                         case MB_RW_FACTORY2_VALVE_TYPE:
                                 break;
