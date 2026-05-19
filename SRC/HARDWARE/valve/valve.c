@@ -156,7 +156,7 @@ void InitValve(void)
 */
 void ProcessValve(void)
 {
-    float tpFloat=0;
+    int32_t tpStep = 0;
     if(!(Valve.status&VALVE_INITING))
     {
         if(!MotionStatus[AXSV])
@@ -219,13 +219,13 @@ void ProcessValve(void)
                             Valve.dir = CW;
                             printd("\r\n 阀头就近逆时针 =>%d", Valve.portDes);
                         }
-                        tpFloat = rdc.stepRound;
-                        (Valve.dir == CCW) ? (tpFloat *= -1) : (tpFloat);
+                        tpStep = rdc.stepRound;
+                        (Valve.dir == CCW) ? (tpStep *= -1) : (tpStep);
                         // 清空计数，避免数据暂留
 //                        Valve.OptBlock = 0;
 //                        Valve.OptGap = 0;
                         VALVE_ENA = ENABLE;
-                        AxisMoveRel(AXSV, (int)tpFloat, accel[AXSV] * 2, decel[AXSV] * 2, speed[AXSV]);
+                        AxisMoveRel(AXSV, (int)tpStep, accel[AXSV] * 2, decel[AXSV] * 2, speed[AXSV]);
                         Valve.dirLast = Valve.direct;
                     }
                     else
@@ -264,13 +264,13 @@ void ProcessValve(void)
                     {
                         printd("\r\n 电机顺时针 =>%d", Valve.portDes);
                     }
-                    tpFloat = rdc.stepRound;
-                    (Valve.dir == CCW) ? (tpFloat *= -1) : (tpFloat);
+                    tpStep = rdc.stepRound;
+                    (Valve.dir == CCW) ? (tpStep *= -1) : (tpStep);
                     // 清空计数，避免数据暂留
 //                        Valve.OptBlock = 0;
 //                        Valve.OptGap = 0;
                     VALVE_ENA = ENABLE;
-                    AxisMoveRel(AXSV, (int)tpFloat, accel[AXSV]*2, decel[AXSV]*2, speed[AXSV]);
+                    AxisMoveRel(AXSV, (int)tpStep, accel[AXSV]*2, decel[AXSV]*2, speed[AXSV]);
                     Valve.dirLast = Valve.direct;
                 }
                 Valve.status &= ~VALVE_RUN_END;     /* 清除运行结束标志 */
@@ -336,12 +336,11 @@ void ProcessValve(void)
     {
         if(Valve.bNewInit==0xff && Valve.status&VALVE_RUN_END)
         {
-            tpFloat = (float)rdc.stepRound/valveFix.fix.portCnt;
-            tpFloat /= 2;
+            tpStep = (int32_t)rdc.stepRound / valveFix.fix.portCnt / 2;
             if(!MotionStatus[AXSV])
             {
                 VALVE_ENA = ENABLE;
-                AxisMoveRel(AXSV, -(int)tpFloat, accel[AXSV], decel[AXSV], speed[AXSV]);
+                AxisMoveRel(AXSV, -(int)tpStep, accel[AXSV], decel[AXSV], speed[AXSV]);
                 Valve.status &= ~(VALVE_INITING|VALVE_RUNNING);
                 Valve.bNewInit = 1;
                 Valve.bReInit = 1;
