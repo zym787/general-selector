@@ -15,51 +15,64 @@
 
 void bsp_IOInit(void)
 {
-    RCC->APB2ENR |= RCC_APB2Periph_AFIO;
+        RCC->APB2ENR |= RCC_APB2Periph_AFIO;
 
-///E版本
+/// E版本
 #ifdef A12_909
-    RCC->APB2ENR |= (RCC_APB2Periph_GPIOB);
-    // FB OUT
-    GPIOB->CRH &= (GPIO_Crh_P13);
-    GPIOB->CRH |= (GPIO_Mode_Out_PP_50MHz_P13);
-    GPIOB->ODR |= (GPIO_Pin_13);
-    // KEY IN
-    GPIOB->CRL &= (GPIO_Crl_P5);
-    GPIOB->CRL |= (GPIO_Mode_IN_PU_PD_P5);
+        RCC->APB2ENR |= (RCC_APB2Periph_GPIOB);
+        // FB OUT
+        GPIOB->CRH &= (GPIO_Crh_P13);
+        GPIOB->CRH |= (GPIO_Mode_Out_PP_50MHz_P13);
+        GPIOB->ODR |= (GPIO_Pin_13);
+        // KEY IN
+        GPIOB->CRL &= (GPIO_Crl_P5);
+        GPIOB->CRL |= (GPIO_Mode_IN_PU_PD_P5);
 #endif
 
 #ifdef A12_906
-    RCC->APB2ENR |= (RCC_APB2Periph_GPIOB);
-    // FB OUT
-    GPIOB->CRH &= (GPIO_Crh_P13);
-    GPIOB->CRH |= (GPIO_Mode_Out_PP_50MHz_P13);
-    GPIOB->ODR |= (GPIO_Pin_13);
-    // KEY IN
-    GPIOB->CRH &= (GPIO_Crh_P14);
-    GPIOB->CRH |= (GPIO_Mode_IN_PU_PD_P14);
+        RCC->APB2ENR |= (RCC_APB2Periph_GPIOB);
+        // FB OUT
+        GPIOB->CRH &= (GPIO_Crh_P13);
+        GPIOB->CRH |= (GPIO_Mode_Out_PP_50MHz_P13);
+        GPIOB->ODR |= (GPIO_Pin_13);
+        // KEY IN
+        GPIOB->CRH &= (GPIO_Crh_P14);
+        GPIOB->CRH |= (GPIO_Mode_IN_PU_PD_P14);
 #endif
 
-///F版本
+/// F版本
 #ifdef A12_926
-    RCC->APB2ENR |= (RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB);
-    // OUT1(PB13) OUT2(PA8) FBOUT(PA11) ERROUT(PA12)
-    GPIOB->CRH &= (GPIO_Crh_P13);
-    GPIOB->CRH |= (GPIO_Mode_Out_PP_50MHz_P13);
-    GPIOB->ODR |= (GPIO_Pin_13);
-    GPIOA->CRH &= (GPIO_Crh_P8 | GPIO_Crh_P11 | GPIO_Crh_P12);
-    GPIOA->CRH |= (GPIO_Mode_Out_PP_50MHz_P8 | GPIO_Mode_Out_PP_50MHz_P11 | GPIO_Mode_Out_PP_50MHz_P12);
-    GPIOA->ODR |= (GPIO_Pin_8 | GPIO_Pin_11 | GPIO_Pin_12);
-    // IO_OUT1 = 1;
-    // IO_OUT2 = 1;
-    // IO_FBOUT = 1;
-    // IO_ERROUT = 1;
+        RCC->APB2ENR |= (RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB);
+        // OUT1(PB13) OUT2(PA8) FBOUT(PA11) ERROUT(PA12)
+        /* OUT1 PB13 */
+        GPIOB->CRH &= (GPIO_Crh_P13);
+        GPIOB->CRH |= (GPIO_Mode_Out_PP_50MHz_P13);
+        GPIOB->ODR |= (GPIO_Pin_13);
+        /* OUT2 PA8, FBOUT PA11, ERROUT PA12 */
+        // GPIOA->CRH &= (GPIO_Crh_P8 & GPIO_Crh_P11 & GPIO_Crh_P12);
+        // GPIOA->CRH |= (GPIO_Mode_Out_PP_50MHz_P8 | GPIO_Mode_Out_PP_50MHz_P11 | GPIO_Mode_Out_PP_50MHz_P12);
+        // GPIOA->ODR |= (GPIO_Pin_8 | GPIO_Pin_11 | GPIO_Pin_12);
+        GPIOA->CRH &= (GPIO_Crh_P8);
+        GPIOA->CRH |= (GPIO_Mode_Out_PP_50MHz_P8);
+        GPIOA->ODR |= (GPIO_Pin_8);
+        GPIOA->CRH &= (GPIO_Crh_P11);
+        GPIOA->CRH |= (GPIO_Mode_Out_PP_50MHz_P11);
+        GPIOA->ODR |= (GPIO_Pin_11);
+        GPIOA->CRH &= (GPIO_Crh_P12);
+        GPIOA->CRH |= (GPIO_Mode_Out_PP_50MHz_P12);
+        GPIOA->ODR |= (GPIO_Pin_12);
+        // IO_OUT1 = 1;
+        // IO_OUT2 = 1;
+        // IO_FBOUT = 1;
+        // IO_ERROUT = 1;
 
-    // IN1(PB3) IN2(PB4)
-    GPIOB->CRL &= (GPIO_Crl_P3);
-    GPIOB->CRL |= (GPIO_Mode_IN_PU_PD_P3);
-    GPIOB->CRL &= (GPIO_Crl_P4);
-    GPIOB->CRL |= (GPIO_Mode_IN_PU_PD_P4);
+        // IN1(PB3) IN2(PB4)
+        GPIOB->CRL &= (GPIO_Crl_P3);
+        GPIOB->CRL |= (GPIO_Mode_IN_PU_PD_P3);
+        GPIOB->ODR |= (GPIO_Pin_3);
+        GPIOB->CRL &= (GPIO_Crl_P4);
+        GPIOB->CRL |= (GPIO_Mode_IN_PU_PD_P4);
+        GPIOB->ODR |= (GPIO_Pin_4);
 #endif
 }
 
@@ -71,257 +84,224 @@ void bsp_IOInit(void)
 ///          1       0       1       0       0       0
 void bsp_IODetect(void)
 {
-    if (true  == syspara.ioCtrl)
-    {
+        if (true == syspara.ioCtrl) {
 #ifdef IOCTRL
-        static uint8_t InPosition = 0; /* 单程执行完成标志 */
-        /// BI悬空/接5V 输出0 状态A
-        /// AI悬空/接0V 输出0 状态A
-        if (1 == IO_IN)
-        {
-            if (VALVE_RUN_END == Valve.status)
-            {
-                
+                static uint8_t InPosition = 0; /* 单程执行完成标志 */
+                /// BI悬空/接5V 输出0 状态A
+                /// AI悬空/接0V 输出0 状态A
+                if (1 == IO_IN) {
+                        if (VALVE_RUN_END == Valve.status) {
 #if FIRST_HOLE_IO_E_DIR == 1
-                /// E1
-                /// 3状态C -> 2状态B -> 1状态A
-                if (0x03 == Valve.portCur)
-                {
-                    InPosition = 0;
-                    Valve.portDes = 0x02;
-                    Valve.dir = 0xff;
-                    dbg_printf("\r\n >1  %d->%d Dir:%d", Valve.portCur, Valve.portDes, Valve.dir);
-                }
-                else if (0x02 == Valve.portCur)
-                {
-                    syspara.ctrlPause = true;
-                    dbg_printf("\r\n >2  Waiting %dms < %d", timerPara.timePause, syspara.pauseTime);
-                    if (syspara.pauseTime <= timerPara.timePause)
-                    {
-                        timerPara.timePause = 0;
-                        syspara.ctrlPause = false;
-                        Valve.portDes = 0x01;
-                        Valve.dir = 0xff;
-                        dbg_printf("\r\n >3  %d->%d Dir:%d", Valve.portCur, Valve.portDes, Valve.dir);
-                    }
+                                /// E1
+                                /// 3状态C -> 2状态B -> 1状态A
+                                if (0x03 == Valve.portCur) {
+                                        InPosition = 0;
+                                        Valve.portDes = 0x02;
+                                        Valve.dir = 0xff;
+                                        dbg_printf("\r\n >1  %d->%d Dir:%d", Valve.portCur, Valve.portDes, Valve.dir);
+                                } else if (0x02 == Valve.portCur) {
+                                        syspara.ctrlPause = true;
+                                        dbg_printf("\r\n >2  Waiting %dms < %d", timerPara.timePause,
+                                                   syspara.pauseTime);
+                                        if (syspara.pauseTime <= timerPara.timePause) {
+                                                timerPara.timePause = 0;
+                                                syspara.ctrlPause = false;
+                                                Valve.portDes = 0x01;
+                                                Valve.dir = 0xff;
+                                                dbg_printf("\r\n >3  %d->%d Dir:%d", Valve.portCur, Valve.portDes,
+                                                           Valve.dir);
+                                        }
 #ifdef DEBUG
-                    else if (1 == timerPara.timePause % 300)
-                    {
-                        dbg_printf("\r\n timer pauseTime: %d", timerPara.timePause);
-                    }
-#endif // DEBUG
-                }
-                else if (0x01 == Valve.portCur && !InPosition)
-                {
-                    uint32_t timeCost = syspara.timeRamp[0] + syspara.timeRamp[1] + syspara.pauseTime;
-                    InPosition = 1;
-                    dbg_printf("\r\n >4 In Position %d", Valve.portCur);
-                    printd("\r\n 耗时 %dms", timeCost);
-                    IO_OUT = ON;
-                }
-                else
-                {
-                    Valve.portDes = 0x00;
-                }
+                                        else if (1 == timerPara.timePause % 300) {
+                                                dbg_printf("\r\n timer pauseTime: %d", timerPara.timePause);
+                                        }
+#endif  // DEBUG
+                                } else if (0x01 == Valve.portCur && !InPosition) {
+                                        uint32_t timeCost =
+                                            syspara.timeRamp[0] + syspara.timeRamp[1] + syspara.pauseTime;
+                                        InPosition = 1;
+                                        dbg_printf("\r\n >4 In Position %d", Valve.portCur);
+                                        printd("\r\n 耗时 %dms", timeCost);
+                                        IO_OUT = ON;
+                                } else {
+                                        Valve.portDes = 0x00;
+                                }
 #elif FIRST_HOLE_IO_E_DIR == 2
-                // E2
-                /// 5状态C -> 6状态B -> 1状态A
-                if (0x05 == Valve.portCur)
-                {
-                    InPosition = 0;
-                    Valve.portDes = 0x06;
-                    Valve.dir = 0xff;
-                    dbg_printf("\r\n >1  %d->%d Dir:%d", Valve.portCur, Valve.portDes, Valve.dir);
-                }
-                else if (0x06 == Valve.portCur)
-                {
-                    syspara.ctrlPause = true;
-                    dbg_printf("\r\n >2  Waiting %dms < %d", timerPara.timePause, syspara.pauseTime);
-                    if (syspara.pauseTime <= timerPara.timePause)
-                    {
-                        timerPara.timePause = 0;
-                        syspara.ctrlPause = false;
-                        Valve.portDes = 0x01;
-                        Valve.dir = 0xff;
-                        dbg_printf("\r\n >3  %d->%d Dir:%d", Valve.portCur, Valve.portDes, Valve.dir);
-                    }
+                                // E2
+                                /// 5状态C -> 6状态B -> 1状态A
+                                if (0x05 == Valve.portCur) {
+                                        InPosition = 0;
+                                        Valve.portDes = 0x06;
+                                        Valve.dir = 0xff;
+                                        dbg_printf("\r\n >1  %d->%d Dir:%d", Valve.portCur, Valve.portDes, Valve.dir);
+                                } else if (0x06 == Valve.portCur) {
+                                        syspara.ctrlPause = true;
+                                        dbg_printf("\r\n >2  Waiting %dms < %d", timerPara.timePause,
+                                                   syspara.pauseTime);
+                                        if (syspara.pauseTime <= timerPara.timePause) {
+                                                timerPara.timePause = 0;
+                                                syspara.ctrlPause = false;
+                                                Valve.portDes = 0x01;
+                                                Valve.dir = 0xff;
+                                                dbg_printf("\r\n >3  %d->%d Dir:%d", Valve.portCur, Valve.portDes,
+                                                           Valve.dir);
+                                        }
 #ifdef DEBUG
-                    else if (1 == timerPara.timePause % 300)
-                    {
-                        dbg_printf("\r\n timer pauseTime: %d", timerPara.timePause);
-                    }
-#endif // DEBUG
-                }
-                else if (0x01 == Valve.portCur && !InPosition)
-                {
-                    uint32_t timeCost = syspara.timeRamp[0] + syspara.timeRamp[1] + syspara.pauseTime;
-                    InPosition = 1;
-                    dbg_printf("\r\n >4 In Position %d", Valve.portCur);
-                    printd("\r\n 耗时 %dms", timeCost);
-                    IO_OUT = ON;
-                }
-                else
-                {
-                    Valve.portDes = 0x00;
-                }
+                                        else if (1 == timerPara.timePause % 300) {
+                                                dbg_printf("\r\n timer pauseTime: %d", timerPara.timePause);
+                                        }
+#endif  // DEBUG
+                                } else if (0x01 == Valve.portCur && !InPosition) {
+                                        uint32_t timeCost =
+                                            syspara.timeRamp[0] + syspara.timeRamp[1] + syspara.pauseTime;
+                                        InPosition = 1;
+                                        dbg_printf("\r\n >4 In Position %d", Valve.portCur);
+                                        printd("\r\n 耗时 %dms", timeCost);
+                                        IO_OUT = ON;
+                                } else {
+                                        Valve.portDes = 0x00;
+                                }
 #endif
-            }
-        }
-        /// BI接0V      输出 1  状态C
-        /// AI接3.3-12V 输出 1  状态C
-        else
-        {
-            if (VALVE_RUN_END == Valve.status)
-            {
+                        }
+                }
+                /// BI接0V      输出 1  状态C
+                /// AI接3.3-12V 输出 1  状态C
+                else {
+                        if (VALVE_RUN_END == Valve.status) {
 #if FIRST_HOLE_IO_E_DIR == 1
-                ///1状态A -> 2状态B -> 3状态C
-                if (0x01 == Valve.portCur)
-                {
-                    InPosition = 0;
-                    Valve.portDes = 0x02;
-                    Valve.dir = 0xff;
-                    syspara.recordTimeRamp = 1;
-                    dbg_printf("\r\n >1  %d->%d Dir:%d", Valve.portCur, Valve.portDes, Valve.dir);
-                }
-                else if (0x02 == Valve.portCur)
-                {
-                    syspara.ctrlPause = true;
-                    dbg_printf("\r\n >2  Waiting %dms", syspara.pauseTime);
-                    if (syspara.pauseTime <= timerPara.timePause)
-                    {
-                        timerPara.timePause = 0;
-                        syspara.ctrlPause = false;
-                        Valve.portDes = 0x03;
-                        Valve.dir = 0xff;
-                        syspara.recordTimeRamp = 2;
-                        dbg_printf("\r\n >3  %d->%d Dir:%d", Valve.portCur, Valve.portDes, Valve.dir);
-                    }
+                                /// 1状态A -> 2状态B -> 3状态C
+                                if (0x01 == Valve.portCur) {
+                                        InPosition = 0;
+                                        Valve.portDes = 0x02;
+                                        Valve.dir = 0xff;
+                                        syspara.recordTimeRamp = 1;
+                                        dbg_printf("\r\n >1  %d->%d Dir:%d", Valve.portCur, Valve.portDes, Valve.dir);
+                                } else if (0x02 == Valve.portCur) {
+                                        syspara.ctrlPause = true;
+                                        dbg_printf("\r\n >2  Waiting %dms", syspara.pauseTime);
+                                        if (syspara.pauseTime <= timerPara.timePause) {
+                                                timerPara.timePause = 0;
+                                                syspara.ctrlPause = false;
+                                                Valve.portDes = 0x03;
+                                                Valve.dir = 0xff;
+                                                syspara.recordTimeRamp = 2;
+                                                dbg_printf("\r\n >3  %d->%d Dir:%d", Valve.portCur, Valve.portDes,
+                                                           Valve.dir);
+                                        }
 #ifdef DEBUG
-                    else
-                    {
-                        if (1 == timerPara.timePause % 300)
-                        {
-                            dbg_printf("\r\n pauseTime: %d", timerPara.timePause);
-                        }
-                    }
-#endif // DEBUG
-                }
-                else if (0x03 == Valve.portCur && !InPosition)
-                {
-                    uint32_t timeCost = syspara.timeRamp[0] + syspara.timeRamp[1] + syspara.pauseTime;
-                    InPosition = 1;
-                    dbg_printf("\r\n >4 In Position %d", Valve.portCur);
-                    printd("\r\n 耗时 %dms", timeCost);
-                    IO_OUT = OFF;
-                }
-                else
-                {
-                    Valve.portDes = 0x00;
-                }
+                                        else {
+                                                if (1 == timerPara.timePause % 300) {
+                                                        dbg_printf("\r\n pauseTime: %d", timerPara.timePause);
+                                                }
+                                        }
+#endif  // DEBUG
+                                } else if (0x03 == Valve.portCur && !InPosition) {
+                                        uint32_t timeCost =
+                                            syspara.timeRamp[0] + syspara.timeRamp[1] + syspara.pauseTime;
+                                        InPosition = 1;
+                                        dbg_printf("\r\n >4 In Position %d", Valve.portCur);
+                                        printd("\r\n 耗时 %dms", timeCost);
+                                        IO_OUT = OFF;
+                                } else {
+                                        Valve.portDes = 0x00;
+                                }
 #elif FIRST_HOLE_IO_E_DIR == 2
-                /// 1状态A -> 6状态B -> 5状态C
-                if (0x01 == Valve.portCur)
-                {
-                    InPosition = 0;
-                    Valve.portDes = 0x06;
-                    Valve.dir = 0xff;
-                    syspara.recordTimeRamp = 1;
-                    dbg_printf("\r\n >1  %d->%d Dir:%d", Valve.portCur, Valve.portDes, Valve.dir);
-                }
-                else if (0x06 == Valve.portCur)
-                {
-                    syspara.ctrlPause = true;
-                    dbg_printf("\r\n >2  Waiting %dms", syspara.pauseTime);
-                    if (syspara.pauseTime <= timerPara.timePause)
-                    {
-                        timerPara.timePause = 0;
-                        syspara.ctrlPause = false;
-                        Valve.portDes = 0x05;
-                        Valve.dir = 0xff;
-                        syspara.recordTimeRamp = 2;
-                        dbg_printf("\r\n >3  %d->%d Dir:%d", Valve.portCur, Valve.portDes, Valve.dir);
-                    }
+                                /// 1状态A -> 6状态B -> 5状态C
+                                if (0x01 == Valve.portCur) {
+                                        InPosition = 0;
+                                        Valve.portDes = 0x06;
+                                        Valve.dir = 0xff;
+                                        syspara.recordTimeRamp = 1;
+                                        dbg_printf("\r\n >1  %d->%d Dir:%d", Valve.portCur, Valve.portDes, Valve.dir);
+                                } else if (0x06 == Valve.portCur) {
+                                        syspara.ctrlPause = true;
+                                        dbg_printf("\r\n >2  Waiting %dms", syspara.pauseTime);
+                                        if (syspara.pauseTime <= timerPara.timePause) {
+                                                timerPara.timePause = 0;
+                                                syspara.ctrlPause = false;
+                                                Valve.portDes = 0x05;
+                                                Valve.dir = 0xff;
+                                                syspara.recordTimeRamp = 2;
+                                                dbg_printf("\r\n >3  %d->%d Dir:%d", Valve.portCur, Valve.portDes,
+                                                           Valve.dir);
+                                        }
 #ifdef DEBUG
-                    else
-                    {
-                        if (1 == timerPara.timePause % 300)
-                        {
-                            dbg_printf("\r\n pauseTime: %d", timerPara.timePause);
-                        }
-                    }
-#endif // DEBUG
-                }
-                else if (0x05 == Valve.portCur && !InPosition)
-                {
-                    uint32_t timeCost = syspara.timeRamp[0] + syspara.timeRamp[1] + syspara.pauseTime;
-                    InPosition = 1;
-                    dbg_printf("\r\n >4 In Position %d", Valve.portCur);
-                    printd("\r\n 耗时 %dms", timeCost);
-                    IO_OUT = OFF;
-                }
-                else
-                {
-                    Valve.portDes = 0x00;
-                }
+                                        else {
+                                                if (1 == timerPara.timePause % 300) {
+                                                        dbg_printf("\r\n pauseTime: %d", timerPara.timePause);
+                                                }
+                                        }
+#endif  // DEBUG
+                                } else if (0x05 == Valve.portCur && !InPosition) {
+                                        uint32_t timeCost =
+                                            syspara.timeRamp[0] + syspara.timeRamp[1] + syspara.pauseTime;
+                                        InPosition = 1;
+                                        dbg_printf("\r\n >4 In Position %d", Valve.portCur);
+                                        printd("\r\n 耗时 %dms", timeCost);
+                                        IO_OUT = OFF;
+                                } else {
+                                        Valve.portDes = 0x00;
+                                }
 #endif
-            }
-        }
+                        }
+                }
 #endif
 #ifdef MUT_IOCTRL
-        /// ININ    3 2 1 0
-        /// 通道    1 2 3 4
-        /// IOOUT   3 2 1 0
-        uint8_t IoInStatus = 0x03 & (~(IO_IN1 << 0 | IO_IN2 << 1));
-        uint8_t IoOutStatus = 0;
-        if (VALVE_RUN_END == Valve.status)
-        {
-            dbg_printf("\r\n > Status    1  2  3  4");
-            dbg_printf("\r\n > Position  %d  %d  %d  %d  (Complete%d Error%d)",
-                       Valve.StatusChannel[0], Valve.StatusChannel[1], Valve.StatusChannel[2], Valve.StatusChannel[3], IO_FBOUT, IO_ERROUT);
-            ///到位
-            if (Valve.StatusChannel[IoInStatus] == Valve.portCur)
-            {
-                /// IO状态输出
-                IoOutStatus = Valve.portCur - 1;
-                IO_OUT1 = (~IoInStatus & 0x01) ? ON : OFF;
-                IO_OUT2 = (~IoInStatus & 0x02) ? ON : OFF;
-                IO_ERROUT = ON;
-                IO_FBOUT = OFF; /// 移动完成
-                dbg_printf("\r\n > In Position %d=>>%d(%d)    IO  IN1/2:%d %d  OUT1/2:%d %d  (Complete%d Error%d)",
-                           Valve.portCur, Valve.StatusChannel[IoInStatus], IoInStatus, IO_IN1, IO_IN2, IO_OUT1, IO_OUT2, IO_FBOUT, IO_ERROUT);
-            }
-            ///新状态输入
-            else
-            {
-                IO_FBOUT = ON; /// 移动未完成
-                IO_ERROUT = ON;
-                /// IO输入检测
-                Valve.portDes = Valve.StatusChannel[IoInStatus];
-                Valve.dir = 0xFF;
-                printd("\r\n > Update Position %d!=>>%d(%d)    IO  IN1/2:%d %d  OUT1/2:%d %d  (Complete%d Error%d)",
-                       Valve.portCur, Valve.StatusChannel[IoInStatus], IoInStatus, IO_IN1, IO_IN2, IO_OUT1, IO_OUT2, IO_FBOUT, IO_ERROUT);
-            }
-        }
-        ///报错
-        else if (VALVE_ERR == Valve.status)
-        {
-            IO_FBOUT = ON;
-            IO_ERROUT = OFF;
-        }
-        ///运行&初始化
-        else
-        {
-            IO_ERROUT = ON;
-            IO_FBOUT = ON;
-        }
+                /// ININ    3 2 1 0
+                /// 通道    1 2 3 4
+                /// IOOUT   3 2 1 0
+                uint8_t IoInStatus = 0x03 & (~(IO_IN1 << 0 | IO_IN2 << 1));
+                uint8_t IoOutStatus = 0;
+                if (VALVE_RUN_END == Valve.status) {
+                        dbg_printf("\r\n > Status    1  2  3  4");
+                        dbg_printf("\r\n > Position  %d  %d  %d  %d  (Complete%d Error%d)", Valve.StatusChannel[0],
+                                   Valve.StatusChannel[1], Valve.StatusChannel[2], Valve.StatusChannel[3], IO_FBOUT,
+                                   IO_ERROUT);
+                        /// 到位
+                        if (Valve.StatusChannel[IoInStatus] == Valve.portCur) {
+                                /// IO状态输出
+                                IoOutStatus = Valve.portCur - 1;
+                                IO_OUT1 = (~IoInStatus & 0x01) ? ON : OFF;
+                                IO_OUT2 = (~IoInStatus & 0x02) ? ON : OFF;
+                                IO_ERROUT = ON;
+                                IO_FBOUT = OFF;  /// 移动完成
+                                dbg_printf(
+                                    "\r\n > In Position %d=>>%d(%d)    IO  IN1/2:%d %d  OUT1/2:%d %d  (Complete%d "
+                                    "Error%d)",
+                                    Valve.portCur, Valve.StatusChannel[IoInStatus], IoInStatus, IO_IN1, IO_IN2, IO_OUT1,
+                                    IO_OUT2, IO_FBOUT, IO_ERROUT);
+                        }
+                        /// 新状态输入
+                        else {
+                                IO_FBOUT = ON;  /// 移动未完成
+                                IO_ERROUT = ON;
+                                /// IO输入检测
+                                Valve.portDes = Valve.StatusChannel[IoInStatus];
+                                Valve.dir = 0xFF;
+                                printd(
+                                    "\r\n > Update Position %d!=>>%d(%d)    IO  IN1/2:%d %d  OUT1/2:%d %d  (Complete%d "
+                                    "Error%d)",
+                                    Valve.portCur, Valve.StatusChannel[IoInStatus], IoInStatus, IO_IN1, IO_IN2, IO_OUT1,
+                                    IO_OUT2, IO_FBOUT, IO_ERROUT);
+                        }
+                }
+                /// 报错
+                else if (VALVE_ERR == Valve.status) {
+                        IO_FBOUT = ON;
+                        IO_ERROUT = OFF;
+                }
+                /// 运行&初始化
+                else {
+                        IO_ERROUT = ON;
+                        IO_FBOUT = ON;
+                }
 #endif
-    }
+        }
 }
 
 void bsp_IORecordTimeRamp(void)
 {
-    if(syspara.recordTimeRamp)
-    {
-        syspara.timeRamp[syspara.recordTimeRamp-1] = syspara.lastTime;
-    }
+        if (syspara.recordTimeRamp) {
+                syspara.timeRamp[syspara.recordTimeRamp - 1] = syspara.lastTime;
+        }
 }

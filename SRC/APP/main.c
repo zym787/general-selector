@@ -28,6 +28,7 @@ void ParameterInit(void)
 
                 // 地址 0~63
                 I2CPageRead_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ags_mbParam.mAddrs);
+                modbus.Address = ags_mbParam.mAddrs;
                 printd("\r 地址: %d", ags_mbParam.mAddrs);
 
                 /* 波特率 */
@@ -48,7 +49,7 @@ void ParameterInit(void)
 
                 // 原点补偿
                 I2CPageRead_Nbytes(ADDR_VALVE_FIX, LEN_VALVE_FIX, &Valve.fixOrg);
-                printd("\r 原点补偿: %d (1度)", Valve.fixOrg);
+                printd("\r 原点补偿: %d (0.1度)", Valve.fixOrg);
 
                 // 方向补偿 无用
                 I2CPageRead_Nbytes(ADDR_DIR_FIX, LEN_DIR_FIX, &valveFix.fix.dirGap);
@@ -192,6 +193,7 @@ void ParameterInit(void)
                 I2CPageWrite_Nbytes(ADDR_BOARD_ID, LEN_BOARD_ID, ReadBuf);
                 /* 地址 1 */
                 ags_mbParam.mAddrs = AGS_ADDR_DEF;
+                modbus.Address = ags_mbParam.mAddrs;
                 I2CPageWrite_Nbytes(ADDR_MODULE_NUM, LEN_MODULE_NUM, &ags_mbParam.mAddrs);
                 /* 波特率 1 9600bps */
                 syspara.baudrate = BAUD_9600;
@@ -470,10 +472,10 @@ int main(void)
 {
         Stm32_Clock_Init(9); /* 系统时钟设置 */
         delay_init(72);      /* 延时初始化 */
-#ifdef RELEASE
+#if 0
     JTAG_Set(JTAG_SWD_DISABLE);
 #else
-    JTAG_Set(JTAG_SWD_ENABLE);
+    JTAG_Set(SWD_ENABLE);
 #endif
         delay_ms(100);
         Usart1_Init(72, 115200); /* 串口初始化为115200 */
