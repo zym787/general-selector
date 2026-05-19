@@ -43,8 +43,9 @@ void ParameterInit(void)
 
                 // 通道数
                 I2CPageRead_Nbytes(ADDR_PORT_CNT, LEN_PORT_CNT, &valveFix.fix.portCnt);
-                (valveFix.fix.portCnt && valveFix.fix.portCnt > 32) ? (valveFix.fix.portCnt = 10)
-                                                                    : (valveFix.fix.portCnt);
+                if (!valveFix.fix.portCnt || valveFix.fix.portCnt > 32) {
+                        valveFix.fix.portCnt = 10;
+                }
                 printd("\r 通道数: %d", valveFix.fix.portCnt);
 
                 // 原点补偿
