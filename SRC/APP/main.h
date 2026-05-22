@@ -10,8 +10,8 @@
 // clang-format off
 
 #define DESCRIPTION         "Selector Valve"
-#define SOFTWARE_VERSION    "r48"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0048     /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r49"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0049     /* 软件修改版次 */
 
 #define BOARD_0     0x88
 #define BOARD_1     0x66
@@ -111,6 +111,8 @@
 //  v2.0.0CDEF-r47  2026.04.08  去除老化次数显示,防呆设计
 //  v2.0.0CDEF-r48  2026.05.19  F版本修复IO初始化,以防止出现IO无法输入/输出问题
 //                              同步QHF Modbus协议,添加参数限幅
+//  v2.0.0CDEF-r49  2026.05.22  修复模式切换无法保持问题,新增70号寄存器老化间隔
+//                              新增协议切换限制
 
 
 
@@ -243,10 +245,9 @@ typedef struct {
         uint32_t totalCnt;      /* 切换次数 */
         uint32_t totalCntLst;
         GodMode_T GodMode;      /* 当前模式 */
+        uint8_t agingInterval;   /* 老化间隔 */
 } _SYS_T;
 PEXT _SYS_T syspara;
-
-PEXT uint8_t intCtrl;
 
 PEXT void ParameterInit(void);
 PEXT int main(void);

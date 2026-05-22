@@ -1,6 +1,6 @@
 #define _MAIN_H_GLOBALS_
 #include "common.h"
-ELAB_TAG("main"); /* elog 标签 */
+// ELAB_TAG("main"); /* elog 标签 */
 
 // clang-format off
 
@@ -68,8 +68,8 @@ void ParameterInit(void)
                     Valve.fDirCw, Valve.fDirCCw);
 
                 // 烧机间隔
-                I2CPageRead_Nbytes(ADDR_INTVL, LEN_INTVL, &intCtrl);
-                printd("\r 老化间隔:%d 秒", intCtrl);
+                I2CPageRead_Nbytes(ADDR_INTVL, LEN_INTVL, &syspara.agingInterval);
+                printd("\r 老化间隔:%d 秒", syspara.agingInterval);
 
                 /* 序列号 */
                 I2CPageRead_Nbytes(ADDR_SN, LEN_SN, Valve.SnCode);
@@ -163,7 +163,7 @@ void ParameterInit(void)
                 I2CPageRead_Nbytes(ADDR_HALF_SEAL, LEN_HALF_SEAL, &Valve.bHalfSeal);
                 printd("\r 半通道: %d %s", Valve.bHalfSeal, (Valve.bHalfSeal) == 0 ? "关闭" : "开启");
 #if ((defined IOCTRL) || (defined MUT_IOCTRL))
-                I2CPageRead_Nbytes(ADDR_IO_CTRL, LEN_IO_CTRL, &syspara.ioCtrl);
+                I2CPageRead_Nbytes(ADDR_IO_CTRL, LEN_IO_CTRL, (uint8_t *)&syspara.ioCtrl);
                 printd("\r\n IO控制: %d %s", syspara.ioCtrl, (syspara.ioCtrl) == false ? "关闭" : "开启");
 #endif
                 /// 停留时间
@@ -182,6 +182,14 @@ void ParameterInit(void)
                 /* 切换次数 */
                 I2CPageRead_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, ((uint8_t *)&syspara.totalCnt));
                 printd("\r\n 切换次数:%d", syspara.totalCnt);
+                /* 模式 */
+                I2CPageRead_Nbytes(ADDR_GOD_MODE, LEN_GOD_MODE, &syspara.GodMode);
+                if (GD_NORMAL != syspara.GodMode) {
+                        printd("\r 模式: %d %s", syspara.GodMode,
+                               (syspara.GodMode) == GD_AGING     ? "老化模式"
+                               : (syspara.GodMode) == GD_FACTORY ? "工厂模式"
+                                                                 : "Normal模式");
+                }
         } else {
                 __bFirstInit = 1;
                 Valve.bReInit = 0;
@@ -218,8 +226,8 @@ void ParameterInit(void)
                 Valve.fDirCCw = 20;
                 I2CPageWrite_Nbytes(ADDR_DIR_SD + 1, LEN_DIR_SD - 1, &Valve.fDirCCw);
                 /* 老化间隔 5秒 */
-                intCtrl = IntDflt;
-                I2CPageWrite_Nbytes(ADDR_INTVL, LEN_INTVL, &intCtrl);
+                syspara.agingInterval = IntDflt;
+                I2CPageWrite_Nbytes(ADDR_INTVL, LEN_INTVL, &syspara.agingInterval);
                 /* 减速比 10 */
                 rdc.rate = RDCR_10;
                 I2CPageWrite_Nbytes(ADDR_RDC_RATE, LEN_RDC_RATE, &rdc.rate);
@@ -244,6 +252,8 @@ void ParameterInit(void)
                 /// 老化次数
                 syspara.burnCnt = 0;
                 I2CPageWrite_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
+                syspara.GodMode = GD_NORMAL;
+                I2CPageWrite_Nbytes(ADDR_GOD_MODE, LEN_GOD_MODE, &syspara.GodMode);
                 /// 通道状态
 #ifdef MUT_IOCTRL
                 uint8_t temp[4] = {1, 2, 3, 4};

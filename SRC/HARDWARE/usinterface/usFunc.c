@@ -418,8 +418,8 @@ void TermInt(char rw)
     int getInt=0;
     if(rw == READ_ACT)
     {
-        I2CPageRead_Nbytes(ADDR_INTVL, LEN_INTVL, &intCtrl);
-        printd("\r\n 读取老化间隔 %d 秒", intCtrl);
+        I2CPageRead_Nbytes(ADDR_INTVL, LEN_INTVL, &syspara.agingInterval);
+        printd("\r\n 读取老化间隔 %d 秒", syspara.agingInterval);
     }
     else
     {
@@ -432,8 +432,8 @@ void TermInt(char rw)
         if(getInt&&getInt<=255)
         {
             printd("\r\n 设置老化间隔 %d 秒", getInt);
-            intCtrl = getInt;
-            I2CPageWrite_Nbytes(ADDR_INTVL, LEN_INTVL, &intCtrl);
+            syspara.agingInterval = getInt;
+            I2CPageWrite_Nbytes(ADDR_INTVL, LEN_INTVL, &syspara.agingInterval);
         }
     }
 }
@@ -536,7 +536,7 @@ void TermProtocal(char rw)
                     printd("\r\n Err code %d", ret);
                     return;
             }
-
+#if (defined FIRST_HOLE_C) || (defined END_HOLE_D)
             switch (getInt) {
                     default:
                             printd("\r\n wrong type set default AGS");
@@ -553,6 +553,10 @@ void TermProtocal(char rw)
                             printd("\r\n set protocal to MODBUS");
                             break;
             }
+#else
+            printd("\r\n 仅支持AGS");
+            syspara.protocol_type = AGS_MODBUS;
+#endif
             I2CPageWrite_Nbytes(ADDR_PROTOCAL, LEN_PROTOCAL, &syspara.protocol_type);
     }
 }

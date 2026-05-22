@@ -251,7 +251,6 @@ void bsp_IODetect(void)
                 /// 通道    1 2 3 4
                 /// IOOUT   3 2 1 0
                 uint8_t IoInStatus = 0x03 & (~(IO_IN1 << 0 | IO_IN2 << 1));
-                uint8_t IoOutStatus = 0;
                 if (VALVE_RUN_END == Valve.status) {
                         dbg_printf("\r\n > Status    1  2  3  4");
                         dbg_printf("\r\n > Position  %d  %d  %d  %d  (Complete%d Error%d)", Valve.StatusChannel[0],
@@ -260,7 +259,6 @@ void bsp_IODetect(void)
                         /// 到位
                         if (Valve.StatusChannel[IoInStatus] == Valve.portCur) {
                                 /// IO状态输出
-                                IoOutStatus = Valve.portCur - 1;
                                 IO_OUT1 = (~IoInStatus & 0x01) ? ON : OFF;
                                 IO_OUT2 = (~IoInStatus & 0x02) ? ON : OFF;
                                 IO_ERROUT = ON;

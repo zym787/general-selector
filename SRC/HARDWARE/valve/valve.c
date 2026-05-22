@@ -591,7 +591,7 @@ void TestBurn(void)
                 bFirstEnter = 1;
         }
 
-        if (timerPara.timeWaitMill > intCtrl * SEC) {  // 30秒间隔，启动模块运转到下一个通道
+        if (timerPara.timeWaitMill > syspara.agingInterval * SEC) {  // 30秒间隔，启动模块运转到下一个通道
                 timerPara.timeWaitMill = 0;
                 if (Valve.status == VALVE_RUN_END) {
                         if (Valve.portCur == 0xff)

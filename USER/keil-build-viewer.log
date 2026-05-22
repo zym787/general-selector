@@ -34,10 +34,10 @@
 
 [region info]
 [load region] LR_IROM1
-	[execution region] ER_IROM1, 0x08000000, 0x00010000, 0x0000CA50 [memory type] 2 [memory ID] 3
+	[execution region] ER_IROM1, 0x08000000, 0x00010000, 0x0000CA84 [memory type] 2 [memory ID] 3
 
-	[execution region] RW_IRAM1, 0x20000000, 0x00005000, 0x000013E8 [memory type] 1 [memory ID] 2
-		[ZI block] addr: 0x2000022C, size: 0x000011BC (4540)
+	[execution region] RW_IRAM1, 0x20000000, 0x00005000, 0x000013E0 [memory type] 1 [memory ID] 2
+		[ZI block] addr: 0x20000224, size: 0x000011BC (4540)
 
 
 [object name max length] 22
@@ -96,19 +96,19 @@
 
 [record region info]
 [load region] LR_IROM1
-	[execution region] ER_IROM1, 0x08000000, 0x00010000, 0x0000BB9C [type] 2 [ID] 3
-	[execution region] RW_IRAM1, 0x20000000, 0x00005000, 0x000013A8 [type] 1 [ID] 2
+	[execution region] ER_IROM1, 0x08000000, 0x00010000, 0x0000BBE0 [type] 2 [ID] 3
+	[execution region] RW_IRAM1, 0x20000000, 0x00005000, 0x000013A0 [type] 1 [ID] 2
 -------------------------------------------------------------------------------
          FILE(s)        |         RAM (byte)       |       FLASH (byte)       |
 -------------------------------------------------------------------------------
 adc.o                   |          43  [NEW]       |         291  [NEW]       |
 ags_mb.o                |         800              |        3471              |
-bsp_io.o                |           0  [-1]        |         657  [+168]      |
+bsp_io.o                |           0  [-1]        |         649  [+160]      |
 delay.o                 |           4              |         180              |
 eep24serial.o           |           0              |        1256              |
 elab_log.o              |         256              |         105              |
-main.o                  |          76  [+1]        |        4700  [+924]      |
-modbus.o                |         722              |        3247              |
+main.o                  |          68  [+1]        |        4828  [+931]      |
+modbus.o                |         722              |        3391              |
 modbuscrc16.o           |           0              |         568              |
 protext.o               |         264              |        1744              |
 signal.o                |         236              |        1706              |
@@ -118,8 +118,8 @@ stm32f10x_rcc.o         |          20  [NEW]       |         952  [NEW]       |
 sys.o                   |           0              |         708              |
 timer.o                 |          21              |         581              |
 usart.o                 |           8              |        1020              |
-usfunc.o                |         248              |       10277  [+384]      |
-valve.o                 |         107              |        3653  [-36]       |
+usfunc.o                |         248              |       10153  [+380]      |
+valve.o                 |         107              |        3557  [-48]       |
 xf_utils_log_dump.o     |           0              |         716              |
 Smotor.lib              |         485              |        2569              |
 USINTF_CR-0.lib         |         160              |        1506              |
@@ -128,14 +128,14 @@ USINTF_CR-0.lib         |         160              |        1506              |
 LR_IROM1
         RAM 1             [0x20000000 | 0x00005000 (20480)]
                 [zi start] 1   [zi end] 12
-                RW_IRAM1  [0x20000000]|¡ö¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ______________________________________| (   4.9 KB /  20.0 KB )  24.9%  [+64]
+                RW_IRAM1  [0x20000000]|¡ö¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ______________________________________| (   4.9 KB /  20.0 KB )  24.8%  [+64]
  
         FLASH 1           [0x08000000 | 0x00010000 (65536)]
-                ER_IROM1  [0x08000000]|¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö___________| (  50.5 KB /  64.0 KB )  79.0%  [+3764]
+                ER_IROM1  [0x08000000]|¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö___________| (  50.6 KB /  64.0 KB )  79.1%  [+3748]
  
 [htm file path] E:\workdir\zym_new\general-selector\OBJ\XZF.htm
 Maximum Stack Usage =        324 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)
  
 =============================================================================================================================
 
-run time: 0.077 s
+run time: 0.102 s

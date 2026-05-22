@@ -533,6 +533,23 @@ void mb_ReadHolding(uint16_t _regAddr)
                 if (Valve.status == VALVE_RUN_END) {
                         MB_SET_HOLDING(MB_RW_CTRL_SET_ZERO, 0);
                 }
+        } else if (MB_RW_CTRL_SET_GOD_MODE == _regAddr) {
+                uint8_t _mod;
+                switch (syspara.GodMode) {
+                        case GD_NORMAL:
+                                _mod = NORMAL_CODE;
+                                break;
+                        case GD_AGING:
+                                _mod = AGING_CODE;
+                                break;
+                        case GD_FACTORY:
+                                _mod = FACTORY_CODE;
+                                break;
+                        default:
+                                _mod = 0;
+                                break;
+                }
+                MB_SET_HOLDING(MB_RW_CTRL_SET_GOD_MODE, _mod);
         }
         /* 只读参数寄存器 STATUS */
         else if (MB_R_STATUS_CHANNEL_CUR <= _regAddr && MB_R_STATUS_COUNT_2 >= _regAddr) {
@@ -632,6 +649,8 @@ void mb_ReadHolding(uint16_t _regAddr)
                                 break;
                 }
                 return;
+        } else if (MB_RW_FACTORY3_AGING_INTERVAL == _regAddr) {
+                MB_SET_HOLDING(MB_RW_FACTORY3_AGING_INTERVAL, syspara.agingInterval); /* 老化间隔 */
         } else {
                 // MB_SET_HOLDING(_regAddr, 0); /* 其他寄存器暂时返回0 */
                 return;
@@ -732,13 +751,19 @@ void mb_WriteHolding(uint16_t _regAddr, uint16_t _value)
                                 break;
                         case MB_RW_CTRL_SET_GOD_MODE:
                                 if (_value == AGING_CODE) {
-                                        syspara.GodMode = GD_AGING; /* 进入老化模式 */
-                                } else if (_value == SECURITY_CODE) {
-                                        syspara.GodMode = GD_FACTORY; /* 进入工厂模式 */
+                                        syspara.GodMode = GD_AGING; /* 234 进入老化模式 */
+                                } else if (_value == FACTORY_CODE) {
+                                        syspara.GodMode = GD_FACTORY; /* 252 进入工厂模式 */
                                 } else if (_value == NORMAL_CODE) {
-                                        syspara.GodMode = GD_NORMAL; /* 进入正常模式 */
+                                        syspara.GodMode = GD_NORMAL; /* 34 进入正常模式 + 清空次数 */
                                         syspara.burnCnt = 0;         /* 老化次数清零 */
+                                        syspara.totalCnt = 0;        /* 切换次数清零 */
+                                        syspara.totalCntLst = syspara.totalCnt;
                                         I2CPageWrite_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
+                                        I2CPageWrite_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT,
+                                                            (uint8_t *)&syspara.totalCnt);
+                                } else if (0 == _value) {
+                                        syspara.GodMode = GD_NORMAL; /* 0 进入正常模式 */
                                 } else {
                                         modbus.ErrorState = MB_ERROR_DATA;
                                         syspara.GodMode = GD_NORMAL;
@@ -846,7 +871,7 @@ void mb_WriteHolding(uint16_t _regAddr, uint16_t _value)
         }
         /* 工厂模式安全码寄存器 FACTORY2_SECURE_CODE */
         // if (MB_RW_FACTORY2_SECURE_CODE == _regAddr) {
-        //         if (_value == SECURITY_CODE) {
+        //         if (_value == FACTORY_CODE) {
         //                 syspara.GodMode = GD_FACTORY; /* 进入工厂模式 */
         //         }
         // }
@@ -911,6 +936,14 @@ void mb_WriteHolding(uint16_t _regAddr, uint16_t _value)
                         default:
                                 break;
                 }
+        }
+        if (MB_RW_FACTORY3_AGING_INTERVAL == _regAddr) {
+                if (255 < _value) {
+                        modbus.ErrorState = MB_ERROR_DATA;
+                        return; /* 参数限幅 */
+                }
+                syspara.agingInterval = _value;
+                I2CPageWrite_Nbytes(ADDR_INTVL, LEN_INTVL, &syspara.agingInterval);
         }
 }
 
