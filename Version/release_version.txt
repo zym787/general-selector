@@ -1,15 +1,15 @@
-=== 编译日志开始 (2026-05-22 10:30:26) ===
+=== 编译日志开始 (2026-06-01 15:18:37) ===
 Keil路径: D:\toolchain\Keil_v5\UV4\UV4.exe
 工程路径: .\USER\XZF.uvprojx
-版次号: r49
-变更记录: CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议
-日期: 260522
+版次号: 50
+变更记录: 修复Modbus中老化次数无法保持问题_点检模式IO和半通道支援中文
+日期: 260601
 Targets: C_1FH, D_EH, E_1IO, F_1MIO
 
-🗑️ 已删除旧产物: XZF_v2.0.0C-r48_260519_909开机1号孔_(修复IO输入输出错误_修复Modbus地址及参数问题)_(开启LTS).hex
-🗑️ 已删除旧产物: XZF_v2.0.0D-r48_260519_909开机末端孔_(修复IO输入输出错误_修复Modbus地址及参数问题)_(开启LTS).hex
-🗑️ 已删除旧产物: XZF_v2.0.0E-r48_260519_909开机1号孔带IO控制_(修复IO输入输出错误_修复Modbus地址及参数问题)_(开启LTS).hex
-🗑️ 已删除旧产物: XZF_v2.0.0F-r48_260519_909开机1号孔带多IO控制_(修复IO输入输出错误_修复Modbus地址及参数问题)_(开启LTS).hex
+🗑️ 已删除旧产物: XZF_v2.0.0C-rr49_260522_909开机1号孔_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS).hex
+🗑️ 已删除旧产物: XZF_v2.0.0D-rr49_260522_909开机末端孔_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS).hex
+🗑️ 已删除旧产物: XZF_v2.0.0E-rr49_260522_909开机1号孔带IO控制_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS).hex
+🗑️ 已删除旧产物: XZF_v2.0.0F-rr49_260522_909开机1号孔带多IO控制_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS).hex
 ✅ 共清理 4 个旧编译产物
 
 
@@ -24,17 +24,16 @@ Targets: C_1FH, D_EH, E_1IO, F_1MIO
 ✅ 编译成功: C_1FH
 =========== 2 已编译target: C_1FH | 警告: 0 条===========
 👌 C_1FH  Board:|909开机1号孔|  Flag:|C|  Note:|(开启LTS)|
-✅ 已复制: keil_compile_log.txt -> .\Version\XZF_v2.0.0C-rr49_909开机1号孔_260522_keil_compile_log.txt
+✅ 已复制: keil_compile_log.txt -> .\Version\XZF_v2.0.0C-r50_909开机1号孔_260601_keil_compile_log.txt
 =========== 3 已复制编译日志文件===========
 =========== 4 已找到.hex文件: OBJ\XZF.hex===========
 👌 C_1FH  Board:|909开机1号孔|  Flag:|C|  Note:|(开启LTS)|
-✅ 已复制: OBJ\XZF.hex -> .\Version\XZF_v2.0.0C-rr49_260522_909开机1号孔_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS).hex
-=========== 5 已重命名并复制文件: .\Version\XZF_v2.0.0C-rr49_260522_909开机1号孔_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS).hex===========
+✅ 已复制: OBJ\XZF.hex -> .\Version\XZF_v2.0.0C-r50_260601_909开机1号孔_(修复Modbus中老化次数无法保持问题_点检模式IO和半通道支援中文)_(开启LTS).hex
+=========== 5 已重命名并复制文件: .\Version\XZF_v2.0.0C-r50_260601_909开机1号孔_(修复Modbus中老化次数无法保持问题_点检模式IO和半通道支援中文)_(开启LTS).hex===========
 👌 C_1FH  Board:|909开机1号孔|  Flag:|C|  Note:|(开启LTS)|
-✅ 已压缩: OBJ -> .\Version\output\XZF_v2.0.0C-rr49_909开机1号孔_260522_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS)_output.zip
-=========== 6 已压缩OBJ目录并复制文件: .\Version\output\XZF_v2.0.0C-rr49_909开机1号孔_260522_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS)_output.zip===========
+✅ 已压缩: OBJ -> .\Version\output\XZF_v2.0.0C-r50_909开机1号孔_260601_(修复Modbus中老化次数无法保持问题_点检模式IO和半通道支援中文)_(开启LTS)_output.zip
+=========== 6 已压缩OBJ目录并复制文件: .\Version\output\XZF_v2.0.0C-r50_909开机1号孔_260601_(修复Modbus中老化次数无法保持问题_点检模式IO和半通道支援中文)_(开启LTS)_output.zip===========
 🗑️ 已删除: keil_compile_log.txt
-🗑️ 已删除: XZF.hex
 =========== 7 已清除hex及log文件===========
 
 
@@ -49,17 +48,16 @@ Targets: C_1FH, D_EH, E_1IO, F_1MIO
 ✅ 编译成功: D_EH
 =========== 2 已编译target: D_EH | 警告: 0 条===========
 👌 D_EH  Board:|909开机末端孔|  Flag:|D|  Note:|(开启LTS)|
-✅ 已复制: keil_compile_log.txt -> .\Version\XZF_v2.0.0D-rr49_909开机末端孔_260522_keil_compile_log.txt
+✅ 已复制: keil_compile_log.txt -> .\Version\XZF_v2.0.0D-r50_909开机末端孔_260601_keil_compile_log.txt
 =========== 3 已复制编译日志文件===========
 =========== 4 已找到.hex文件: OBJ\XZF.hex===========
 👌 D_EH  Board:|909开机末端孔|  Flag:|D|  Note:|(开启LTS)|
-✅ 已复制: OBJ\XZF.hex -> .\Version\XZF_v2.0.0D-rr49_260522_909开机末端孔_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS).hex
-=========== 5 已重命名并复制文件: .\Version\XZF_v2.0.0D-rr49_260522_909开机末端孔_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS).hex===========
+✅ 已复制: OBJ\XZF.hex -> .\Version\XZF_v2.0.0D-r50_260601_909开机末端孔_(修复Modbus中老化次数无法保持问题_点检模式IO和半通道支援中文)_(开启LTS).hex
+=========== 5 已重命名并复制文件: .\Version\XZF_v2.0.0D-r50_260601_909开机末端孔_(修复Modbus中老化次数无法保持问题_点检模式IO和半通道支援中文)_(开启LTS).hex===========
 👌 D_EH  Board:|909开机末端孔|  Flag:|D|  Note:|(开启LTS)|
-✅ 已压缩: OBJ -> .\Version\output\XZF_v2.0.0D-rr49_909开机末端孔_260522_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS)_output.zip
-=========== 6 已压缩OBJ目录并复制文件: .\Version\output\XZF_v2.0.0D-rr49_909开机末端孔_260522_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS)_output.zip===========
+✅ 已压缩: OBJ -> .\Version\output\XZF_v2.0.0D-r50_909开机末端孔_260601_(修复Modbus中老化次数无法保持问题_点检模式IO和半通道支援中文)_(开启LTS)_output.zip
+=========== 6 已压缩OBJ目录并复制文件: .\Version\output\XZF_v2.0.0D-r50_909开机末端孔_260601_(修复Modbus中老化次数无法保持问题_点检模式IO和半通道支援中文)_(开启LTS)_output.zip===========
 🗑️ 已删除: keil_compile_log.txt
-🗑️ 已删除: XZF.hex
 =========== 7 已清除hex及log文件===========
 
 
@@ -74,17 +72,16 @@ Targets: C_1FH, D_EH, E_1IO, F_1MIO
 ✅ 编译成功: E_1IO
 =========== 2 已编译target: E_1IO | 警告: 0 条===========
 👌 E_1IO  Board:|909开机1号孔带IO控制|  Flag:|E|  Note:|(开启LTS)|
-✅ 已复制: keil_compile_log.txt -> .\Version\XZF_v2.0.0E-rr49_909开机1号孔带IO控制_260522_keil_compile_log.txt
+✅ 已复制: keil_compile_log.txt -> .\Version\XZF_v2.0.0E-r50_909开机1号孔带IO控制_260601_keil_compile_log.txt
 =========== 3 已复制编译日志文件===========
 =========== 4 已找到.hex文件: OBJ\XZF.hex===========
 👌 E_1IO  Board:|909开机1号孔带IO控制|  Flag:|E|  Note:|(开启LTS)|
-✅ 已复制: OBJ\XZF.hex -> .\Version\XZF_v2.0.0E-rr49_260522_909开机1号孔带IO控制_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS).hex
-=========== 5 已重命名并复制文件: .\Version\XZF_v2.0.0E-rr49_260522_909开机1号孔带IO控制_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS).hex===========
+✅ 已复制: OBJ\XZF.hex -> .\Version\XZF_v2.0.0E-r50_260601_909开机1号孔带IO控制_(修复Modbus中老化次数无法保持问题_点检模式IO和半通道支援中文)_(开启LTS).hex
+=========== 5 已重命名并复制文件: .\Version\XZF_v2.0.0E-r50_260601_909开机1号孔带IO控制_(修复Modbus中老化次数无法保持问题_点检模式IO和半通道支援中文)_(开启LTS).hex===========
 👌 E_1IO  Board:|909开机1号孔带IO控制|  Flag:|E|  Note:|(开启LTS)|
-✅ 已压缩: OBJ -> .\Version\output\XZF_v2.0.0E-rr49_909开机1号孔带IO控制_260522_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS)_output.zip
-=========== 6 已压缩OBJ目录并复制文件: .\Version\output\XZF_v2.0.0E-rr49_909开机1号孔带IO控制_260522_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS)_output.zip===========
+✅ 已压缩: OBJ -> .\Version\output\XZF_v2.0.0E-r50_909开机1号孔带IO控制_260601_(修复Modbus中老化次数无法保持问题_点检模式IO和半通道支援中文)_(开启LTS)_output.zip
+=========== 6 已压缩OBJ目录并复制文件: .\Version\output\XZF_v2.0.0E-r50_909开机1号孔带IO控制_260601_(修复Modbus中老化次数无法保持问题_点检模式IO和半通道支援中文)_(开启LTS)_output.zip===========
 🗑️ 已删除: keil_compile_log.txt
-🗑️ 已删除: XZF.hex
 =========== 7 已清除hex及log文件===========
 
 
@@ -99,17 +96,16 @@ Targets: C_1FH, D_EH, E_1IO, F_1MIO
 ✅ 编译成功: F_1MIO
 =========== 2 已编译target: F_1MIO | 警告: 0 条===========
 👌 F_1MIO  Board:|909开机1号孔带多IO控制|  Flag:|F|  Note:|(开启LTS)|
-✅ 已复制: keil_compile_log.txt -> .\Version\XZF_v2.0.0F-rr49_909开机1号孔带多IO控制_260522_keil_compile_log.txt
+✅ 已复制: keil_compile_log.txt -> .\Version\XZF_v2.0.0F-r50_909开机1号孔带多IO控制_260601_keil_compile_log.txt
 =========== 3 已复制编译日志文件===========
 =========== 4 已找到.hex文件: OBJ\XZF.hex===========
 👌 F_1MIO  Board:|909开机1号孔带多IO控制|  Flag:|F|  Note:|(开启LTS)|
-✅ 已复制: OBJ\XZF.hex -> .\Version\XZF_v2.0.0F-rr49_260522_909开机1号孔带多IO控制_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS).hex
-=========== 5 已重命名并复制文件: .\Version\XZF_v2.0.0F-rr49_260522_909开机1号孔带多IO控制_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS).hex===========
+✅ 已复制: OBJ\XZF.hex -> .\Version\XZF_v2.0.0F-r50_260601_909开机1号孔带多IO控制_(修复Modbus中老化次数无法保持问题_点检模式IO和半通道支援中文)_(开启LTS).hex
+=========== 5 已重命名并复制文件: .\Version\XZF_v2.0.0F-r50_260601_909开机1号孔带多IO控制_(修复Modbus中老化次数无法保持问题_点检模式IO和半通道支援中文)_(开启LTS).hex===========
 👌 F_1MIO  Board:|909开机1号孔带多IO控制|  Flag:|F|  Note:|(开启LTS)|
-✅ 已压缩: OBJ -> .\Version\output\XZF_v2.0.0F-rr49_909开机1号孔带多IO控制_260522_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS)_output.zip
-=========== 6 已压缩OBJ目录并复制文件: .\Version\output\XZF_v2.0.0F-rr49_909开机1号孔带多IO控制_260522_(CD版本Modbus新增模式保持功能和70号老化间隔寄存器_新增仅支持CD版本切换协议)_(开启LTS)_output.zip===========
+✅ 已压缩: OBJ -> .\Version\output\XZF_v2.0.0F-r50_909开机1号孔带多IO控制_260601_(修复Modbus中老化次数无法保持问题_点检模式IO和半通道支援中文)_(开启LTS)_output.zip
+=========== 6 已压缩OBJ目录并复制文件: .\Version\output\XZF_v2.0.0F-r50_909开机1号孔带多IO控制_260601_(修复Modbus中老化次数无法保持问题_点检模式IO和半通道支援中文)_(开启LTS)_output.zip===========
 🗑️ 已删除: keil_compile_log.txt
-🗑️ 已删除: XZF.hex
 =========== 7 已清除hex及log文件===========
 
 ============================================================
@@ -121,7 +117,7 @@ Targets: C_1FH, D_EH, E_1IO, F_1MIO
    ⚠️  警告: 0 条
 ============================================================
 
-=== 编译日志结束 (2026-05-22 10:30:44) ===
+=== 编译日志结束 (2026-06-01 15:18:56) ===
 
 ✅ 所有target处理完成！
 💯 产物已存放在: .\Version

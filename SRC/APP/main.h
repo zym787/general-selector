@@ -10,8 +10,8 @@
 // clang-format off
 
 #define DESCRIPTION         "Selector Valve"
-#define SOFTWARE_VERSION    "r49"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0049     /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r50"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0050     /* 软件修改版次 */
 
 #define BOARD_0     0x88
 #define BOARD_1     0x66
@@ -113,6 +113,7 @@
 //                              同步QHF Modbus协议,添加参数限幅
 //  v2.0.0CDEF-r49  2026.05.22  修复模式切换无法保持问题,新增70号寄存器老化间隔
 //                              新增协议切换限制
+//  v2.0.0CDEF-r50  2026.06.01  修复Modbus中老化次数无法保持问题,点检模式IO和半通道新增中文显示
 
 
 

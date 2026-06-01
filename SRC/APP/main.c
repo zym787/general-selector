@@ -189,7 +189,9 @@ void ParameterInit(void)
                                (syspara.GodMode) == GD_AGING     ? "老化模式"
                                : (syspara.GodMode) == GD_FACTORY ? "工厂模式"
                                                                  : "Normal模式");
-                } else if (syspara.GodMode == GD_AGING) {
+                }
+                /* 老化模式下显示老化次数和老化间隔 */
+                if (syspara.GodMode == GD_AGING) {
                         I2CPageRead_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
                         printd("\r 老化次数: %d", syspara.burnCnt);
                         printd("\r 老化间隔: %d 秒", syspara.agingInterval);
