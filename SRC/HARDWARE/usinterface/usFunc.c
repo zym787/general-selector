@@ -889,11 +889,11 @@ void TermInspection(char rw)
     // printd("\r\n 老化次数  (TESTC) : %d", syspara.burnCnt);          /* 老化次数 */
     printd("\r\n 切换次数  (MOVES) : %d", syspara.totalCnt);      /* 切换次数 */
 #ifdef FIRST_HOLE_IO_E
-    printd("\r\n IO控制     (IOE) : %d", syspara.ioCtrl);            /* IO */
+    printd("\r\n IO控制     (IOE) : %d %s", syspara.ioCtrl, (0 == syspara.ioCtrl ? "关" : "开")); /* IO */
     printd("\r\n 停留时间   (REPLY): %d", syspara.pauseTime);        /* 停留时间 */
 #endif // FIRST_HOLE_IO_E
 #ifdef FIRST_HOLE_MUT_IO_F
-    printd("\r\n IO控制     (IOE) : %d", syspara.ioCtrl);            /* IO */
+    printd("\r\n IO控制     (IOE) : %d %s", syspara.ioCtrl, (0 == syspara.ioCtrl ? "关" : "开")); /* IO */
     printd("\r\n                         1  2  3  4");
     printd("\r\n 切换顺序     (STATC)  : %d %d %d %d", Valve.StatusChannel[0], Valve.StatusChannel[1], Valve.StatusChannel[2], Valve.StatusChannel[3]);                            /* IO */
 #endif // FIRST_HOLE_MUT_IO_F
