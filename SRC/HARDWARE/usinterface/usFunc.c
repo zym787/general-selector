@@ -881,7 +881,7 @@ void TermInspection(char rw)
     printd("\r\n 波特率     (BAUD) : %d %dbps", syspara.baudrate, BaudRate_V[syspara.baudrate]); /* 波特率 */
     printd("\r\n 速度       (SPD)  : %d", Valve.spd);                /* 速度 */
     printd("\r\n 减速比     (RDCR) : %d", rdc.rate);                 /* 减速比 */
-    printd("\r\n 半通道     (HALF) : %d", Valve.bHalfSeal);          /* 半通道 */
+    printd("\r\n 半通道     (HALF) : %d %s", Valve.bHalfSeal, (0 == Valve.bHalfSeal ? "关" : "开")); /* 半通道 */
     printd("\r\n 逆时针补偿 (CW)   : %d", Valve.fDirCw);             /* 顺时针补偿 */
     printd("\r\n 顺时针补偿 (CCW)  : %d", Valve.fDirCCw);            /* 逆时针补偿 */
     printd("\r\n 原点补偿   (FIXO) : %d", Valve.fixOrg);             /* 原点补偿 */
