@@ -168,7 +168,9 @@ void ParameterInit(void)
 #endif
                 /// 停留时间
                 I2CPageRead_Nbytes(ADDR_PAUSE_TIME, LEN_PAUSE_TIME, (uint8_t *)&syspara.pauseTime);
+#ifdef FIRST_HOLE_IO_E
                 printd("\r\n 中间状态停留时间: %d 毫秒", syspara.pauseTime);
+#endif
                 I2CPageRead_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
                 // printd("\r\n 老化次数 %d", syspara.burnCnt);
                 /// 通道状态
@@ -183,19 +185,26 @@ void ParameterInit(void)
                 I2CPageRead_Nbytes(ADDR_TOTAL_CNT, LEN_TOTAL_CNT, ((uint8_t *)&syspara.totalCnt));
                 printd("\r\n 切换次数:%d", syspara.totalCnt);
                 /* 模式 */
-                I2CPageRead_Nbytes(ADDR_GOD_MODE, LEN_GOD_MODE, &syspara.GodMode);
-                if (GD_NORMAL != syspara.GodMode) {
-                        printd("\r 模式: %d %s", syspara.GodMode,
-                               (syspara.GodMode) == GD_AGING     ? "老化模式"
-                               : (syspara.GodMode) == GD_FACTORY ? "工厂模式"
-                                                                 : "Normal模式");
+                if (MODBUS == syspara.protocol_type) {
+                        I2CPageRead_Nbytes(ADDR_GOD_MODE, LEN_GOD_MODE, &syspara.GodMode);
+                        switch (syspara.GodMode) {
+                                case GD_AGING:
+                                        printd("\r 模式: %d 老化模式  完成后请切换回正常模式!!!", syspara.GodMode);
+                                        break;
+                                case GD_FACTORY:
+                                        printd("\r 模式: %d 工厂模式  完成后请切换回正常模式!!!", syspara.GodMode);
+                                        break;
+                                case GD_NORMAL:
+                                default:
+                                        syspara.GodMode = GD_NORMAL;
+                                        break;
+                        }
+                        /* 老化模式下显示老化次数 */
+                        if (syspara.GodMode == GD_AGING) {
+                                printd("\r 老化次数: %d", syspara.burnCnt);
+                        }
                 }
-                /* 老化模式下显示老化次数和老化间隔 */
-                if (syspara.GodMode == GD_AGING) {
-                        I2CPageRead_Nbytes(ADDR_BURN_CNT, LEN_BURN_CNT, (uint8_t *)&syspara.burnCnt);
-                        printd("\r 老化次数: %d", syspara.burnCnt);
-                        printd("\r 老化间隔: %d 秒", syspara.agingInterval);
-                }
+                        
         } else {
                 __bFirstInit = 1;
                 Valve.bReInit = 0;

@@ -5,7 +5,7 @@
        176          0          0          4          0          0   delay.o
       1256          0          0          0          0          0   eep24serial.o
        100          0          5          0        256          0   elab_log.o
-      4396          0        424          8         60          0   main.o
+      4452          0        424          8         60          0   main.o
       3372          0          7         12        710          0   modbus.o
         56          0        512          0          0          0   modbuscrc16.o
       1744          0          0          0        264          0   protext.o
@@ -16,7 +16,7 @@
        708          0          0          0          0          0   sys.o
        580          0          0          1         20          0   timer.o
       1012          0          0          8          0          0   usart.o
-      7868          0       2037        248          0          0   usfunc.o
+      7908          0       2037        248          0          0   usfunc.o
       3544          0          0         13         94          0   valve.o
        716          0          0          0          0          0   xf_utils_log_dump.o
       2384          0          0        185        300          0   smotor.o
@@ -28,7 +28,7 @@ Memory Map of the image
 
 	Load Region LR_IROM1 
 
-		Execution Region ER_IROM1 (Exec base: 0x08000000, Size: 0x0000CA84, Max: 0x00010000, END)
+		Execution Region ER_IROM1 (Exec base: 0x08000000, Size: 0x0000CAE4, Max: 0x00010000, END)
 
 		Execution Region RW_IRAM1 (Exec base: 0x20000000, Size: 0x000013E0, Max: 0x00005000, END)
 
