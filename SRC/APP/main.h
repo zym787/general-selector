@@ -10,8 +10,8 @@
 // clang-format off
 
 #define DESCRIPTION         "Selector Valve"
-#define SOFTWARE_VERSION    "r51"                /* 软件修改版次 */
-#define SOFT_REVISION       (uint16_t)0x0051     /* 软件修改版次 */
+#define SOFTWARE_VERSION    "r52"                /* 软件修改版次 */
+#define SOFT_REVISION       (uint16_t)0x0052     /* 软件修改版次 */
 
 #define BOARD_0     0x88
 #define BOARD_1     0x66
@@ -115,7 +115,7 @@
 //                              新增协议切换限制
 //  v2.0.0CDEF-r50  2026.06.01  修复Modbus中老化次数无法保持问题,点检模式IO和半通道新增中文显示
 //  v2.0.0CDEF-r51  2026.06.02  修复Modbus模式下模式显示问题
-
+//  v2.0.0CDEF-r52  2026.06.12  修复ags模式下串口通信调试输出
 
 
 //----EEPROM存储地址分配---//

@@ -571,7 +571,9 @@ void ags_mbProcess(void)
         if (MB_RECIVE_END == ags_mbParam.sRUN) {
                 if (LEAST_RCV_CNT < ags_mbParam.rCnt) {
                         LED_WORK = !LED_WORK;
+#ifdef DEBUG_AGS_MB
                         XF_LOG_BUFFER_HEX(ags_mbParam.rBuf, ags_mbParam.rCnt);
+#endif
                         if (0 == ModbusCRC16(&ags_mbParam.rBuf[0], ags_mbParam.rCnt)) {
 #ifdef DEBUG_AGS_MB
                                 printd("\r r:");

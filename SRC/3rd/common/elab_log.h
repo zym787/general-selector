@@ -24,12 +24,19 @@
  /* ==================== [Defines] ========================================== */
 #define ELAB_COLOR_ENABLE (0)
 #define ELAB_TIME_ENABLE (0)
+#define ELAB_ENABLE (0)
 
 #define ELAB_TAG(_tag)   static const char *TAG = _tag
 
+#if (ELAB_ENABLE == 0)
+#undef ELOG_LEVEL_CURRENT
+#define ELOG_LEVEL_CURRENT (0)
+#else
 #ifndef ELOG_LEVEL_CURRENT
 #define ELOG_LEVEL_CURRENT ELOG_LEVEL_DEBUG
 #endif
+#endif
+
  /* ==================== [Typedefs] ========================================== */
  enum elog_level_enum
 {
