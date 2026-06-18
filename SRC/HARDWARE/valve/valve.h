@@ -147,6 +147,7 @@ typedef struct
     unsigned short ErrBlinkTime;    //错误灯提示间隔
     unsigned char fixOrg;          	// 原点补偿
     unsigned char spd;          // 再次复位转动
+    uint8_t spdInit;          // 初始化速度
 
     unsigned int OptStep;           //光耦脉冲步数统计
     unsigned int OptGap;           //光耦高电平脉冲步数

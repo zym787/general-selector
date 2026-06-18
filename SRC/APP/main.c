@@ -295,12 +295,19 @@ void ParameterInit(void)
         getOptStartStatus();
         /* 设置速度范围 */
         tBoundary.spd_min = SPD_MIN;
-        tBoundary.spd_init = INIT_SPD; /* 初始化速度默认情况为15RPM */
+        
         /* 速度 */
         I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
-        if (tBoundary.spd_min > Valve.spd || tBoundary.spd_max < Valve.spd)
+        I2CPageRead_Nbytes(ADDR_SPD_INIT, LEN_SPD_INIT, &Valve.spdInit);
+        if (tBoundary.spd_min > Valve.spd || tBoundary.spd_max < Valve.spd){
                 Valve.spd = tBoundary.spd_min;
-        printd("\r 速度: %d RPM", Valve.spd);
+        }
+
+        if (tBoundary.spd_min > Valve.spdInit || tBoundary.spd_max < Valve.spdInit) {
+                Valve.spdInit = INIT_SPD; /* 初始化速度超过范围为15RPM */
+        }
+        tBoundary.spd_init = Valve.spdInit; 
+        printd("\r 速度: %d RPM  初始化速度: %d RPM", Valve.spd, Valve.spdInit);
 
         /* 使用初始化速度找原点 */
         speed[AXSV] = 100;
@@ -312,8 +319,8 @@ void ParameterInit(void)
         accel[AXSV] *= (rdc.rate);
         decel[AXSV] *= (tBoundary.spd_init);
         decel[AXSV] *= (rdc.rate);
-        dbg_printf("\r\n 初始化运动 减速!  (%dRPM) spd%d acc%d dec%d", tBoundary.spd_init, speed[AXSV], accel[AXSV],
-                   decel[AXSV]);
+        dbg_printf("\r\n 初始化运动 减速!  (%dRPM) spd%d acc%d dec%d", tBoundary.spd_init, speed[AXSV],
+                        accel[AXSV], decel[AXSV]);
         VALVE_ENA = ENABLE;
         Valve.status = VALVE_INITING;
         Valve.ErrBlinkTime = NORMAL_BLINK;

@@ -439,38 +439,51 @@ void TermInt(char rw)
 }
 
 /*
-
-*/
+ * 速度设置
+ * SPD=速度,初始化速度。单指令是仅修改速度
+ */
 void TermSpd(char rw)
 {
-    int getInt=0;
+    int getInt[2]={0,0};
     if(rw == READ_ACT)
     {
         I2CPageRead_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
-        printd("\r\n 读取速度 %d 转/分", Valve.spd);
+        I2CPageRead_Nbytes(ADDR_SPD_INIT, LEN_SPD_INIT, &Valve.spdInit);
+        printd("\r\n 读取速度: %d转/分   初始化速度: %d转/分", Valve.spd, Valve.spdInit);
     }
     else
     {
-        unsigned char ret = FetchInt(3, 0, str.rcvStr, &getInt);
+        unsigned char ret = FetchInt(3, 0, str.rcvStr, getInt);
         if(ret)
         {
             printd("\r\n Err code %d", ret);
             return;
         }
+
+        printd("\r\n 设置速度和初始化速度\r\n SPD=n,m  n:速度 m:初始化速度\r\n SPD=n  n:速度");
+
+        if (tBoundary.spd_min <= getInt[0] && tBoundary.spd_max >= getInt[0]) {
+                Valve.spd = getInt[0];
+                printd("\r\n 参数1: 设置速度 %d转/分", Valve.spd);
+        } else {
+                printd("\r\n %d 速度超限 (%d减速比速度范围: %d-%d)", getInt[0], rdc.rate, tBoundary.spd_min,
+                       tBoundary.spd_max);
+                Valve.spd = tBoundary.spd_init;
+                printd("\r\n 参数1: 使用默认速度 %d", Valve.spd);
+        }
+
+        if (tBoundary.spd_min <= getInt[1] && tBoundary.spd_max >= getInt[1]) {
+                Valve.spdInit = getInt[1];
+                printd("\r\n 参数2: 设置初始化速度 %d转/分", Valve.spdInit);
+        } else {
+                printd("\r\n %d 初始化速度超限 (%d减速比初始化速度范围: %d-%d)", getInt[1], rdc.rate, tBoundary.spd_min,
+                       tBoundary.spd_max);
+                Valve.spdInit = INIT_SPD;
+                printd("\r\n 参数2: 使用默认初始化速度 %d", Valve.spdInit);
+        }
         
-        if(tBoundary.spd_min <= getInt && tBoundary.spd_max >= getInt)
-        {
-            Valve.spd = getInt;
-            printd("\r\n 设置速度 %d转/分", Valve.spd);
-        }
-        else
-        {
-            printd("\r\n %d 速度超限 (%d减速比速度范围: %d-%d)", 
-                getInt, rdc.rate, tBoundary.spd_min, tBoundary.spd_max);
-            Valve.spd = tBoundary.spd_init;
-            printd("\r\n 使用默认速度 %d", Valve.spd);
-        }
         I2CPageWrite_Nbytes(ADDR_SPD, LEN_SPD, &Valve.spd);
+        I2CPageWrite_Nbytes(ADDR_SPD_INIT, LEN_SPD_INIT, &Valve.spdInit);
     }
 }
 
@@ -871,23 +884,28 @@ void TermIO(char rw)
  */
 void TermInspection(char rw)
 {
-    printd("\r\n ***************< 点检模式 >***************");
-    /* 点检参数 */
-    printd("\r\n 版本       (VR)   : %s", SOFT_VER_C);               /* 版本号 */
-    printd("\r\n 电路板     (PCB)  : %s", PCB_VR);                   /* PCB版本号 */
-    printd("\r\n 编译时间   (TIME) : %s %s", __DATE__, __TIME__);    /* 时间 */
-    printd("\r\n 地址       (ADDR) : %d", ags_mbParam.mAddrs);        /* 地址 */
-    printd("\r\n 通道数     (CNT)  : %d", valveFix.fix.portCnt);     /* 通道数 */
-    printd("\r\n 波特率     (BAUD) : %d %dbps", syspara.baudrate, BaudRate_V[syspara.baudrate]); /* 波特率 */
-    printd("\r\n 速度       (SPD)  : %d", Valve.spd);                /* 速度 */
-    printd("\r\n 减速比     (RDCR) : %d", rdc.rate);                 /* 减速比 */
-    printd("\r\n 半通道     (HALF) : %d %s", Valve.bHalfSeal, (0 == Valve.bHalfSeal ? "关" : "开")); /* 半通道 */
-    printd("\r\n 逆时针补偿 (CW)   : %d", Valve.fDirCw);             /* 顺时针补偿 */
-    printd("\r\n 顺时针补偿 (CCW)  : %d", Valve.fDirCCw);            /* 逆时针补偿 */
-    printd("\r\n 原点补偿   (FIXO) : %d", Valve.fixOrg);             /* 原点补偿 */
-    // printd("\r\n 方向补偿   (FIXG) : %d", valveFix.fix.dirGap);      /* 方向补偿 */
-    // printd("\r\n 老化次数  (TESTC) : %d", syspara.burnCnt);          /* 老化次数 */
-    printd("\r\n 切换次数  (MOVES) : %d", syspara.totalCnt);      /* 切换次数 */
+        printd("\r\n ------------------------------------------");
+        printd("\r\n                 请 注 意 !                ");
+        printd("\r\n      未 使 用 变 量 请 勿 自 行 识 别      ");
+        printd("\r\n ------------------------------------------\r\n");
+        printd("\r\n ***************< 点检模式 >***************");
+        /* 点检参数 */
+        printd("\r\n 版本       (VR)   : %s", SOFT_VER_C);                                               /* 版本号 */
+        printd("\r\n 电路板     (PCB)  : %s", PCB_VR);                                                   /* PCB版本号 */
+        printd("\r\n 编译时间   (TIME) : %s %s", __DATE__, __TIME__);                                    /* 时间 */
+        printd("\r\n 地址       (ADDR) : %d", ags_mbParam.mAddrs);                                       /* 地址 */
+        printd("\r\n 通道数     (CNT)  : %d", valveFix.fix.portCnt);                                     /* 通道数 */
+        printd("\r\n 波特率     (BAUD) : %d %dbps", syspara.baudrate, BaudRate_V[syspara.baudrate]);     /* 波特率 */
+        printd("\r\n 速度       (SPD)  : %d RPM", Valve.spd);                                            /* 速度 */
+        // printd("\r\n 初始化速度 (SPD)  : %d RPM", Valve.spdInit);                                        /* 初始化速度 */
+        printd("\r\n 减速比     (RDCR) : %d", rdc.rate);                                                 /* 减速比 */
+        printd("\r\n 半通道     (HALF) : %d %s", Valve.bHalfSeal, (0 == Valve.bHalfSeal ? "关" : "开")); /* 半通道 */
+        printd("\r\n 逆时针补偿 (CW)   : %d", Valve.fDirCw);  /* 顺时针补偿 */
+        printd("\r\n 顺时针补偿 (CCW)  : %d", Valve.fDirCCw); /* 逆时针补偿 */
+        printd("\r\n 原点补偿   (FIXO) : %d", Valve.fixOrg);  /* 原点补偿 */
+        // printd("\r\n 方向补偿   (FIXG) : %d", valveFix.fix.dirGap);      /* 方向补偿 */
+        // printd("\r\n 老化次数  (TESTC) : %d", syspara.burnCnt);          /* 老化次数 */
+        printd("\r\n 切换次数  (MOVES) : %d", syspara.totalCnt); /* 切换次数 */
 #ifdef FIRST_HOLE_IO_E
     printd("\r\n IO控制     (IOE) : %d %s", syspara.ioCtrl, (0 == syspara.ioCtrl ? "关" : "开")); /* IO */
     printd("\r\n 停留时间   (REPLY): %d", syspara.pauseTime);        /* 停留时间 */
